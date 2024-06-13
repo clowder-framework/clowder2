@@ -8,41 +8,20 @@ import {
 	SingleDropdownRange,
 } from "@appbaseio/reactivesearch";
 import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
-import Layout from "../Layout";
-import { SearchResult } from "./SearchResult";
+import PublicLayout from "../PublicLayout";
 import { searchTheme, theme } from "../../theme";
 import config from "../../app.config";
-import Cookies from "universal-cookie";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
+import { PublicSearchResult } from "./PublicSearchResult";
 
-export function Search() {
+export function PublicSearch() {
 	const [luceneOn, setLuceneOn] = useState(false);
 
-	const cookies = new Cookies();
-	const [authorizationHeader, setAuthorizationHeader] = useState({
-		Authorization: cookies.get("Authorization"),
-	});
-	const getUpdatedCookie = () => {
-		const cookies = new Cookies();
-		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
-	};
-
-	// Pulling latest cookie
-	useEffect(() => {
-		const intervalId = setInterval(
-			getUpdatedCookie,
-			config.refreshTokenInterval
-		);
-		return () => clearInterval(intervalId);
-	}, []);
-
 	// toggle super admin
-	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	// const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// @ts-ignore
 	return (
-		<Layout>
+		<PublicLayout>
 			<div className="outer-container">
 				<Grid container spacing={4}>
 					<Grid item xs>
@@ -70,9 +49,8 @@ export function Search() {
 							}
 						/>
 						<ReactiveBase
-							url={config.searchEndpoint}
+							url={config.publicSearchEndpoint}
 							app="all"
-							headers={authorizationHeader}
 							theme={searchTheme}
 						>
 							{luceneOn ? (
@@ -110,19 +88,14 @@ export function Search() {
 										fuzziness={0}
 										debounce={100}
 										react={{
-											and: [
-												"creatorfilter",
-												"downloadfilter",
-												"fromfilter",
-												"tofilter",
-											],
+											and: ["downloadfilter", "fromfilter", "tofilter"],
 										}}
 										// apply react to the filter
 										URLParams={true}
 										showFilter={true}
 										showClear={true}
 										renderNoSuggestion="No suggestions found."
-										dataField={["name", "description", "creator.keyword"]}
+										dataField={["name", "description"]}
 										fieldWeights={[3, 2, 1]}
 										innerClass={{
 											title: "search-title",
@@ -132,19 +105,6 @@ export function Search() {
 
 									{/*filters*/}
 									<Grid container spacing={2} sx={{ marginBottom: "20px" }}>
-										<Grid item xs={12} sm={4} md={4} lg={4}>
-											<MultiDropdownList
-												componentId="creatorfilter"
-												dataField="creator"
-												size={5}
-												sortBy="count"
-												showCount={true}
-												placeholder="Creator: All"
-												innerClass={{
-													select: "filter-select",
-												}}
-											/>
-										</Grid>
 										<Grid item xs={12} sm={4} md={4} lg={4}>
 											<SingleDropdownRange
 												componentId="downloadfilter"
@@ -210,7 +170,7 @@ export function Search() {
 									react={{
 										and: ["string-searchbox"],
 									}}
-									render={({ data }) => <SearchResult data={data} />}
+									render={({ data }) => <PublicSearchResult data={data} />}
 									sortBy="desc"
 								/>
 							) : (
@@ -222,14 +182,13 @@ export function Search() {
 									react={{
 										and: [
 											"searchbox",
-											"creatorfilter",
 											"downloadfilter",
 											"fromfilter",
 											"tofilter",
 										],
 									}}
 									render={({ data }) => {
-										return <SearchResult data={data} />;
+										return <PublicSearchResult data={data} />;
 									}}
 									sortBy="desc"
 								/>
@@ -238,6 +197,6 @@ export function Search() {
 					</Grid>
 				</Grid>
 			</div>
-		</Layout>
+		</PublicLayout>
 	);
 }

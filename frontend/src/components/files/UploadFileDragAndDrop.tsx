@@ -30,12 +30,13 @@ import FileUploadDrop from "./FileUploadDrop";
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
+	setDragDropFiles: any;
 };
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
-	const { selectedDatasetId, folderId } = props;
+	const { selectedDatasetId, folderId, setDragDropFiles } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
@@ -53,7 +54,9 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	const createFileMetadata = (
 		fileId: string | undefined,
 		metadata: MetadataIn
-	) => dispatch(postFileMetadata(fileId, metadata));
+	) => {
+		dispatch(postFileMetadata(fileId, metadata));
+	};
 
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
@@ -157,9 +160,9 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 
 	useEffect(() => {
 		if (newFiles.length > 0) {
-			newFiles.map((file) => {
+			newFiles.forEach((file) => {
 				// post new metadata
-				Object.keys(metadataRequestForms).map((key) => {
+				Object.keys(metadataRequestForms).forEach((key) => {
 					createFileMetadata(file.id, metadataRequestForms[key]);
 				});
 			});
@@ -171,8 +174,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 			// Stop spinner
 			setLoading(false);
 
-			// go back to the dataset
-			location.reload();
+			setDragDropFiles(false);
 		}
 	}, [newFiles]);
 

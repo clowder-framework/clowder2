@@ -83,6 +83,11 @@ interface RECEIVE_DATASETS {
 	datasets: Paged;
 }
 
+interface RECEIVE_MY_DATASETS {
+	type: "RECEIVE_MY_DATASETS";
+	myDatasets: Paged;
+}
+
 interface RECEIVE_PUBLIC_DATASETS {
 	type: "RECEIVE_PUBLIC_DATASETS";
 	publicDatasets: Dataset[];
@@ -383,6 +388,11 @@ interface DELETE_METADATA_DEFINITION {
 	metadataDefinition: MetadataDefinition;
 }
 
+interface EDIT_METADATA_DEFINITION {
+	type: "EDIT_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
 interface SAVE_METADATA_DEFINITION {
 	type: "SAVE_METADATA_DEFINITION";
 	metadataDefinition: MetadataDefinition;
@@ -591,6 +601,21 @@ interface REVOKE_ADMIN {
 	profile: UserOut;
 }
 
+interface SET_READONLY {
+	type: "SET_READONLY";
+	profile: UserOut;
+}
+
+interface ENABLE_READONLY {
+	type: "ENABLE_READONLY";
+	profile: UserOut;
+}
+
+interface DISABLE_READONLY {
+	type: "DISABLE_READONLY";
+	profile: UserOut;
+}
+
 interface GET_PUBLIC_VIS_DATA {
 	type: "GET_PUBLIC_VIS_DATA";
 	publicVisData: VisualizationDataOut;
@@ -666,6 +691,7 @@ export type DataAction =
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
+	| RECEIVE_MY_DATASETS
 	| RECEIVE_PUBLIC_DATASETS
 	| RECEIVE_PUBLIC_DATASET_ABOUT
 	| RECEIVE_FILES_IN_PUBLIC_DATASET
@@ -716,6 +742,7 @@ export type DataAction =
 	| SEARCH_METADATA_DEFINITIONS
 	| DELETE_METADATA_DEFINITION
 	| SAVE_METADATA_DEFINITION
+	| EDIT_METADATA_DEFINITION
 	| RESET_SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
 	| RECEIVE_PUBLIC_DATASET_METADATA
@@ -765,6 +792,9 @@ export type DataAction =
 	| UPDATE_FILE
 	| SET_ADMIN
 	| REVOKE_ADMIN
+	| SET_READONLY
+	| ENABLE_READONLY
+	| DISABLE_READONLY
 	| GET_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_CONFIG
 	| DOWNLOAD_PUBLIC_VIS_DATA

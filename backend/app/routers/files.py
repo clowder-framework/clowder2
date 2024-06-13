@@ -290,6 +290,7 @@ async def download_file(
     file_id: str,
     version: Optional[int] = None,
     increment: Optional[bool] = True,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -340,6 +341,10 @@ async def download_file(
             if increment:
                 # Increment download count
                 await file.update(Inc({FileDB.downloads: 1}))
+
+                # reindex
+                await index_file(es, FileOut(**file.dict()), update=True)
+
             return response
 
     else:
@@ -351,6 +356,7 @@ async def download_file_url(
     file_id: str,
     version: Optional[int] = None,
     expires_in_seconds: Optional[int] = 3600,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     external_fs: Minio = Depends(dependencies.get_external_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -391,6 +397,9 @@ async def download_file_url(
 
         # Increment download count
         await file.update(Inc({FileDB.downloads: 1}))
+
+        # reindex
+        await index_file(es, FileOut(**file.dict()), update=True)
 
         # return presigned url
         return {"presigned_url": presigned_url}

@@ -271,8 +271,9 @@ async def remove_member(
         # Remove user from all affected Authorization entries
         # TODO not sure if this is right
         async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
-            auth.user_ids.remove(username)
-            await auth.replace()
+            if username in auth.user_ids:
+                auth.user_ids.remove(username)
+                await auth.replace()
 
         # Update group itself
         group.users.remove(found_user)

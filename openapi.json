@@ -430,6 +430,130 @@
         ]
       }
     },
+    "/api/v2/users/enable_readonly/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Enable Readonly User",
+        "operationId": "enable_readonly_user_api_v2_users_enable_readonly__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/disable_readonly/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Disable Readonly User",
+        "operationId": "disable_readonly_user_api_v2_users_disable_readonly__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/users/enable/{useremail}": {
       "post": {
         "tags": [
@@ -1902,6 +2026,67 @@
             "in": "path"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataDefinitionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Update Metadata Definition",
+        "operationId": "update_metadata_definition_api_v2_metadata_definition__metadata_definition_id__put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Metadata Definition Id",
+              "type": "string"
+            },
+            "name": "metadata_definition_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataDefinitionIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6112,7 +6297,7 @@
           "listeners"
         ],
         "summary": "Get Listeners",
-        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status",
+        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status\n    all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode",
         "operationId": "get_listeners_api_v2_listeners_get",
         "parameters": [
           {
@@ -6180,6 +6365,25 @@
               "type": "string"
             },
             "name": "process",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "All",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "all",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
             "in": "query"
           }
         ],
@@ -6326,6 +6530,15 @@
             },
             "name": "process",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6454,6 +6667,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6506,6 +6728,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -6568,6 +6799,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6630,6 +6870,15 @@
             },
             "name": "heartbeat_interval",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6640,6 +6889,132 @@
                 "schema": {
                   "title": "Response Check Listener Livelihood Api V2 Listeners  Listener Id  Status Get",
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/enable": {
+      "put": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Enable Listener",
+        "description": "Enable an Event Listener. Only admins can enable listeners.\n\nArguments:\n    listener_id -- UUID of the listener to be enabled",
+        "operationId": "enable_listener_api_v2_listeners__listener_id__enable_put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListenerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/disable": {
+      "put": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Disable Listener",
+        "description": "Disable an Event Listener. Only admins can enable listeners.\n\nArguments:\n    listener_id -- UUID of the listener to be enabled",
+        "operationId": "disable_listener_api_v2_listeners__listener_id__disable_put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListenerOut"
                 }
               }
             }
@@ -7156,10 +7531,10 @@
           {
             "required": false,
             "schema": {
-              "title": "Name",
+              "title": "Searchterm",
               "type": "string"
             },
-            "name": "name",
+            "name": "searchTerm",
             "in": "query"
           },
           {
@@ -7181,6 +7556,15 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7189,11 +7573,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Feeds Api V2 Feeds Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeedOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -7290,8 +7670,88 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "feeds"
+        ],
+        "summary": "Edit Feed",
+        "description": "Update the information about an existing Feed..\n\nArguments:\n    feed_id -- UUID of the feed to be udpated\n    feed_in -- JSON object including updated information",
+        "operationId": "edit_feed_api_v2_feeds__feed_id__put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Feed Id",
+              "type": "string"
+            },
+            "name": "feed_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7342,6 +7802,15 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7349,7 +7818,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/FeedOut"
+                }
               }
             }
           },
@@ -7394,6 +7865,15 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -7467,6 +7947,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7474,9 +7963,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FeedOut"
-                }
+                "schema": {}
               }
             }
           },
@@ -10553,6 +11040,11 @@
             "title": "Alive",
             "type": "boolean"
           },
+          "active": {
+            "title": "Active",
+            "type": "boolean",
+            "default": false
+          },
           "properties": {
             "$ref": "#/components/schemas/ExtractorInfo"
           }
@@ -10679,6 +11171,11 @@
             "title": "Name",
             "type": "string"
           },
+          "description": {
+            "title": "Description",
+            "type": "string",
+            "default": ""
+          },
           "search": {
             "$ref": "#/components/schemas/SearchObject"
           },
@@ -10727,6 +11224,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string",
+            "default": ""
           },
           "search": {
             "$ref": "#/components/schemas/SearchObject"
@@ -11523,6 +12025,11 @@
             "items": {
               "$ref": "#/components/schemas/MetadataField"
             }
+          },
+          "modified": {
+            "title": "Modified",
+            "type": "string",
+            "format": "date-time"
           }
         },
         "description": "This describes a metadata object with a short name and description, predefined set of fields, and context.\nThese provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.\n\nExample: {\n    \"name\" : \"LatLon\",\n    \"description\" : \"A set of Latitude/Longitude coordinates\",\n    \"required_for_items\": {\n        \"datasets\": false,\n        \"files\": false\n    },\n    \"context\" : [\n        {\n        \"longitude\" : \"https://schema.org/longitude\",\n        \"latitude\" : \"https://schema.org/latitude\"\n        },\n    ],\n    \"fields\" : [\n        {\n            \"name\" : \"longitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        },\n        {\n            \"name\" : \"latitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        }\n    ]\n}"
@@ -11580,6 +12087,11 @@
             "items": {
               "$ref": "#/components/schemas/MetadataField"
             }
+          },
+          "modified": {
+            "title": "Modified",
+            "type": "string",
+            "format": "date-time"
           },
           "id": {
             "title": "Id",
@@ -11982,15 +12494,8 @@
       },
       "SearchObject": {
         "title": "SearchObject",
-        "required": [
-          "index_name"
-        ],
         "type": "object",
         "properties": {
-          "index_name": {
-            "title": "Index Name",
-            "type": "string"
-          },
           "criteria": {
             "title": "Criteria",
             "type": "array",
@@ -12009,7 +12514,7 @@
             "type": "string"
           }
         },
-        "description": "This is a way to save a search (i.e. as a Feed).\n\nParameters:\n    index_name -- which ES index to search\n    criteria -- some number of field/operator/value tuples describing the search requirements\n    mode -- and/or determines whether all of the criteria must match, or any of them\n    original -- if the user originally performed a string search, their original text entry is preserved here"
+        "description": "This is a way to save a search (i.e. as a Feed).\n\nParameters:\n    criteria -- some number of field/operator/value tuples describing the search requirements\n    mode -- and/or determines whether all of the criteria must match, or any of them\n    original -- if the user originally performed a string search, their original text entry is preserved here"
       },
       "Status": {
         "title": "Status",
@@ -12230,6 +12735,11 @@
           },
           "admin_mode": {
             "title": "Admin Mode",
+            "type": "boolean",
+            "default": false
+          },
+          "read_only_user": {
+            "title": "Read Only User",
             "type": "boolean",
             "default": false
           }

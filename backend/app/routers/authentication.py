@@ -206,6 +206,54 @@ async def revoke_admin(
         )
 
 
+@router.post("/users/enable_readonly/{useremail}", response_model=UserOut)
+async def enable_readonly_user(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            if not user.admin:
+                user.read_only_user = True
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {useremail} is admin cannot be read only",
+                )
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
+@router.post("/users/disable_readonly/{useremail}", response_model=UserOut)
+async def disable_readonly_user(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            if not user.admin:
+                user.read_only_user = False
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {useremail} is admin cannot be read only",
+                )
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
 @router.post("/users/enable/{useremail}", response_model=UserOut)
 async def user_enable(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
