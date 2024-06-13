@@ -16,11 +16,11 @@ Identifiers (DOIs) for any given dataset version, ensuring unique and persistent
 
 ## Architecture
 
-The architecture diagram illustrates Clowder’s dataset versioning. The *Current Working Dataset* is actively modified,
+The architecture diagram illustrates Clowder’s dataset versioning. The *Latest Dataset* is actively modified,
 including its files, folders, metadata, visualizations, and thumbnails. Changes are continuously updated to reflect the
 latest state.
 
-Users can decide to release the latest state of the current working dataset at any given time. When a dataset is
+Users can decide to release the latest state of the latest dataset at any given time. When a dataset is
 released, it becomes a *Versioned Dataset*. Any versioned dataset, such as V1 Dataset, can be assigned a Digital Object
 Identifier (DOI) for unique identification. Once a DOI is assigned, this version cannot be deleted.
 
@@ -45,7 +45,7 @@ copied into the released collection, with the origin ID linking back to the same
 
 ### 1. New Collections
 
-We refer to the original dataset as the current working dataset. Additionally, we introduce new collections to store
+We refer to the original dataset as the latest dataset. Additionally, we introduce new collections to store
 the released dataset information. The new collections include:
 
 - **datasets_freeze**: Released dataset documents will be copied over to store released dataset information.
@@ -59,9 +59,9 @@ the released dataset information. The new collections include:
 ### 2. Data Models
 
 - **Dataset Model**: Each released dataset version will contain additional fields including:
-    - `frozen`: Boolean indicating if the dataset is released.
-    - `frozen_version_num`: Incremental integer indicating the version number.
-    - `origin_id`: Reference to the original resource. If it's the first version, it will be the same as the current
+    - `frozen`: Boolean indicating if the dataset is released. _False indicates the latest dataset._
+    - `frozen_version_num`: Incremental integer indicating the version number. _-999 indicates the latest dataset._
+    - `origin_id`: Reference to the original resource. If it's the latest version, it will be the same as the current
       dataset ID.
 - **File, Folder, Metadata, Visualization, and Thumbnail Models**:
     - `frozen`: Boolean indicating if the resource is released.
@@ -69,7 +69,7 @@ the released dataset information. The new collections include:
 
 ### 3. MongoDB Views
 
-We use MongoDB views to join the current working datasets with the released datasets, providing a comprehensive view
+We use MongoDB views to join the latest dataset with the released datasets, providing a comprehensive view
 for client consumption. These views include:
 
 - **datasets_view**: Combines datasets and datasets_freeze.
@@ -99,24 +99,37 @@ for client consumption. These views include:
 - **Get the Latest Version**: Endpoint to retrieve the latest version of a dataset.
     - **GET** `/datasets/{dataset_id}/freeze/latest_version_num`
 
-### Updated Endpoints
-
-Update database source from MongoDB collections to combined MongoDB views in all GET endpoints for comprehensive data
-retrieval.
+- **Delete Specific Version**: Endpoint to delete a specific version of a dataset.
+    - **DELETE** `/datasets/{dataset_id}/freeze/{frozen_version_num}`
+    - The procedure for deleting a released dataset version is as follows:
+        1. Delete associated metadata (Mongo document).
+        2. Delete folders (Mongo document).
+        3. Delete dataset thumbnail (Mongo document and raw bytes if not raw bytes not used in other released versions
+           or the latest dataset. _* Referred to as "if applicable" from now on_).
+        4. Delete dataset visualization configuration (Mongo document).
+        5. Delete dataset visualization data (Mongo document and raw bytes if applicable).
+        6. Delete files:
+            - Delete file metadata (Mongo document).
+            - Delete file thumbnail (Mongo document and raw bytes if applicable).
+            - Delete file visualization configuration (Mongo document).
+            - Delete file visualization data (Mongo document and raw bytes if applicable).
+            - Delete file (Mongo document and raw bytes if applicable).
+        7. **Mark released dataset as deleted (Mongo document).**
 
 ## User Interface
 
 - **Release Dataset**: Add an option to release a dataset.
-- **Version History View**: Display a list of versions.
-- **Version Navigation**: Allow users to navigate between different versions of a dataset. Associated files, folders,
-  metadata, visualizations, and thumbnails will be displayed accordingly.
+- **Dataset Version History**: Implement a feature to list all dataset versions using
+  collapsible, sections, links, and include pagination to enhance navigation and user experience
+    - **Version Navigation**: Allow users to navigate between different versions of a dataset. Associated files,
+      folders,
+      metadata, visualizations, and thumbnails will be displayed accordingly.
+    - **Delete Version**: Develop functionality to delete a specific dataset version or the current dataset,
+    - providing users with greater control over dataset management
 - **Forbidden Modifications**: Prevent modifications to a released dataset.
 
 ## Future Enhancements
 
-- **User Interface to Show All Dataset Versions**: Implement a feature to list all dataset versions using collapsible
-  sections, links, and include pagination to enhance navigation and user experience (Issue #1039).
-- **Delete Dataset Version**: Develop functionality to delete a specific dataset version or the current dataset,
-  providing users with greater control over dataset management (Issue #1040).
 - **Mint DOI**: Integrate DOI support to allow minting Digital Object Identifiers (DOIs) for each dataset version,
-  ensuring unique and persistent identification (Issue #919).
+  ensuring unique and persistent
+  identification ([Issue #919](https://github.com/clowder-framework/clowder2/issues/919)).
