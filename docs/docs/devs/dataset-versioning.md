@@ -104,7 +104,7 @@ for client consumption. These views include:
     - The procedure for deleting a released dataset version is as follows:
         1. Delete associated metadata (Mongo document).
         2. Delete folders (Mongo document).
-        3. Delete dataset thumbnail (Mongo document and raw bytes if not raw bytes not used in other released versions
+        3. Delete dataset thumbnail (Mongo document and raw bytes only if raw bytes not used in other released versions
            or the latest dataset. _* Referred to as "if applicable" from now on_).
         4. Delete dataset visualization configuration (Mongo document).
         5. Delete dataset visualization data (Mongo document and raw bytes if applicable).
