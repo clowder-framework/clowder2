@@ -159,9 +159,9 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
         match_list.append({"match": crit})
 
     # TODO: This will need to be more complex to support other operators
-    if search_obj.mode == "and":
+    if search_obj.mode.lower() == "and":
         subquery = {"bool": {"must": match_list}}
-    if search_obj.mode == "or":
+    if search_obj.mode.lower() == "or":
         subquery = {"bool": {"should": match_list}}
 
     # Wrap the normal criteria with restriction of file ID also

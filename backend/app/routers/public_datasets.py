@@ -19,12 +19,14 @@ from app.models.datasets import (
 )
 from app.models.files import FileDBViewList, FileOut
 from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import FolderDBViewList, FolderOut
+from app.models.folders import FolderDB, FolderDBViewList, FolderOut
 from app.models.metadata import MetadataDBViewList, MetadataDefinitionDB, MetadataOut
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from app.search.index import index_dataset, index_folder
 from beanie import PydanticObjectId
 from beanie.operators import And, Or
 from bson import ObjectId, json_util
+from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
@@ -238,6 +240,7 @@ async def get_dataset_metadata(
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
     dataset_id: str,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     fs: Minio = Depends(dependencies.get_fs),
 ):
     if (
@@ -405,6 +408,15 @@ async def download_dataset(
                 "attachment; filename=%s" % zip_name
             )
             await _increment_data_downloads(dataset_id)
+
+            # reindex
+            await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+            # Update folders index since its using dataset downloads and status to index
+            async for folder in FolderDB.find(
+                FolderDB.dataset_id == PydanticObjectId(dataset_id)
+            ):
+                await index_folder(es, FolderOut(**folder.dict()), update=True)
+
             return response
         else:
             raise HTTPException(

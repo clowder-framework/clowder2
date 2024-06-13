@@ -272,6 +272,7 @@ async def download_file(
     file_id: str,
     version: Optional[int] = None,
     increment: Optional[bool] = True,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -336,6 +337,9 @@ async def download_file(
             if increment:
                 await _increment_file_downloads(file_id)
 
+                # reindex
+                await index_file(es, FileOut(**file.dict()), update=True)
+
             return response
 
     else:
@@ -347,6 +351,7 @@ async def download_file_url(
     file_id: str,
     version: Optional[int] = None,
     expires_in_seconds: Optional[int] = 3600,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     external_fs: Minio = Depends(dependencies.get_external_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -398,8 +403,13 @@ async def download_file_url(
 
         if presigned_url is not None:
             await _increment_file_downloads(file_id)
-
+            # reindex
+            await index_file(es, FileOut(**file.dict()), update=True)
+            # return presigned url
             return {"presigned_url": presigned_url}
+        else:
+            raise HTTPException(status_code=500, detail="Presigned URL not generated")
+
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
