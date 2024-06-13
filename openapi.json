@@ -2826,6 +2826,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Increment",
+              "type": "boolean",
+              "default": true
+            },
+            "name": "increment",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
