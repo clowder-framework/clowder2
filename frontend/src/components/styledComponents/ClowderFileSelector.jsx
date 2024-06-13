@@ -8,7 +8,6 @@ export const ClowderFileSelector = (item) => {
 	};
 	const datasetId = item.options.datasetId;
 	const showOnlyDatasetFiles = item.schema.showOnlyDatasetFiles ? true : false;
-	console.log(showOnlyDatasetFiles);
 	return (
 		<>
 			<ClowderInputLabel>{item.schema.title}</ClowderInputLabel>
