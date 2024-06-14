@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { MembersTableUserEntry } from "./MembersTableUserEntry";
 import { ActionModal } from "../dialog/ActionModal";
-import { deleteGroupMember } from "../../actions/group";
+import { deleteGroupMember, fetchGroupAbout } from "../../actions/group";
 
 type MembersTableProps = {
 	groupId: string | undefined;
@@ -27,6 +27,8 @@ export default function MembersTable(props: MembersTableProps) {
 	);
 	// dispatch
 	const dispatch = useDispatch();
+	const fetchGroupInfo = (groupId: string | undefined) =>
+		dispatch(fetchGroupAbout(groupId));
 
 	const groupMemberDeleted = (
 		groupId: string | undefined,
@@ -35,6 +37,10 @@ export default function MembersTable(props: MembersTableProps) {
 
 	const [deleteMemberConfirmOpen, setDeleteMemberConfirmOpen] = useState(false);
 	const [selectMemberUsername, setSelectMemberUsername] = useState();
+
+	useEffect(() => {
+		fetchGroupInfo(groupId);
+	}, []);
 
 	return (
 		<>
