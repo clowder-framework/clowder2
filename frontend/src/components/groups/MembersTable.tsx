@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,26 +10,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { MembersTableUserEntry } from "./MembersTableUserEntry";
 import { ActionModal } from "../dialog/ActionModal";
-import { deleteGroupMember, fetchGroupAbout } from "../../actions/group";
+import { useState } from "react";
+import { deleteGroupMember } from "../../actions/group";
 
 type MembersTableProps = {
 	groupId: string | undefined;
-	users: any | undefined;
 };
 
 export default function MembersTable(props: MembersTableProps) {
-	const { groupId, users } = props;
+	const { groupId } = props;
 
 	// mapStateToProps
 	const groupAbout = useSelector((state: RootState) => state.group.about);
-	const groupCreatorEmail = useSelector(
-		(state: RootState) => state.group.about.creator
-	);
+
 	// dispatch
 	const dispatch = useDispatch();
-	const fetchGroupInfo = (groupId: string | undefined) =>
-		dispatch(fetchGroupAbout(groupId));
-
 	const groupMemberDeleted = (
 		groupId: string | undefined,
 		username: string | undefined
@@ -65,12 +59,11 @@ export default function MembersTable(props: MembersTableProps) {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{users !== undefined ? (
-							users.map((member) => (
+						{groupAbout !== undefined && groupAbout.users !== undefined ? (
+							groupAbout.users.map((member) => (
 								<MembersTableUserEntry
 									groupId={groupId}
 									member={member}
-									creatorEmail={groupCreatorEmail}
 									key={member.user.id}
 									setDeleteMemberConfirmOpen={setDeleteMemberConfirmOpen}
 									setSelectMemberUsername={setSelectMemberUsername}
