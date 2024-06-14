@@ -30,6 +30,8 @@ export function Group() {
 		dispatch(fetchGroupRole(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
+	const users = useSelector((state: RootState) => state.group.users.data);
+
 	const role = useSelector((state: RootState) => state.group.role);
 	const groupCreatorEmail = useSelector(
 		(state: RootState) => state.group.about.creator
@@ -159,7 +161,7 @@ export function Group() {
 					</AuthWrapper>
 				</Grid>
 			</Grid>
-			<MembersTable groupId={groupId} />
+			<MembersTable groupId={groupId} users={users} />
 		</Layout>
 	);
 }

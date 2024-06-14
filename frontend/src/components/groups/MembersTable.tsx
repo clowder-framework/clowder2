@@ -15,10 +15,11 @@ import { deleteGroupMember, fetchGroupAbout } from "../../actions/group";
 
 type MembersTableProps = {
 	groupId: string | undefined;
+	users: any | undefined;
 };
 
 export default function MembersTable(props: MembersTableProps) {
-	const { groupId } = props;
+	const { groupId, users } = props;
 
 	// mapStateToProps
 	const groupAbout = useSelector((state: RootState) => state.group.about);
@@ -37,10 +38,6 @@ export default function MembersTable(props: MembersTableProps) {
 
 	const [deleteMemberConfirmOpen, setDeleteMemberConfirmOpen] = useState(false);
 	const [selectMemberUsername, setSelectMemberUsername] = useState();
-
-	useEffect(() => {
-		fetchGroupInfo(groupId);
-	}, []);
 
 	return (
 		<>
@@ -68,8 +65,8 @@ export default function MembersTable(props: MembersTableProps) {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{groupAbout !== undefined && groupAbout.users !== undefined ? (
-							groupAbout.users.map((member) => (
+						{users !== undefined ? (
+							users.map((member) => (
 								<MembersTableUserEntry
 									groupId={groupId}
 									member={member}
