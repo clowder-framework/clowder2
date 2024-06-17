@@ -41,7 +41,12 @@ from app.routers.authentication import get_admin, get_admin_mode
 from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
 from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
-from app.search.index import index_dataset, index_file
+from app.search.index import (
+    index_dataset,
+    index_file,
+    index_folder,
+    remove_folder_index,
+)
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from beanie.operators import And, Or
@@ -341,6 +346,13 @@ async def edit_dataset(
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+
+        # Update folders index since its using dataset downloads and status to index
+        async for folder in FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
         return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -379,6 +391,13 @@ async def patch_dataset(
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+
+        # Update folders index since its using dataset downloads and status to index
+        async for folder in FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
         return dataset.dict()
 
 
@@ -423,6 +442,7 @@ async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
     user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -436,6 +456,7 @@ async def add_folder(
             **folder_in.dict(), creator=user, dataset_id=PydanticObjectId(dataset_id)
         )
         await new_folder.insert()
+        await index_folder(es, FolderOut(**new_folder.dict()))
         return new_folder.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -599,9 +620,11 @@ async def delete_folder(
                             await remove_file_entry(file.id, fs, es)
                         await _delete_nested_folders(subfolder.id)
                         await subfolder.delete()
+                        await remove_folder_index(subfolder.id, es)
 
             await _delete_nested_folders(folder_id)
             await folder.delete()
+            await remove_folder_index(folder.id, es)
             return {"deleted": folder_id}
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
@@ -627,6 +650,7 @@ async def patch_folder(
     dataset_id: str,
     folder_id: str,
     folder_info: FolderPatch,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -644,6 +668,8 @@ async def patch_folder(
                     folder.parent_folder = folder_info.parent_folder
             folder.modified = datetime.datetime.utcnow()
             await folder.save()
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
             return folder.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
@@ -898,6 +924,7 @@ async def create_dataset_from_zip(
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
     dataset_id: str,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
@@ -1049,6 +1076,15 @@ async def download_dataset(
         response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
         # Increment download count
         await dataset.update(Inc({DatasetDB.downloads: 1}))
+
+        # reindex
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+        # Update folders index since its using dataset downloads and status to index
+        async for folder in FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
         return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

@@ -93,6 +93,7 @@ export class FilesService {
      * @param fileId
      * @param version
      * @param expiresInSeconds
+     * @param increment
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -101,6 +102,7 @@ export class FilesService {
         fileId: string,
         version?: number,
         expiresInSeconds: number = 3600,
+        increment: boolean = true,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
@@ -109,6 +111,7 @@ export class FilesService {
             query: {
                 'version': version,
                 'expires_in_seconds': expiresInSeconds,
+                'increment': increment,
                 'dataset_id': datasetId,
             },
             errors: {

@@ -204,18 +204,19 @@ export function Search() {
 							{luceneOn ? (
 								<ReactiveList
 									componentId="results"
-									dataField="_score"
+									dataField="created"
 									size={20}
 									pagination={true}
 									react={{
 										and: ["string-searchbox"],
 									}}
 									render={({ data }) => <SearchResult data={data} />}
+									sortBy="desc"
 								/>
 							) : (
 								<ReactiveList
 									componentId="results"
-									dataField="_score"
+									dataField="created"
 									size={20}
 									pagination={true}
 									react={{
@@ -230,6 +231,7 @@ export function Search() {
 									render={({ data }) => {
 										return <SearchResult data={data} />;
 									}}
+									sortBy="desc"
 								/>
 							)}
 						</ReactiveBase>

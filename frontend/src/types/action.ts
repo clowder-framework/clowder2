@@ -1,16 +1,11 @@
-import {
-	ExtractedMetadata,
-	FilePreview,
-	Folder,
-	ListenerState,
-	MetadataJsonld,
-} from "./data";
+import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	FeedOut,
 	EventListenerOut,
 	FileOut,
 	FileOut as FileSummary,
@@ -393,6 +388,11 @@ interface DELETE_METADATA_DEFINITION {
 	metadataDefinition: MetadataDefinition;
 }
 
+interface EDIT_METADATA_DEFINITION {
+	type: "EDIT_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
 interface SAVE_METADATA_DEFINITION {
 	type: "SAVE_METADATA_DEFINITION";
 	metadataDefinition: MetadataDefinition;
@@ -656,6 +656,31 @@ interface FOLDER_UPDATED {
 	folder: FolderOut;
 }
 
+interface CREATE_FEED {
+	type: "CREATE_FEED";
+	feed: FeedOut;
+}
+
+interface EDIT_FEED {
+	type: "EDIT_FEED";
+	feed: FeedOut;
+}
+
+interface RECEIVE_FEEDS {
+	type: "RECEIVE_FEEDS";
+	feeds: Paged;
+}
+
+interface RECEIVE_FEED {
+	type: "RECEIVE_FEED";
+	feed: FeedOut;
+}
+
+interface DELETE_FEED {
+	type: "DELETE_FEED";
+	feed: FeedOut;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -717,6 +742,7 @@ export type DataAction =
 	| SEARCH_METADATA_DEFINITIONS
 	| DELETE_METADATA_DEFINITION
 	| SAVE_METADATA_DEFINITION
+	| EDIT_METADATA_DEFINITION
 	| RESET_SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
 	| RECEIVE_PUBLIC_DATASET_METADATA
@@ -778,4 +804,9 @@ export type DataAction =
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
 	| FOLDER_UPDATED
 	| RECEIVE_DATASET_LICENSE
-	| UPDATE_DATASET_LICENSE;
+	| UPDATE_DATASET_LICENSE
+	| CREATE_FEED
+	| EDIT_FEED
+	| RECEIVE_FEEDS
+	| RECEIVE_FEED
+	| DELETE_FEED;
