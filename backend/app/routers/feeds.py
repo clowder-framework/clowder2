@@ -1,8 +1,10 @@
 from typing import List, Optional
+
 from beanie import PydanticObjectId
 from beanie.operators import Or
 from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
+
 from app.deps.authorization_deps import ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
@@ -11,6 +13,7 @@ from app.models.groups import GroupDB
 from app.models.listeners import EventListenerDB, FeedListener
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
+from app.routers.authentication import get_admin, get_admin_mode
 from app.search.connect import check_search_result
 
 router = APIRouter()
@@ -141,7 +144,11 @@ async def delete_feed(
 
 @router.post("/{feed_id}/listeners", response_model=FeedOut)
 async def associate_listener(
-    feed_id: str, listener: FeedListener, allow: bool = Depends(ListenerAuthorization())
+    feed_id: str,
+    listener: FeedListener,
+    username=Depends(get_current_username),
+    admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
 
@@ -149,6 +156,16 @@ async def associate_listener(
         feed_id: Feed that should have new Event Listener associated
         listener: JSON object with "listener_id" field and "automatic" bool field (whether to auto-trigger on new data)
     """
+    # Because we have FeedListener rather than listener_id here, we can't use injection for this
+    allow = ListenerAuthorization().__call__(
+        listener.listener_id, username, admin_mode, admin
+    )
+    if not allow:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User `{username} does not have permission on listener `{listener.listener_id}`",
+        )
+
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
             await EventListenerDB.get(PydanticObjectId(listener.listener_id))
