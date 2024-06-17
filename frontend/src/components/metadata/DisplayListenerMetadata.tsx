@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import {
@@ -106,29 +106,41 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					metadataList = publicFileMetadataList;
 				else if (resourceType === "dataset" && publicView)
 					metadataList = publicDatasetMetadataList;
-				return (
-					<Grid container spacing={2}>
-						{metadataList.map((metadata, idx) => {
-							if (metadata.agent.listener !== null) {
-								return (
-									<Grid item xs={12} key={idx}>
-										<Card>
-											<CardContent>
-												<ListenerMetadataEntry
-													agent={metadata.agent}
-													content={metadata.content}
-													context={metadata.context}
-													context_url={metadata.context_url}
-													created={metadata.created}
-												/>
-											</CardContent>
-										</Card>
-									</Grid>
-								);
-							}
-						})}
-					</Grid>
-				);
+				if (metadataList.length > 0) {
+					return (
+						<Grid container spacing={2}>
+							{metadataList.map((metadata, idx) => {
+								if (metadata.agent.listener !== null) {
+									return (
+										<Grid item xs={12} key={idx}>
+											<Card>
+												<CardContent>
+													<ListenerMetadataEntry
+														agent={metadata.agent}
+														content={metadata.content}
+														context={metadata.context}
+														context_url={metadata.context_url}
+														created={metadata.created}
+													/>
+												</CardContent>
+											</Card>
+										</Grid>
+									);
+								}
+							})}
+						</Grid>
+					);
+				} else {
+					return (
+						<Box textAlign="center">
+							<p>
+								Currently there is no machine metadata. This means either no
+								listeners are enabled for this resource, or that this resource
+								has not been submitted to any listeners.
+							</p>
+						</Box>
+					);
+				}
 			})()}
 		</>
 	);
