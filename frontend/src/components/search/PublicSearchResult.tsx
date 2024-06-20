@@ -10,11 +10,11 @@ import {
 import { Link } from "react-router-dom";
 import DatasetIcon from "@mui/icons-material/Dataset";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import FolderIcon from "@mui/icons-material/Folder";
 import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
 
 import parse from "html-react-parser";
+import FolderIcon from "@mui/icons-material/Folder";
 
 // Function to parse the elastic search parameter
 // If it contains HTML tags like <mark>, it removes them
@@ -37,7 +37,7 @@ function buildDatasetResult(item) {
 			<Box sx={{ marginTop: "5px" }}>
 				<MuiLink
 					component={Link}
-					to={`/datasets/${item._id}`}
+					to={`/public_datasets/${item._id}`}
 					sx={{ fontWeight: "bold", fontSize: "18px" }}
 				>
 					{parseString(item.name)}
@@ -53,6 +53,28 @@ function buildDatasetResult(item) {
 	);
 }
 
+function buildFolderResult(item) {
+	return (
+		<>
+			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
+				<FolderIcon />
+			</ListItemAvatar>
+			<Box sx={{ marginTop: "5px" }}>
+				<MuiLink
+					component={Link}
+					to={`/public_datasets/${item.dataset_id}?folder=${item._id}`}
+					sx={{ fontWeight: "bold", fontSize: "18px" }}
+				>
+					{parseString(item.name)}
+				</MuiLink>
+				<Typography variant="body2" color={theme.palette.info.main}>
+					Created by {parseString(item.creator)} at {parseDate(item.created)}
+				</Typography>
+			</Box>
+		</>
+	);
+}
+
 function buildFileResult(item) {
 	return (
 		<>
@@ -62,7 +84,7 @@ function buildFileResult(item) {
 			<Box sx={{ marginTop: "5px" }}>
 				<MuiLink
 					component={Link}
-					to={`/files/${item._id}?dataset=${item.dataset_id}`}
+					to={`/public_files/${item._id}?dataset=${item.dataset_id}`}
 					sx={{ fontWeight: "bold", fontSize: "18px" }}
 				>
 					{parseString(item.name)}
@@ -78,29 +100,7 @@ function buildFileResult(item) {
 	);
 }
 
-function buildFolderResult(item) {
-	return (
-		<>
-			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-				<FolderIcon />
-			</ListItemAvatar>
-			<Box sx={{ marginTop: "5px" }}>
-				<MuiLink
-					component={Link}
-					to={`/datasets/${item.dataset_id}?folder=${item._id}`}
-					sx={{ fontWeight: "bold", fontSize: "18px" }}
-				>
-					{parseString(item.name)}
-				</MuiLink>
-				<Typography variant="body2" color={theme.palette.info.main}>
-					Created by {parseString(item.creator)} at {parseDate(item.created)}
-				</Typography>
-			</Box>
-		</>
-	);
-}
-
-export function SearchResult(props) {
+export function PublicSearchResult(props) {
 	const { data } = props;
 
 	if (data.length > 0) {

@@ -23,8 +23,8 @@ def _add_permissions_clause(
             "should": [
                 {"term": {"creator": username}},
                 {"term": {"user_ids": username}},
-                {"term": {"status": "AUTHENTICATED"}},
-                {"term": {"status": "PUBLIC"}},
+                {"term": {"status": "authenticated"}},
+                {"term": {"status": "public"}},
             ]
         }
     }

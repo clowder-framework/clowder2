@@ -3,6 +3,7 @@ import {
 	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
+	FeedOut,
 	FileOut,
 	FileVersion,
 	FolderOut,
@@ -123,6 +124,7 @@ export interface DatasetState {
 	files: Paged;
 	folders: Paged;
 	datasets: Paged;
+	myDatasets: Paged;
 	deletedDataset: DatasetOut;
 	deletedFolder: FolderOut;
 	deletedFile: FileOut;
@@ -213,6 +215,7 @@ export interface UserState {
 	deletedApiKey: UserAPIKeyOut;
 	profile: UserOut;
 	adminMode: boolean;
+	read_only_user: boolean;
 }
 
 export interface ErrorState {
@@ -263,6 +266,12 @@ export interface EventListenerJobStatus {
 	resubmitted: string;
 }
 
+export interface FeedState {
+	feeds: Paged;
+	feed: FeedOut;
+	deletedFeed: FeedOut;
+}
+
 export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
@@ -276,4 +285,5 @@ export interface RootState {
 	folder: FolderState;
 	visualization: VisualizationState;
 	publicVisualization: PublicVisualizationState;
+	feed: FeedState;
 }

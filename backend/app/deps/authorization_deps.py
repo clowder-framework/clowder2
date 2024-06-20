@@ -1,6 +1,7 @@
-from app.keycloak_auth import get_current_username
+from app.keycloak_auth import get_current_username, get_read_only_user
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDB, DatasetStatus
+from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileStatus
 from app.models.groups import GroupDB
 from app.models.listeners import EventListenerDB
@@ -201,6 +202,7 @@ class Authorization:
         force_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
+        readonly: bool = Depends(get_read_only_user),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
@@ -434,6 +436,37 @@ class ListenerAuthorization:
         raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
 
 
+class FeedAuthorization:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/.
+    Regular users can only see their own feeds"""
+
+    # def __init__(self, optional_arg: str = None):
+    #         self.optional_arg = optional_arg
+
+    async def __call__(
+        self,
+        feed_id: str,
+        current_user: str = Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
+        admin: bool = Depends(get_admin),
+    ):
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
+            return True
+
+        # Else check if current user is the creator of the feed
+        if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
+            if feed.creator and feed.creator == current_user:
+                return True
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User `{current_user} does not have permission on feed `{feed_id}`",
+                )
+        raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
+
+
 class CheckStatus:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
@@ -486,20 +519,34 @@ def access(
     force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin: bool = Depends(get_admin),
+    read_only_user: bool = Depends(get_read_only_user),
 ) -> bool:
+    # check for read only user first
+    if read_only_user and role_required == RoleType.VIEWER:
+        return True
     """Enforce implied role hierarchy ADMIN = OWNER > EDITOR > UPLOADER > VIEWER"""
     if user_role == RoleType.OWNER or (admin and admin_mode):
         return True
-    elif user_role == RoleType.EDITOR and role_required in [
-        RoleType.EDITOR,
-        RoleType.UPLOADER,
-        RoleType.VIEWER,
-    ]:
+    elif (
+        user_role == RoleType.EDITOR
+        and role_required
+        in [
+            RoleType.EDITOR,
+            RoleType.UPLOADER,
+            RoleType.VIEWER,
+        ]
+        and not read_only_user
+    ):
         return True
-    elif user_role == RoleType.UPLOADER and role_required in [
-        RoleType.UPLOADER,
-        RoleType.VIEWER,
-    ]:
+    elif (
+        user_role == RoleType.UPLOADER
+        and role_required
+        in [
+            RoleType.UPLOADER,
+            RoleType.VIEWER,
+        ]
+        and not read_only_user
+    ):
         return True
     elif user_role == RoleType.VIEWER and role_required == RoleType.VIEWER:
         return True

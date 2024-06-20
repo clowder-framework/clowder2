@@ -20,6 +20,7 @@ import { Auth as AuthComponent } from "./components/auth/Auth";
 import { RedirectLogin as RedirectLoginComponent } from "./components/auth/RedirectLogin";
 import { RedirectLogout as RedirectLogoutComponent } from "./components/auth/RedirectLogout";
 import { Search } from "./components/search/Search";
+import { PublicSearch } from "./components/search/PublicSearch";
 import { isAuthorized } from "./utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
@@ -41,7 +42,9 @@ import { ManageUsers } from "./components/users/ManageUsers";
 import config from "./app.config";
 import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
 import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
+import { Feeds } from "./components/listeners/Feeds";
 import { AllListeners } from "./components/listeners/AllListeners";
+import { FeedEntry } from "./components/listeners/FeedEntry";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -184,7 +187,7 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route
-					path="/public/datasets/:datasetId"
+					path="/public_datasets/:datasetId"
 					element={<PublicDatasetComponent />}
 				/>
 				<Route
@@ -195,7 +198,7 @@ export const AppRoutes = (): JSX.Element => {
 						</PrivateRoute>
 					}
 				/>
-				<Route path="/public/files/:fileId" element={<PublicFileComponent />} />
+				<Route path="/public_files/:fileId" element={<PublicFileComponent />} />
 				<Route path="/auth/register" element={<RedirectRegisterComponent />} />
 				<Route path="/auth/login" element={<RedirectLoginComponent />} />
 				<Route path="/auth/logout" element={<RedirectLogoutComponent />} />
@@ -224,11 +227,28 @@ export const AppRoutes = (): JSX.Element => {
 						</PrivateRoute>
 					}
 				/>
+				<Route path="/public_search" element={<PublicSearch />} />
 				<Route
 					path="/extractions"
 					element={
 						<PrivateRoute>
 							<ExtractionHistory />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/feeds"
+					element={
+						<PrivateRoute>
+							<Feeds />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/feeds/:feedId"
+					element={
+						<PrivateRoute>
+							<FeedEntry />
 						</PrivateRoute>
 					}
 				/>

@@ -164,6 +164,52 @@ export class LoginService {
     }
 
     /**
+     * Enable Readonly User
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/enable_readonly/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Disable Readonly User
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static disableReadonlyUserApiV2UsersDisableReadonlyUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/disable_readonly/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * User Enable
      * @param useremail
      * @param datasetId
