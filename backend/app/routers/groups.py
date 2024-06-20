@@ -35,7 +35,7 @@ async def get_groups(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -81,7 +81,7 @@ async def search_group(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):

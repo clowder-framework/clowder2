@@ -186,7 +186,7 @@ async def associate_listener(
     listener: FeedListener,
     user=Depends(get_current_user),
     admin=Depends(get_admin),
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
     allow: bool = Depends(FeedAuthorization()),
 ):

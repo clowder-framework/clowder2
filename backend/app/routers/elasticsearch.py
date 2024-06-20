@@ -52,7 +52,7 @@ async def search(
     query: str,
     username=Depends(get_current_username),
     admin=Depends(get_admin),
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()
@@ -65,7 +65,7 @@ async def msearch(
     request: Request,
     username=Depends(get_current_username),
     admin=Depends(get_admin),
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()

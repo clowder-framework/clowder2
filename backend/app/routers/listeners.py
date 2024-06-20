@@ -201,7 +201,7 @@ async def search_listeners(
     user=Depends(get_current_username),
     process: Optional[str] = None,
     admin=Depends(get_admin),
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
 ):
     """Search all Event Listeners in the db based on text.
@@ -307,7 +307,7 @@ async def get_listeners(
     process: Optional[str] = None,
     all: Optional[bool] = False,
     admin=Depends(get_admin),
-    force_admin: bool = False,
+    enable_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
 ):
     """Get a list of all Event Listeners in the db.
