@@ -11,7 +11,7 @@ services:
       - clowder2
     volumes:
       # The JupyterHub configuration file
-      - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro
+      - ./jupyterhub/jupyterhub_config.dev.py:/srv/jupyterhub/jupyterhub_config.py:ro
       # Bind Docker socket on the hostso we can connect to the daemon from
       # within the container
       - /var/run/docker.sock:/var/run/docker.sock:rw
@@ -20,7 +20,7 @@ services:
     ports:
       - "8765:8000"
     env_file:
-        -   jupyterhub/.env
+        -   jupyterhub/.env-dev
     command: jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
 
     depends_on:
