@@ -13,12 +13,9 @@ class JobFeed(BaseModel):
     resources match the saved search criteria for the Feed."""
 
     name: str
+    description: str = ""
     search: SearchObject
     listeners: List[FeedListener] = []
-
-
-class FeedBase(JobFeed):
-    description: str = ""
 
 
 class FeedIn(JobFeed):

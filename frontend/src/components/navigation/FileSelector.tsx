@@ -47,6 +47,41 @@ interface FSItem {
 	content_type?: string;
 }
 
+// Function to fetch children of a folder
+async function fetchFolderFiles(
+	datasetid: string,
+	folderId: string | undefined
+) {
+	try {
+		const response =
+			await V2.DatasetsService.getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
+				datasetid,
+				folderId,
+				// TODO: Remove hardcoded values
+				0,
+				3000
+			);
+		const data = response.data;
+		const FSItems: FSItem[] =
+			data !== undefined
+				? data.map((FSItem: any) => ({
+						datasetId: datasetid,
+						id: FSItem.id,
+						label: FSItem.name,
+						children: FSItem.object_type === "folder" ? [] : undefined,
+						type: FSItem.object_type,
+						content_type:
+							FSItem.object_type !== "folder"
+								? FSItem.content_type.main_type
+								: undefined,
+				  }))
+				: [];
+		return FSItems;
+	} catch (error) {
+		console.error("Error fetching folders and files", error);
+	}
+}
+
 const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 	item,
 	depth = 0,
@@ -76,41 +111,6 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 				return <InsertDriveFileIcon />;
 		}
 	};
-
-	// Function to fetch children of a folder
-	async function fetchFolderFiles(
-		datasetid: string,
-		folderId: string | undefined
-	) {
-		try {
-			const response =
-				await V2.DatasetsService.getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
-					datasetid,
-					folderId,
-					// TODO: Remove hardcoded values
-					0,
-					3000
-				);
-			const data = response.data;
-			const FSItems: FSItem[] =
-				data !== undefined
-					? data.map((FSItem: any) => ({
-							datasetId: datasetid,
-							id: FSItem.id,
-							label: FSItem.name,
-							children: FSItem.object_type === "folder" ? [] : undefined,
-							type: FSItem.object_type,
-							content_type:
-								FSItem.object_type !== "folder"
-									? FSItem.content_type.main_type
-									: undefined,
-					  }))
-					: [];
-			return FSItems;
-		} catch (error) {
-			console.error("Error fetching folders and files", error);
-		}
-	}
 
 	// Function to handle selection of folder or file
 	const onSelect = () => {
@@ -232,9 +232,49 @@ const FileSystemViewer: React.FC<{
 	) : null;
 };
 
-const FileSelector: React.FC<{ onChange: (fileId: string) => void }> = ({
-	onChange,
-}) => {
+const DatasetFileViewer: React.FC<{
+	onSelectFile: (fileId: string, fileName: string) => void;
+	datasetId: string;
+}> = ({ onSelectFile, datasetId }) => {
+	const [FSItems, setFSItems] = useState<FSItem[]>([]);
+
+	// Only display contents of the passed dataset
+	useEffect(() => {
+		fetchFolderFiles(datasetId, undefined).then((data) => {
+			setFSItems(data);
+		});
+	}, [datasetId]);
+
+	return FSItems.length > 0 ? (
+		<Box
+			sx={{
+				width: "100%",
+				height: 360,
+				maxWidth: 360,
+				overflowY: "auto",
+				overflowX: "auto",
+				bgcolor: "background.paper",
+			}}
+		>
+			<Typography variant="h6" sx={{ ml: 2, my: 2 }}>
+				File Selector
+			</Typography>
+			{FSItems.map((FSItem) => (
+				<RecursiveComponent
+					key={FSItem.id}
+					item={FSItem}
+					onSelectFile={onSelectFile}
+				/>
+			))}
+		</Box>
+	) : null;
+};
+
+const FileSelector: React.FC<{
+	showOnlyDatasetFiles: boolean;
+	datasetId: string | undefined;
+	onChange: (fileId: string) => void;
+}> = ({ showOnlyDatasetFiles, datasetId, onChange }) => {
 	const [open, setOpen] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<FileDetails>({
 		fileId: "",
@@ -282,7 +322,14 @@ const FileSelector: React.FC<{ onChange: (fileId: string) => void }> = ({
 						p: 4,
 					}}
 				>
-					<FileSystemViewer onSelectFile={handleFileSelect} />
+					{showOnlyDatasetFiles ? (
+						<DatasetFileViewer
+							onSelectFile={handleFileSelect}
+							datasetId={datasetId as string}
+						/>
+					) : (
+						<FileSystemViewer onSelectFile={handleFileSelect} />
+					)}
 				</Box>
 			</Modal>
 		</Box>

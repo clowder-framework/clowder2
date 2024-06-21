@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 
 import { ListenerInfo } from "./ListenerInfo";
-import Form from "@rjsf/material-ui";
+import Form from "@rjsf/mui";
 import { FormProps } from "@rjsf/core";
 import { submitFileExtractionAction } from "../../actions/file";
 import { submitDatasetExtractionAction } from "../../actions/dataset";
@@ -28,6 +28,7 @@ import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget
 import { ClowderFileSelector } from "../styledComponents/ClowderFileSelector";
 import ExtractorStatus from "./ExtractorStatus";
 import CloseIcon from "@mui/icons-material/Close";
+import validator from "@rjsf/validator-ajv8";
 
 type SubmitExtractionProps = {
 	fileId: string;
@@ -44,14 +45,12 @@ const widgets = {
 	clowderFile: ClowderFileSelector,
 };
 
-const uiSchema = {
-	clowderFile: { "ui:widget": "FileSelector" },
-};
-
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const { fileId, datasetId, open, infoOnly, handleClose, selectedExtractor } =
 		props;
 	const dispatch = useDispatch();
+
+	const uiSchema: any = {};
 
 	const submitFileExtraction = (
 		fileId: string | undefined,
@@ -79,6 +78,27 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 			handleNext();
 		}
 	};
+
+	// The for loop is used to pass the datasetId to a widget if it is a clowderFile Widget
+	if (
+		selectedExtractor &&
+		selectedExtractor["properties"] &&
+		selectedExtractor["properties"]["parameters"] &&
+		selectedExtractor["properties"]["parameters"]["schema"]
+	) {
+		const parameters = selectedExtractor["properties"]["parameters"]["schema"];
+		for (const key in parameters) {
+			// Check if field "format" present and equals "clowderFile"
+			if (parameters[key].format && parameters[key].format === "clowderFile") {
+				uiSchema[key] = {
+					"ui:widget": "clowderFile",
+					"ui:options": {
+						datasetId: datasetId,
+					},
+				};
+			}
+		}
+	}
 
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
@@ -138,6 +158,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 											<Container>
 												<Form
 													widgets={widgets}
+													validator={validator}
+													uiSchema={uiSchema}
 													schema={{
 														properties: selectedExtractor["properties"][
 															"parameters"

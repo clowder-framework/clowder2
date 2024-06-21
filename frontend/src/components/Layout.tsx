@@ -36,7 +36,7 @@ import {
 	getAdminModeStatus as getAdminModeStatusAction,
 	toggleAdminMode as toggleAdminModeAction,
 } from "../actions/user";
-import { AdminPanelSettings } from "@mui/icons-material";
+import { AdminPanelSettings, SavedSearch } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
@@ -455,6 +455,16 @@ export default function PersistentDrawerLeft(props) {
 								<MenuBookIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Jupyter Notebook"} />
+            </ListItemButton>
+					</ListItem>
+				</List>
+				<List>
+					<ListItem key={"feeds"} disablePadding>
+						<ListItemButton component={RouterLink} to="/feeds">
+							<ListItemIcon>
+								<SavedSearch />
+							</ListItemIcon>
+							<ListItemText primary={"Feeds"} />
 						</ListItemButton>
 					</ListItem>
 				</List>
