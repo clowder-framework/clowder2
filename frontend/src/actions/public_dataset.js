@@ -1,5 +1,6 @@
 import { V2 } from "../openapi";
 import { handleErrors } from "./common";
+import { fetchDatasetAbout } from "./dataset";
 
 export const RECEIVE_PUBLIC_DATASET_METADATA =
 	"RECEIVE_PUBLIC_DATASET_METADATA";
@@ -102,6 +103,21 @@ export function fetchPublicDatasetAbout(id) {
 					publicAbout: json,
 					receivedAt: Date.now(),
 				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchPublicDatasetAbout(id)));
+			});
+	};
+}
+
+export function downloadPublicDataset(id) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.downloadDatasetApiV2PublicDatasetsDatasetIdDownloadGet(
+			id
+		)
+			.then((json) => {
+				// fetch dataset about on successfully downloading dataset
+				dispatch(fetchPublicDatasetAbout(id));
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, fetchPublicDatasetAbout(id)));
