@@ -67,7 +67,7 @@ config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 config["publicSearchEndpoint"] = `${hostname}/api/v2/public_elasticsearch`;
 
 // jupterhub
-const localJupyterhubURL: string = "http://localhost:8765";
+const localJupyterhubURL: string = `${config.hostname}/jupyterhub`;
 config["jupyterHubURL"] = process.env.JUPYTERHUB_URL || localJupyterhubURL;
 
 // refresh token time interval

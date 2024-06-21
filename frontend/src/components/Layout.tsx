@@ -455,7 +455,7 @@ export default function PersistentDrawerLeft(props) {
 								<MenuBookIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Jupyter Notebook"} />
-            </ListItemButton>
+						</ListItemButton>
 					</ListItem>
 				</List>
 				<List>
