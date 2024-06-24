@@ -114,16 +114,13 @@ async def index_file(
         insert_record(es, settings.elasticsearch_index, doc, file.id)
 
 
-async def index_dataset_files(
-    es: Elasticsearch,
-    dataset_id: str,
-):
+async def index_dataset_files(es: Elasticsearch, dataset_id: str, update: bool = False):
     query = [
         FileDB.dataset_id == ObjectId(dataset_id),
     ]
     files = await FileDB.find(*query).to_list()
     for file in files:
-        await index_file(es, FileOut(**file.dict()), update=True)
+        await index_file(es, FileOut(**file.dict()), update=update)
 
 
 async def index_folder(

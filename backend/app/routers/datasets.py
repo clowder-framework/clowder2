@@ -783,7 +783,6 @@ async def save_files(
                 authenticated=authenticated,
             )
             files_added.append(new_file.dict())
-            await index_file(es, FileOut(**new_file.dict()), update=True)
         return files_added
 
     else:

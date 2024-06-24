@@ -63,7 +63,7 @@ async def save_authorization(
         **authorization_in.dict(), creator=user, user_ids=user_ids
     )
     await authorization.insert()
-    await index_dataset_files(es, dataset_id)
+    await index_dataset_files(es, dataset_id, update=True)
     return authorization.dict()
 
 
@@ -217,7 +217,7 @@ async def set_dataset_group_role(
                         await index_dataset(
                             es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
                         )
-                        await index_dataset_files(es, str(dataset_id))
+                        await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
@@ -306,7 +306,7 @@ async def set_dataset_user_role(
                     auth_db.user_ids.append(username)
                     await auth_db.save()
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
-                await index_dataset_files(es, dataset_id)
+                await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
             else:
                 # Create a new entry
@@ -354,7 +354,7 @@ async def remove_dataset_group_role(
                 await auth_db.save()
                 # Update elasticsearch index with new users
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
-                await index_dataset_files(es, str(dataset_id))
+                await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -387,7 +387,7 @@ async def remove_dataset_user_role(
                 await auth_db.save()
                 # Update elasticsearch index with updated users
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
-                await index_dataset_files(es, dataset_id)
+                await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
