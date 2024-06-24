@@ -83,7 +83,6 @@ export default function FilesTable(props: FilesTableProps) {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
-						<TableCell>Version</TableCell>
 						<TableCell align="right">Created</TableCell>
 						<TableCell align="right">Size</TableCell>
 						<TableCell align="right">Type</TableCell>
@@ -109,7 +108,6 @@ export default function FilesTable(props: FilesTableProps) {
 										{item.name}
 									</Button>
 								</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">{parseDate(item.created)}</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
