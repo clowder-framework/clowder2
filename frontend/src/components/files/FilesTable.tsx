@@ -108,7 +108,6 @@ export default function FilesTable(props: FilesTableProps) {
 										{item.name}
 									</Button>
 								</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">{parseDate(item.created)}</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
