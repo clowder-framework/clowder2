@@ -51,11 +51,9 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		if (adminMode) {
 			if (selectedTabIndex === 1) {
-				listDatasets(0, limit, true);
-				setCurrPageNum(1);
+				listDatasets((currPageNum - 1) * limit, limit, true);
 			} else {
-				listDatasets(0, limit, false);
-				setCurrPageNum(1);
+				listDatasets((currPageNum - 1) * limit, limit, false);
 			}
 		} else listDatasets((currPageNum - 1) * limit, limit, mine);
 	}, [adminMode, deletedDataset, mine, currPageNum, selectedTabIndex, limit]);
