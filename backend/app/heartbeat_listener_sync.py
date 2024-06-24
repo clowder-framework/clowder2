@@ -23,6 +23,9 @@ def callback(ch, method, properties, body):
 
     extractor_info = msg["extractor_info"]
     extractor_name = extractor_info["name"]
+    extractor_description = extractor_name
+    if "description" in extractor_info:
+        extractor_description = extractor_info["description"]
     extractor_db = EventListenerDB(
         **extractor_info, properties=ExtractorInfo(**extractor_info)
     )
@@ -30,7 +33,7 @@ def callback(ch, method, properties, body):
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    # check to see if extractor alredy exists
+    # check to see if extractor already exists
     existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
     if existing_extractor is not None:
         # Update existing listener
@@ -85,8 +88,8 @@ def callback(ch, method, properties, body):
                 # TODO: Who should the author be for an auto-generated feed? Currently None.
                 new_feed = FeedDB(
                     name=extractor_name,
+                    description=extractor_description,
                     search={
-                        "index_name": "file",
                         "criteria": criteria_list,
                         "mode": "or",
                     },

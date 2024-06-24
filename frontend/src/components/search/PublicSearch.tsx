@@ -164,18 +164,19 @@ export function PublicSearch() {
 							{luceneOn ? (
 								<ReactiveList
 									componentId="results"
-									dataField="_score"
+									dataField="created"
 									size={20}
 									pagination={true}
 									react={{
 										and: ["string-searchbox"],
 									}}
 									render={({ data }) => <PublicSearchResult data={data} />}
+									sortBy="desc"
 								/>
 							) : (
 								<ReactiveList
 									componentId="results"
-									dataField="_score"
+									dataField="created"
 									size={20}
 									pagination={true}
 									react={{
@@ -189,6 +190,7 @@ export function PublicSearch() {
 									render={({ data }) => {
 										return <PublicSearchResult data={data} />;
 									}}
+									sortBy="desc"
 								/>
 							)}
 						</ReactiveBase>
