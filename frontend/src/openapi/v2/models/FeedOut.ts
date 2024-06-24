@@ -20,6 +20,7 @@ import type { SearchObject } from './SearchObject';
  */
 export type FeedOut = {
     name: string;
+    description?: string;
     search: SearchObject;
     listeners?: Array<FeedListener>;
     id?: string;

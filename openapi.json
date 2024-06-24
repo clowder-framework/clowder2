@@ -2826,6 +2826,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Increment",
+              "type": "boolean",
+              "default": true
+            },
+            "name": "increment",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -7531,10 +7541,10 @@
           {
             "required": false,
             "schema": {
-              "title": "Name",
+              "title": "Searchterm",
               "type": "string"
             },
-            "name": "name",
+            "name": "searchTerm",
             "in": "query"
           },
           {
@@ -7556,6 +7566,15 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7564,11 +7583,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Feeds Api V2 Feeds Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeedOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -7665,8 +7680,88 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "feeds"
+        ],
+        "summary": "Edit Feed",
+        "description": "Update the information about an existing Feed..\n\nArguments:\n    feed_id -- UUID of the feed to be udpated\n    feed_in -- JSON object including updated information",
+        "operationId": "edit_feed_api_v2_feeds__feed_id__put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Feed Id",
+              "type": "string"
+            },
+            "name": "feed_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7717,6 +7812,15 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7724,7 +7828,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/FeedOut"
+                }
               }
             }
           },
@@ -11075,6 +11181,11 @@
             "title": "Name",
             "type": "string"
           },
+          "description": {
+            "title": "Description",
+            "type": "string",
+            "default": ""
+          },
           "search": {
             "$ref": "#/components/schemas/SearchObject"
           },
@@ -11123,6 +11234,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string",
+            "default": ""
           },
           "search": {
             "$ref": "#/components/schemas/SearchObject"
@@ -12388,15 +12504,8 @@
       },
       "SearchObject": {
         "title": "SearchObject",
-        "required": [
-          "index_name"
-        ],
         "type": "object",
         "properties": {
-          "index_name": {
-            "title": "Index Name",
-            "type": "string"
-          },
           "criteria": {
             "title": "Criteria",
             "type": "array",
@@ -12415,7 +12524,7 @@
             "type": "string"
           }
         },
-        "description": "This is a way to save a search (i.e. as a Feed).\n\nParameters:\n    index_name -- which ES index to search\n    criteria -- some number of field/operator/value tuples describing the search requirements\n    mode -- and/or determines whether all of the criteria must match, or any of them\n    original -- if the user originally performed a string search, their original text entry is preserved here"
+        "description": "This is a way to save a search (i.e. as a Feed).\n\nParameters:\n    criteria -- some number of field/operator/value tuples describing the search requirements\n    mode -- and/or determines whether all of the criteria must match, or any of them\n    original -- if the user originally performed a string search, their original text entry is preserved here"
       },
       "Status": {
         "title": "Status",
