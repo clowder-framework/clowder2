@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-
+import useTheme from "@mui/material/styles/useTheme";
 const ImageAnnotatorImage = ({ src, points, setPoints }) => {
 	useEffect(() => {
 		const svg = select("#svg-container")
@@ -54,34 +54,37 @@ const ImageAnnotatorImage = ({ src, points, setPoints }) => {
 				.join("path")
 				.attr("d", line().curve(curveLinearClosed))
 				.attr("fill", "none")
-				.attr("stroke", "blue");
+				.attr("stroke", "black")
+				.attr("stroke-width", 2)
+				.attr("stroke-dasharray", "5,5");
 		}
 	}, [points]);
 
 	return <div id="svg-container" style={{ width: "100%", height: "70%" }} />;
 };
 
-const style = {
-	position: "absolute",
-	top: "50%",
-	left: "50%",
-	transform: "translate(-50%, -50%)",
-	height: "75%",
-	bgcolor: "background.paper",
-	border: "2px solid #000",
-	boxShadow: 24,
-	p: 4,
-};
-
-export const ImageAnnotator = ({ src, open, onClose }) => {
+const ImageAnnotatorModal = ({ src, open, onClose, saveAnnotation }) => {
 	const [points, setPoints] = useState([]);
 	const [annotationName, setAnnotationName] = useState("");
 	const [polygon, setPolygon] = useState(null);
 
+	const style = {
+		position: "absolute",
+		top: "50%",
+		left: "50%",
+		transform: "translate(-50%, -50%)",
+		height: "75%",
+		bgcolor: "background.paper",
+		border: "2px solid #000",
+		boxShadow: 24,
+		p: 4,
+	};
 	const handleSaveAnnotation = () => {
 		if (points.length > 2 && annotationName.trim() !== "") {
 			setPolygon({ name: annotationName, points });
 			setPoints([]);
+			saveAnnotation(annotationName, points);
+			onClose();
 		} else {
 			alert(
 				"Please enter a name for the annotation and ensure it has more than two points."
@@ -131,17 +134,51 @@ export const ImageAnnotator = ({ src, open, onClose }) => {
 				<Button onClick={handleReset} variant="outlined" sx={{ mt: 2 }}>
 					Reset
 				</Button>
-				{polygon && (
-					<Box sx={{ mt: 2 }}>
-						<strong>Saved Annotation:</strong> {polygon.name}
-						<ul>
-							{polygon.points.map((point, i) => (
-								<li key={i}>{`(${point[0]}, ${point[1]})`}</li>
-							))}
-						</ul>
-					</Box>
-				)}
 			</Box>
 		</Modal>
+	);
+};
+
+export const ImageAnnotator = ({ src }) => {
+	const [open, setOpen] = useState(false);
+	// Object to store the coordinates and name of the polygon
+	const [annotations, setAnnotations] = useState({});
+
+	const saveAnnotation = (name, points) => {
+		setAnnotations({
+			name: name,
+			points: points,
+		});
+	};
+
+	return (
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "center",
+				alignItems: "center",
+				gap: 2,
+				p: 2,
+			}}
+		>
+			{annotations.name && (
+				<Box sx={{ p: 1 }}>
+					<Typography sx={{ fontWeight: "bold" }} component="div">
+						Annotation:
+					</Typography>
+					<Typography>Name - {annotations.name}</Typography>
+					<Typography>Number of Points: {annotations.points.length}</Typography>
+				</Box>
+			)}
+			<Button variant="contained" onClick={() => setOpen(true)}>
+				Open Image Annotator
+			</Button>
+			<ImageAnnotatorModal
+				src={src}
+				open={open}
+				onClose={() => setOpen(false)}
+				saveAnnotation={saveAnnotation}
+			/>
+		</Box>
 	);
 };
