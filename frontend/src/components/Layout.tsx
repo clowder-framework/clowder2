@@ -41,7 +41,6 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
 
-import Modal from "@mui/material/Modal";
 import { ImageAnnotator } from "./input/ImageAnnotator";
 import ostrich from "./ostrich.jpeg";
 
@@ -486,9 +485,11 @@ export default function PersistentDrawerLeft(props) {
 			>
 				<Footer />
 			</Box>
-			<Modal open={testModalOpen} onClose={() => setTestModalOpen(false)}>
-				<ImageAnnotator src={ostrich} />
-			</Modal>
+			<ImageAnnotator
+				src={ostrich}
+				open={testModalOpen}
+				onClose={() => setTestModalOpen(false)}
+			/>
 		</Box>
 	);
 }

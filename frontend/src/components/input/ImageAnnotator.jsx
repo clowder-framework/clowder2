@@ -2,17 +2,18 @@ import React, { useState, useEffect } from "react";
 import { select, pointer } from "d3-selection";
 import { line, curveLinearClosed } from "d3-shape";
 
-export const ImageAnnotator = ({ src }) => {
-	const [points, setPoints] = useState([]);
-	const [polygon, setpolygon] = useState([]);
-	const [annotationName, setAnnotationName] = useState("");
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
+const ImageAnnotatorImage = ({ src, points, setPoints }) => {
 	useEffect(() => {
-		const svg = select("div#svg-container")
+		const svg = select("#svg-container")
 			.append("svg")
 			.attr("width", "100%")
-			.attr("height", "100%")
-			.style("border", "1px solid black");
+			.attr("height", "100%");
 
 		svg
 			.append("image")
@@ -25,15 +26,12 @@ export const ImageAnnotator = ({ src }) => {
 			});
 
 		return () => {
-			// Clean up the SVG to avoid memory leaks
-			select("div#svg-container").selectAll("svg").remove();
+			select("#svg-container").selectAll("svg").remove();
 		};
-	}, [src]); // Dependency only on src to prevent unnecessary redraws
+	}, [src, setPoints]);
 
 	useEffect(() => {
-		const svg = select("div#svg-container").select("svg");
-
-		// Drawing points
+		const svg = select("#svg-container").select("svg");
 		svg
 			.selectAll("circle")
 			.data(points)
@@ -43,7 +41,12 @@ export const ImageAnnotator = ({ src }) => {
 			.attr("r", 5)
 			.attr("fill", "red");
 
-		// Drawing polygon path
+		// Remove points and path if points equals 0
+		if (points.length === 0) {
+			svg.selectAll("circle").remove();
+			svg.selectAll("path").remove();
+		}
+
 		if (points.length > 1) {
 			svg
 				.selectAll("path")
@@ -55,15 +58,30 @@ export const ImageAnnotator = ({ src }) => {
 		}
 	}, [points]);
 
+	return <div id="svg-container" style={{ width: "100%", height: "70%" }} />;
+};
+
+const style = {
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	transform: "translate(-50%, -50%)",
+	height: "75%",
+	bgcolor: "background.paper",
+	border: "2px solid #000",
+	boxShadow: 24,
+	p: 4,
+};
+
+export const ImageAnnotator = ({ src, open, onClose }) => {
+	const [points, setPoints] = useState([]);
+	const [annotationName, setAnnotationName] = useState("");
+	const [polygon, setPolygon] = useState(null);
+
 	const handleSaveAnnotation = () => {
 		if (points.length > 2 && annotationName.trim() !== "") {
-			const newAnnotation = {
-				name: annotationName,
-				points: points,
-			};
-			setpolygon((prevpolygon) => [...prevpolygon, newAnnotation]);
-			setPoints([]); // Clear current points
-			setAnnotationName(""); // Reset the annotation name
+			setPolygon({ name: annotationName, points });
+			setPoints([]);
 		} else {
 			alert(
 				"Please enter a name for the annotation and ensure it has more than two points."
@@ -71,35 +89,59 @@ export const ImageAnnotator = ({ src }) => {
 		}
 	};
 
-	// function to reset the points
 	const handleReset = () => {
 		setPoints([]);
-
-		const svg = select("div#svg-container").select("svg");
-		svg.selectAll("circle").remove(); // Remove all circles
-		svg.selectAll("path").remove(); // Remove all paths
+		setPolygon(null);
 	};
 
 	return (
-		<div>
-			<div
-				id="svg-container"
-				style={{ width: "31.25em", height: "31.25em" }}
-			></div>
-			<input
-				type="text"
-				value={annotationName}
-				onChange={(e) => setAnnotationName(e.target.value)}
-				placeholder="Enter annotation name"
-			/>
-			<button onClick={handleSaveAnnotation}>Save Annotation</button>
-			<button onClick={handleReset}>Reset</button>
-			{polygon.map((polygon, index) => (
-				<div key={index}>
-					Annotation {index + 1} - {polygon.name}:{" "}
-					{JSON.stringify(polygon.points)}
-				</div>
-			))}
-		</div>
+		<Modal
+			open={open}
+			onClose={() => {
+				onClose();
+				handleReset();
+			}}
+			aria-labelledby="modal-modal-title"
+			aria-describedby="modal-modal-description"
+		>
+			<Box sx={style}>
+				<Typography id="modal-modal-title" variant="h6" component="h2">
+					Annotate Image
+				</Typography>
+				<ImageAnnotatorImage
+					src={src}
+					points={points}
+					setPoints={setPoints}
+					onSave={handleSaveAnnotation}
+				/>
+				<TextField
+					fullWidth
+					margin="normal"
+					label="Annotation Name"
+					value={annotationName}
+					onChange={(e) => setAnnotationName(e.target.value)}
+				/>
+				<Button
+					onClick={handleSaveAnnotation}
+					variant="contained"
+					sx={{ mt: 2, mr: 1 }}
+				>
+					Save Annotation
+				</Button>
+				<Button onClick={handleReset} variant="outlined" sx={{ mt: 2 }}>
+					Reset
+				</Button>
+				{polygon && (
+					<Box sx={{ mt: 2 }}>
+						<strong>Saved Annotation:</strong> {polygon.name}
+						<ul>
+							{polygon.points.map((point, i) => (
+								<li key={i}>{`(${point[0]}, ${point[1]})`}</li>
+							))}
+						</ul>
+					</Box>
+				)}
+			</Box>
+		</Modal>
 	);
 };
