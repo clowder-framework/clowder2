@@ -26,15 +26,36 @@ interface ImageAnnotatorModalProps {
 
 interface ImageAnnotatorProps {
 	fileId: string;
-	imageAnnotation?: { name: string; points: Array<[number, number]> } | object;
+	onChange: ({
+		name,
+		points,
+	}: {
+		name: string;
+		points: Array<[number, number]>;
+	}) => void;
 }
 
-// Function to fetch image data
+// Function to check if file is an image
+async function checkFileIsImage(fileId: string) {
+	try {
+		const response =
+			await V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(fileId);
+
+		// @ts-ignore
+		if (response["content_type"]["main_type"] === "image") return true;
+		else return false;
+	} catch (error) {
+		console.error("Error fetching file metadata", error);
+		return false;
+	}
+}
+
+// Function to fetch file data
 async function fetchImageData(fileId: string) {
 	try {
 		const response =
 			await V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(fileId);
-		return response.presigned_url;
+		return response["presigned_url"];
 	} catch (error) {
 		console.error("Error fetching image data", error);
 	}
@@ -107,14 +128,24 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 }) => {
 	const [points, setPoints] = useState<Array<[number, number]>>([]);
 	const [annotationName, setAnnotationName] = useState("");
+	const [isImage, setIsImage] = useState(true);
 	const [image, setImage] = useState<string | null>(null);
+
+	// Check if file is an image
+	useEffect(() => {
+		checkFileIsImage(fileId).then((response) => {
+			setIsImage(response);
+		});
+	}, [fileId]);
 
 	// Fetch image data
 	useEffect(() => {
-		fetchImageData(fileId).then((data) => {
-			setImage(data);
-		});
-	}, [fileId]);
+		if (isImage) {
+			fetchImageData(fileId).then((response) => {
+				setImage(response);
+			});
+		}
+	}, [isImage, fileId]);
 
 	const style = {
 		position: "absolute",
@@ -158,29 +189,38 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 				<Typography id="modal-modal-title" variant="h6" component="h2">
 					Annotate Image
 				</Typography>
-				{!image && <CircularProgress />}
-				<ImageAnnotatorImage
-					image={image}
-					points={points}
-					setPoints={setPoints}
-				/>
-				<TextField
-					fullWidth
-					margin="normal"
-					label="Annotation Name"
-					value={annotationName}
-					onChange={(e) => setAnnotationName(e.target.value)}
-				/>
-				<Button
-					onClick={handleSaveAnnotation}
-					variant="contained"
-					sx={{ mt: 2, mr: 1 }}
-				>
-					Save Annotation
-				</Button>
-				<Button onClick={handleReset} variant="outlined" sx={{ mt: 2 }}>
-					Reset
-				</Button>
+				{!isImage && (
+					<Typography id="modal-modal-description" variant="body1">
+						The selected file is not an image.
+					</Typography>
+				)}
+				{!image && isImage && <CircularProgress />}
+				{image && isImage && (
+					<>
+						<ImageAnnotatorImage
+							image={image}
+							points={points}
+							setPoints={setPoints}
+						/>
+						<TextField
+							fullWidth
+							margin="normal"
+							label="Annotation Name"
+							value={annotationName}
+							onChange={(e) => setAnnotationName(e.target.value)}
+						/>
+						<Button
+							onClick={handleSaveAnnotation}
+							variant="contained"
+							sx={{ mt: 2, mr: 1 }}
+						>
+							Save Annotation
+						</Button>
+						<Button onClick={handleReset} variant="outlined" sx={{ mt: 2 }}>
+							Reset
+						</Button>
+					</>
+				)}
 			</Box>
 		</Modal>
 	);
@@ -188,7 +228,7 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 
 const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
 	fileId,
-	imageAnnotation,
+	onChange,
 }) => {
 	const [open, setOpen] = useState(false);
 	const [annotation, setAnnotation] = useState<{
@@ -202,10 +242,10 @@ const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
 
 	// Set annotation, this is the output of the image annotator
 	useEffect(() => {
-		if (imageAnnotation) {
-			setAnnotation(imageAnnotation);
+		if (annotation) {
+			onChange(annotation);
 		}
-	}, [imageAnnotation]);
+	}, [annotation]);
 
 	return (
 		<Box
@@ -217,7 +257,7 @@ const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
 				p: 2,
 			}}
 		>
-			{annotation && (
+			{annotation && annotation.points.length !== 0 && (
 				<Box sx={{ p: 1 }}>
 					<Typography sx={{ fontWeight: "bold" }} component="div">
 						Annotation:

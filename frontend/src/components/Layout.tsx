@@ -41,9 +41,6 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
 
-import Modal from "@mui/material/Modal";
-import ImageAnnotator from "./input/ImageAnnotator";
-
 const drawerWidth = 240;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -158,8 +155,6 @@ export default function PersistentDrawerLeft(props) {
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-
-	const [testModalOpen, setTestModalOpen] = React.useState(false);
 	// @ts-ignore
 	return (
 		<Box
@@ -454,14 +449,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
-				<List>
-					<ListItem key={"testModal"} disablePadding>
-						<ListItemButton onClick={() => setTestModalOpen(true)}>
-							<ListItemText>Something</ListItemText>
-						</ListItemButton>
-					</ListItem>
-				</List>
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />
@@ -485,19 +472,6 @@ export default function PersistentDrawerLeft(props) {
 			>
 				<Footer />
 			</Box>
-			<Modal open={testModalOpen} onClose={() => setTestModalOpen(false)}>
-				<Box
-					sx={{
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)",
-						bgcolor: "background.paper",
-						position: "absolute",
-					}}
-				>
-					<ImageAnnotator fileId={"664e26545ad2bc313542c273"} />
-				</Box>
-			</Modal>
 		</Box>
 	);
 }
