@@ -125,7 +125,7 @@ export function Search() {
 										dataField={[
 											"name",
 											"description",
-											"metadata_text",
+											"metadata_stringify",
 											"creator.keyword",
 										]}
 										fieldWeights={[3, 2, 2, 1]}
