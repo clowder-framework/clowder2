@@ -35,7 +35,7 @@ export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (
 			onSubmit={({ formData }) => {
 				onSave(formData);
 			}}
-			ErrorList={ClowderRjsfErrorList}
+			// ErrorList={ClowderRjsfErrorList}
 		>
 			<Box className="inputGroup">
 				<Button variant="contained" type="submit">
