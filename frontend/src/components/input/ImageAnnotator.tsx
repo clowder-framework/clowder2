@@ -1,14 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { select, pointer } from "d3-selection";
 import { line, curveLinearClosed } from "d3-shape";
+import {
+	Modal,
+	Box,
+	Button,
+	TextField,
+	Typography,
+	CircularProgress,
+} from "@mui/material";
+import { V2 } from "../../openapi";
 
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import useTheme from "@mui/material/styles/useTheme";
-const ImageAnnotatorImage = ({ src, points, setPoints }) => {
+interface ImageAnnotatorImageProps {
+	image: string | null;
+	points: Array<[number, number]>;
+	setPoints: React.Dispatch<React.SetStateAction<Array<[number, number]>>>;
+}
+
+interface ImageAnnotatorModalProps {
+	fileId: string;
+	open: boolean;
+	onClose: () => void;
+	saveAnnotation: (name: string, points: Array<[number, number]>) => void;
+}
+
+interface ImageAnnotatorProps {
+	fileId: string;
+	imageAnnotation?: { name: string; points: Array<[number, number]> } | object;
+}
+
+// Function to fetch image data
+async function fetchImageData(fileId: string) {
+	try {
+		const response =
+			await V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(fileId);
+		return response.presigned_url;
+	} catch (error) {
+		console.error("Error fetching image data", error);
+	}
+}
+
+const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
+	image,
+	points,
+	setPoints,
+}) => {
 	useEffect(() => {
 		const svg = select("#svg-container")
 			.append("svg")
@@ -17,20 +53,26 @@ const ImageAnnotatorImage = ({ src, points, setPoints }) => {
 
 		svg
 			.append("image")
-			.attr("xlink:href", src)
+			.attr("xlink:href", image)
 			.attr("width", "100%")
 			.attr("height", "100%")
 			.on("click", (event) => {
-				const coords = pointer(event);
+				const coords = pointer(event) as [number, number];
 				setPoints((prevPoints) => [...prevPoints, coords]);
 			});
 
 		return () => {
 			select("#svg-container").selectAll("svg").remove();
 		};
-	}, [src, setPoints]);
+	}, [image, setPoints]);
 
 	useEffect(() => {
+		// In case of reset, remove all circles and paths
+		if (points.length === 0) {
+			select("#svg-container").selectAll("circle").remove();
+			select("#svg-container").selectAll("path").remove();
+		}
+
 		const svg = select("#svg-container").select("svg");
 		svg
 			.selectAll("circle")
@@ -40,12 +82,6 @@ const ImageAnnotatorImage = ({ src, points, setPoints }) => {
 			.attr("cy", (d) => d[1])
 			.attr("r", 5)
 			.attr("fill", "red");
-
-		// Remove points and path if points equals 0
-		if (points.length === 0) {
-			svg.selectAll("circle").remove();
-			svg.selectAll("path").remove();
-		}
 
 		if (points.length > 1) {
 			svg
@@ -63,10 +99,22 @@ const ImageAnnotatorImage = ({ src, points, setPoints }) => {
 	return <div id="svg-container" style={{ width: "100%", height: "70%" }} />;
 };
 
-const ImageAnnotatorModal = ({ src, open, onClose, saveAnnotation }) => {
-	const [points, setPoints] = useState([]);
+const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
+	fileId,
+	open,
+	onClose,
+	saveAnnotation,
+}) => {
+	const [points, setPoints] = useState<Array<[number, number]>>([]);
 	const [annotationName, setAnnotationName] = useState("");
-	const [polygon, setPolygon] = useState(null);
+	const [image, setImage] = useState<string | null>(null);
+
+	// Fetch image data
+	useEffect(() => {
+		fetchImageData(fileId).then((data) => {
+			setImage(data);
+		});
+	}, [fileId]);
 
 	const style = {
 		position: "absolute",
@@ -79,10 +127,9 @@ const ImageAnnotatorModal = ({ src, open, onClose, saveAnnotation }) => {
 		boxShadow: 24,
 		p: 4,
 	};
+
 	const handleSaveAnnotation = () => {
 		if (points.length > 2 && annotationName.trim() !== "") {
-			setPolygon({ name: annotationName, points });
-			setPoints([]);
 			saveAnnotation(annotationName, points);
 			onClose();
 		} else {
@@ -94,7 +141,7 @@ const ImageAnnotatorModal = ({ src, open, onClose, saveAnnotation }) => {
 
 	const handleReset = () => {
 		setPoints([]);
-		setPolygon(null);
+		saveAnnotation(annotationName, []);
 	};
 
 	return (
@@ -111,11 +158,11 @@ const ImageAnnotatorModal = ({ src, open, onClose, saveAnnotation }) => {
 				<Typography id="modal-modal-title" variant="h6" component="h2">
 					Annotate Image
 				</Typography>
+				{!image && <CircularProgress />}
 				<ImageAnnotatorImage
-					src={src}
+					image={image}
 					points={points}
 					setPoints={setPoints}
-					onSave={handleSaveAnnotation}
 				/>
 				<TextField
 					fullWidth
@@ -139,42 +186,51 @@ const ImageAnnotatorModal = ({ src, open, onClose, saveAnnotation }) => {
 	);
 };
 
-export const ImageAnnotator = ({ src }) => {
+const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
+	fileId,
+	imageAnnotation,
+}) => {
 	const [open, setOpen] = useState(false);
-	// Object to store the coordinates and name of the polygon
-	const [annotations, setAnnotations] = useState({});
+	const [annotation, setAnnotation] = useState<{
+		name: string;
+		points: Array<[number, number]>;
+	} | null>(null);
 
-	const saveAnnotation = (name, points) => {
-		setAnnotations({
-			name: name,
-			points: points,
-		});
+	const saveAnnotation = (name: string, points: Array<[number, number]>) => {
+		setAnnotation({ name, points });
 	};
+
+	// Set annotation, this is the output of the image annotator
+	useEffect(() => {
+		if (imageAnnotation) {
+			setAnnotation(imageAnnotation);
+		}
+	}, [imageAnnotation]);
 
 	return (
 		<Box
 			sx={{
 				display: "flex",
-				flexDirection: "center",
+				flexDirection: "column",
 				alignItems: "center",
 				gap: 2,
 				p: 2,
 			}}
 		>
-			{annotations.name && (
+			{annotation && (
 				<Box sx={{ p: 1 }}>
 					<Typography sx={{ fontWeight: "bold" }} component="div">
 						Annotation:
 					</Typography>
-					<Typography>Name - {annotations.name}</Typography>
-					<Typography>Number of Points: {annotations.points.length}</Typography>
+					<Typography>Name - {annotation.name}</Typography>
+					<Typography>Number of Points: {annotation.points.length}</Typography>
 				</Box>
 			)}
 			<Button variant="contained" onClick={() => setOpen(true)}>
 				Open Image Annotator
 			</Button>
 			<ImageAnnotatorModal
-				src={src}
+				fileId={fileId}
 				open={open}
 				onClose={() => setOpen(false)}
 				saveAnnotation={saveAnnotation}
@@ -182,3 +238,5 @@ export const ImageAnnotator = ({ src }) => {
 		</Box>
 	);
 };
+
+export default ImageAnnotator;

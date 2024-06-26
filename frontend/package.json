@@ -47,6 +47,7 @@
 		"@rjsf/mui": "^5.18.4",
 		"@rjsf/utils": "^5.18.4",
 		"@rjsf/validator-ajv8": "^5.18.4",
+		"@types/d3": "^7.4.3",
 		"@types/react-gravatar": "^2.6.10",
 		"babel-polyfill": "^6.26.0",
 		"classnames": "^2.2.6",

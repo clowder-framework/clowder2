@@ -42,8 +42,7 @@ import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
 
 import Modal from "@mui/material/Modal";
-import { ImageAnnotator } from "./input/ImageAnnotator";
-import ostrich from "./ostrich.jpeg";
+import ImageAnnotator from "./input/ImageAnnotator";
 
 const drawerWidth = 240;
 
@@ -496,7 +495,7 @@ export default function PersistentDrawerLeft(props) {
 						position: "absolute",
 					}}
 				>
-					<ImageAnnotator src={ostrich} />
+					<ImageAnnotator fileId={"664e26545ad2bc313542c273"} />
 				</Box>
 			</Modal>
 		</Box>
