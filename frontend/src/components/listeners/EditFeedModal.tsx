@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Container, Button, Box } from "@mui/material";
 import feedSchema from "../../schema/feedSchema.json";
 import { FormProps } from "@rjsf/core";
-import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import Form from "@rjsf/mui";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchListeners, updateFeed } from "../../actions/listeners";

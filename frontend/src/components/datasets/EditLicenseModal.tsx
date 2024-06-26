@@ -2,16 +2,13 @@ import React, { useState } from "react";
 import {
 	Container,
 	Dialog,
-	DialogTitle,
 	DialogContent,
-	DialogActions,
+	DialogTitle,
 	Button,
-	TextField,
 	Box,
 } from "@mui/material";
 import licenseSchema from "../../schema/licenseSchema.json";
 import { FormProps } from "@rjsf/core";
-import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import Form from "@rjsf/mui";
 import validator from "@rjsf/validator-ajv8";
 import { useDispatch, useSelector } from "react-redux";
