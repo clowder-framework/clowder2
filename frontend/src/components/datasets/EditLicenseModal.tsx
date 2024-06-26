@@ -44,7 +44,6 @@ export const EditLicenseModal = (props: EditLicenseModalProps) => {
 					// close modal
 					setEditLicenseOpen(false);
 				}}
-				ErrorList={ClowderRjsfErrorList}
 			>
 				<Box className="inputGroup" sx={{ float: "right" }}>
 					<Button variant="contained" type="submit">

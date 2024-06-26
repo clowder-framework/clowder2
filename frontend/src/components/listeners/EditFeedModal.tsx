@@ -62,7 +62,6 @@ export const EditFeedModal = (props: EditFeedProps) => {
 					// close modal
 					setEditFeedOpen(false);
 				}}
-				ErrorList={ClowderRjsfErrorList}
 			>
 				<Box className="inputGroup" sx={{ float: "right" }}>
 					<Button variant="contained" type="submit">
