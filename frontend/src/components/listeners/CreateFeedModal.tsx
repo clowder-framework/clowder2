@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Container, Button, Box } from "@mui/material";
 import feedSchema from "../../schema/feedSchema.json";
 import { FormProps } from "@rjsf/core";
-import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import Form from "@rjsf/mui";
 import { useDispatch, useSelector } from "react-redux";
 import { createFeed, fetchListeners } from "../../actions/listeners";
@@ -52,7 +51,6 @@ export const CreateFeedModal = (props: CreateFeedProps) => {
 					// close modal
 					setCreateFeedOpen(false);
 				}}
-				ErrorList={ClowderRjsfErrorList}
 			>
 				<Box className="inputGroup" sx={{ float: "right" }}>
 					<Button variant="contained" type="submit">
