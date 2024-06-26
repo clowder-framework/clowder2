@@ -125,10 +125,10 @@ export function Search() {
 										dataField={[
 											"name",
 											"description",
+											"metadata_text",
 											"creator.keyword",
-											"metadata",
 										]}
-										fieldWeights={[3, 2, 1]}
+										fieldWeights={[3, 2, 2, 1]}
 										innerClass={{
 											title: "search-title",
 											input: "search-input",

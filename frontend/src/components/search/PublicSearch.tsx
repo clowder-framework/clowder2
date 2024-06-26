@@ -98,10 +98,10 @@ export function PublicSearch() {
 										dataField={[
 											"name",
 											"description",
+											"metadata_stringify",
 											"creator.keyword",
-											"metadata",
 										]}
-										fieldWeights={[3, 2, 1]}
+										fieldWeights={[3, 2, 2, 1]}
 										innerClass={{
 											title: "search-title",
 											input: "search-input",

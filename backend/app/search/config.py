@@ -16,12 +16,13 @@ class IndexSettings:
             "dataset_id": {"type": "text", "index": False},
             "folder_id": {"type": "text", "index": False},
             "bytes": {"type": "long"},
-            # metadata fields cast to plain string to enable search
+            # metadata fields
             "metadata": {
                 "type": "object",
                 "dynamic": True,
-                "properties": {"*": {"type": "text"}},
             },
+            # metadata fields cast to plain string to enable search
+            "metadata_stringify": {"type": "text"},
         }
     }
 
