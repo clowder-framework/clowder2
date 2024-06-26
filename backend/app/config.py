@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     MINIO_UPLOAD_CHUNK_SIZE: int = 10 * 1024 * 1024
     MINIO_EXPIRES: int = 3600  # seconds
     MINIO_SECURE: str = "False"  # http vs https
+    MINIO_EXTERNAL_SECURE: str = "False"  # http vs https
+    MINIO_VERSIONING_ENABLED: str = "True"
 
     # Files in the listed directories can be added to Clowder without copying them elsewhere
     LOCAL_WHITELIST: List[str] = []

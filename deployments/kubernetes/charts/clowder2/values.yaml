@@ -81,15 +81,23 @@ geoserver:
 # MINIO
 # ----------------------------------------------------------------------
 minio:
+  # disable if using an external e3 store
   enabled: true
+  # set serverUrl for external s3 store
+  # serverUrl: my.s3.store.net
 
   # login to minio
   auth:
     rootUser: minioadmin
     rootPassword: minioadmin
+    # enable https/tls for external s3 store access
+    secure: false
 
   # enable webui
   disableWebUI: false
+
+  # disable for external s3 store without versioning support
+  enableVersioning: true
 
   containerPorts:
     api: 9000
