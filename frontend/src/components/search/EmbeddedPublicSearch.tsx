@@ -46,7 +46,7 @@ export function EmbeddedPublicSearch() {
 				showFilter={true}
 				showClear
 				renderNoSuggestion="No suggestions found."
-				dataField={["name", "description"]}
+				dataField={["name", "description", "creator.keyword", "metadata"]}
 				// placeholder="Search for Dataset"
 				innerClass={{
 					title: "search-title",

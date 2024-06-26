@@ -122,7 +122,12 @@ export function Search() {
 										showFilter={true}
 										showClear={true}
 										renderNoSuggestion="No suggestions found."
-										dataField={["name", "description", "creator.keyword"]}
+										dataField={[
+											"name",
+											"description",
+											"creator.keyword",
+											"metadata",
+										]}
 										fieldWeights={[3, 2, 1]}
 										innerClass={{
 											title: "search-title",
