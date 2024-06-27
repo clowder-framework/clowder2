@@ -123,6 +123,24 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		});
 	};
 
+	const checkIfMetadataNeeded = () => {
+		// This function checks if Step 1 to upload metadata is needed when users upload new file
+		let required = false;
+
+		metadataDefinitionList.forEach((val, _) => {
+			if (val.required_for_items.files) {
+				val.fields.forEach((field) => {
+					if (field.required) {
+						required = true;
+						return;
+					}
+				});
+			}
+		});
+
+		return required;
+	};
+
 	// step 1
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
@@ -184,7 +202,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 				<Stepper activeStep={activeStep} orientation="vertical">
 					{/*<Stepper activeStep={activeStep}>*/}
 					{/*step 1 Metadata*/}
-					{metadataDefinitionList?.length > 0 && (
+					{checkIfMetadataNeeded() && (
 						<Step key="fill-in-metadata">
 							<StepLabel>Fill In Metadata</StepLabel>
 							<StepContent TransitionProps={{ unmountOnExit: false }}>
@@ -229,9 +247,11 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 									selectedFiles={selectedFiles}
 								/>
 								<Box className="inputGroup">
-									<Button onClick={handleBack} sx={{ float: "right" }}>
-										Back
-									</Button>
+									{checkIfMetadataNeeded() && (
+										<Button onClick={handleBack} sx={{ float: "right" }}>
+											Back
+										</Button>
+									)}
 									<Button
 										variant="contained"
 										onClick={handleFinishMultiple}
