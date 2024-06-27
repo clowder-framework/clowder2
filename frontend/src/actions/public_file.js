@@ -159,3 +159,6 @@ export function filePublicDownloaded(
 		}
 	};
 }
+
+export const INCREMENT_PUBLIC_FILE_DOWNLOADS =
+	"INCREMENT_PUBLIC_FILE_DOWNLOADS";

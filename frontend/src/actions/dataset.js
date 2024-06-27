@@ -495,3 +495,5 @@ export function fetchDatasetRoles(datasetId) {
 			});
 	};
 }
+
+export const INCREMENT_DATASET_DOWNLOADS = "INCREMENT_DATASET_DOWNLOADS";
