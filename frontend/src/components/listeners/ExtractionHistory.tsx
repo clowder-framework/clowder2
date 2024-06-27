@@ -108,7 +108,9 @@ export const ExtractionHistory = (): JSX.Element => {
 												setSelectedExtractor(listener);
 											}}
 										>
-											<ListItemText primary={listener.name} />
+											<ListItemText
+												primary={listener.name.replace("private.", "")}
+											/>
 										</ListItemButton>
 									);
 								})

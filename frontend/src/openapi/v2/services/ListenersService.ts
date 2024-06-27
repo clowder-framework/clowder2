@@ -32,6 +32,8 @@ export class ListenersService {
      * category -- filter by category has to be exact match
      * label -- filter by label has to be exact match
      * alive_only -- filter by alive status
+     * process -- filter by file or dataset type (if specified)
+     * dataset_id -- restrict to listeners that run on the given dataset or a file within (if not otherwise permitted)
      * all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode
      * @param skip
      * @param limit
@@ -40,8 +42,8 @@ export class ListenersService {
      * @param label
      * @param aliveOnly
      * @param process
-     * @param all
      * @param datasetId
+     * @param all
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -53,8 +55,8 @@ export class ListenersService {
         label?: string,
         aliveOnly: boolean = false,
         process?: string,
-        all: boolean = false,
         datasetId?: string,
+        all: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -67,8 +69,8 @@ export class ListenersService {
                 'label': label,
                 'alive_only': aliveOnly,
                 'process': process,
-                'all': all,
                 'dataset_id': datasetId,
+                'all': all,
             },
             errors: {
                 422: `Validation Error`,
@@ -317,6 +319,156 @@ export class ListenersService {
         return __request({
             method: 'PUT',
             path: `/api/v2/listeners/${listenerId}/disable`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add User Permission
+     * @param listenerId
+     * @param targetUser
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static addUserPermissionApiV2ListenersListenerIdUsersTargetUserPost(
+        listenerId: string,
+        targetUser: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/listeners/${listenerId}/users/${targetUser}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove User Permission
+     * @param listenerId
+     * @param targetUser
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeUserPermissionApiV2ListenersListenerIdUsersTargetUserDelete(
+        listenerId: string,
+        targetUser: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/listeners/${listenerId}/users/${targetUser}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add Group Permission
+     * @param listenerId
+     * @param targetGroup
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static addGroupPermissionApiV2ListenersListenerIdGroupsTargetGroupPost(
+        listenerId: string,
+        targetGroup: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/listeners/${listenerId}/groups/${targetGroup}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Group Permission
+     * @param listenerId
+     * @param targetGroup
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeGroupPermissionApiV2ListenersListenerIdGroupsTargetGroupDelete(
+        listenerId: string,
+        targetGroup: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/listeners/${listenerId}/groups/${targetGroup}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add Dataset Permission
+     * @param listenerId
+     * @param targetDataset
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static addDatasetPermissionApiV2ListenersListenerIdDatasetsTargetDatasetPost(
+        listenerId: string,
+        targetDataset: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/listeners/${listenerId}/datasets/${targetDataset}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Dataset Permission
+     * @param listenerId
+     * @param targetDataset
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeDatasetPermissionApiV2ListenersListenerIdDatasetsTargetDatasetDelete(
+        listenerId: string,
+        targetDataset: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/listeners/${listenerId}/datasets/${targetDataset}`,
             query: {
                 'dataset_id': datasetId,
             },

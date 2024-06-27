@@ -249,11 +249,15 @@ def create_folder(
     return response.json()
 
 
-def register_v1_extractor(client: TestClient, headers: dict, name: str = None):
+def register_v1_extractor(
+    client: TestClient, headers: dict, name: str = None, user: str = None
+):
     """Registers a new v1 listener (extractor) and returns the JSON."""
-    new_extractor = extractor_info_v1_example
+    new_extractor = dict(extractor_info_v1_example)
     if name:
         new_extractor["name"] = name
+    if user:
+        new_extractor["owners"] = {"users": [user]}
     response = client.post(
         f"{settings.API_V2_STR}/extractors", json=new_extractor, headers=headers
     )
@@ -264,11 +268,11 @@ def register_v1_extractor(client: TestClient, headers: dict, name: str = None):
 
 def register_v2_listener(client: TestClient, headers: dict, name: str = None):
     """Registers a new v2 listener and returns the JSON. Note that this typically uses RabbitMQ heartbeat."""
-    listener_info = listener_v2_example
+    listener_info = dict(listener_v2_example)
     if name is not None:
         listener_info["name"] = name
     response = client.post(
-        f"{settings.API_V2_STR}/listeners", json=listener_v2_example, headers=headers
+        f"{settings.API_V2_STR}/listeners", json=listener_info, headers=headers
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

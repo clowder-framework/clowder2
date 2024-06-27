@@ -11,6 +11,7 @@ export function fetchListeners(
 	label = null,
 	aliveOnly = false,
 	process = null,
+	dataset_id = null,
 	all = false
 ) {
 	return (dispatch) => {
@@ -23,6 +24,7 @@ export function fetchListeners(
 			label,
 			aliveOnly,
 			process,
+			dataset_id,
 			all
 		)
 			.then((json) => {
@@ -43,7 +45,8 @@ export function fetchListeners(
 							category,
 							label,
 							aliveOnly,
-							process
+							process,
+							dataset_id
 						)
 					)
 				);
@@ -98,7 +101,8 @@ export function queryListeners(
 	skip = 0,
 	limit = 21,
 	heartbeatInterval = 0,
-	process = null
+	process = null,
+	datasetId = null
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -107,7 +111,8 @@ export function queryListeners(
 			skip,
 			limit,
 			heartbeatInterval,
-			process
+			process,
+			datasetId
 		)
 			.then((json) => {
 				dispatch({
@@ -120,7 +125,14 @@ export function queryListeners(
 				dispatch(
 					handleErrors(
 						reason,
-						queryListeners(text, skip, limit, heartbeatInterval, process)
+						queryListeners(
+							text,
+							skip,
+							limit,
+							heartbeatInterval,
+							process,
+							datasetId
+						)
 					)
 				);
 			});

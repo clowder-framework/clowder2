@@ -3,12 +3,13 @@ from enum import Enum
 from typing import List, Optional, Union
 
 import pymongo
+from beanie import Document, PydanticObjectId, View
+from pydantic import AnyUrl, BaseModel, Field
+
 from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
-from beanie import Document, PydanticObjectId, View
-from pydantic import AnyUrl, BaseModel, Field
 
 
 class Repository(BaseModel):
@@ -37,6 +38,17 @@ class ExtractorInfo(BaseModel):
     categories: Optional[List[str]] = []
     parameters: Optional[dict] = None
     version: Optional[str] = "1.0"
+    unique_key: Optional[str] = None
+
+
+class AccessList(BaseModel):
+    """Container object for lists of user emails/group IDs/dataset IDs that can submit to listener.
+    The singular owner is the primary who can modify other lists."""
+
+    owner: str
+    users: List[str] = []
+    groups: List[PydanticObjectId] = []
+    datasets: List[PydanticObjectId] = []
 
 
 class EventListenerBase(BaseModel):
@@ -45,6 +57,7 @@ class EventListenerBase(BaseModel):
     name: str
     version: str = "1.0"
     description: str = ""
+    access: Optional[AccessList] = None
 
 
 class EventListenerIn(EventListenerBase):
@@ -68,7 +81,7 @@ class EventListenerDB(Document, EventListenerBase):
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
     lastAlive: datetime = None
-    alive: Optional[bool] = None  # made up field to indicate if extractor is alive
+    alive: Optional[bool] = None
     active: bool = False
     properties: Optional[ExtractorInfo] = None
 
