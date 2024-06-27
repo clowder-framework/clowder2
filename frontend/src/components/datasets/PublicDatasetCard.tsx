@@ -15,9 +15,6 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
-import { useDispatch } from "react-redux";
-import { downloadDataset } from "../../actions/dataset";
-import { downloadPublicDataset } from "../../actions/public_dataset";
 // import {Favorite, Share} from "@material-ui/icons";
 
 type PublicDatasetCardProps = {
@@ -34,11 +31,6 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 	const { id, name, author, created, description, thumbnailId, publicView } =
 		props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
-
-	const dispatch = useDispatch();
-
-	const download = (datasetId: string | undefined) =>
-		dispatch(downloadPublicDataset(datasetId));
 
 	useEffect(() => {
 		let url = "";
@@ -119,7 +111,7 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 			<CardActions sx={{ pb: 0 }}>
 				<Tooltip title="Download">
 					<IconButton
-						onClick={() => download(id)}
+						href={`${config.hostname}/api/v2/public_datasets/${id}/download`}
 						color="primary"
 						aria-label="download"
 						sx={{ mr: 3 }}
@@ -127,6 +119,16 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 						<Download />
 					</IconButton>
 				</Tooltip>
+				{/*<Tooltip title="Favorite">*/}
+				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
+				{/*		<Favorite/>*/}
+				{/*	</IconButton>*/}
+				{/*</Tooltip>*/}
+				{/*<Tooltip title="Share">*/}
+				{/*	<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>*/}
+				{/*		<Share/>*/}
+				{/*	</IconButton>*/}
+				{/*</Tooltip>*/}
 			</CardActions>
 		</Card>
 	);
