@@ -13,6 +13,7 @@ import {
 	fetchFileSummary,
 	fileDeleted,
 	generateFilePresignedUrl as generateFilePresignedUrlAction,
+	INCREMENT_FILE_DOWNLOADS,
 	RESET_FILE_PRESIGNED_URL,
 } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
@@ -150,7 +151,10 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				sx={{ minWidth: "auto" }}
 				variant="contained"
 				onClick={() => {
-					listFileSummary(fileId);
+					dispatch({
+						type: INCREMENT_FILE_DOWNLOADS,
+						receivedAt: Date.now(),
+					});
 					window.location.href = `${config.hostname}/api/v2/files/${fileId}`;
 				}}
 				endIcon={<Download />}

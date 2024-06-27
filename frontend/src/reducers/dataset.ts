@@ -3,6 +3,7 @@ import {
 	DELETE_DATASET,
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
+	INCREMENT_DATASET_DOWNLOADS,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
 	RECEIVE_DATASET_ROLES,
@@ -102,6 +103,13 @@ const dataset = (state = defaultState, action: DataAction) => {
 			});
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, { about: action.about });
+		case INCREMENT_DATASET_DOWNLOADS:
+			return Object.assign({}, state, {
+				about: {
+					...state.about,
+					downloads: state.about.downloads + 1,
+				},
+			});
 		case RECEIVE_DATASET_LICENSE:
 			return Object.assign({}, state, { license: action.license });
 		case UPDATE_DATASET_LICENSE:

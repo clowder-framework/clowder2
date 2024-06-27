@@ -192,3 +192,6 @@ export function fetchPublicFoldersFilesInDataset(
 			});
 	};
 }
+
+export const INCREMENT_PUBLIC_DATASET_DOWNLOADS =
+	"INCREMENT_PUBLIC_DATASET_DOWNLOADS";
