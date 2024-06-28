@@ -34,6 +34,9 @@ export function Group() {
 		dispatch(deleteGroup(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
+	const groupOwner = useSelector(
+		(state: RootState) => state.group.about.creator
+	);
 	const role = useSelector((state: RootState) => state.group.role);
 
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
@@ -93,6 +96,7 @@ export function Group() {
 				}}
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
+				groupOwner={groupOwner}
 			/>
 			<Box
 				sx={{
