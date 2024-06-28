@@ -1,13 +1,16 @@
 from datetime import datetime
 from typing import Optional
 
+from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
+from app.models.datasets import DatasetDB, DatasetOut
 from app.models.groups import GroupBase, GroupDB, GroupIn, GroupOut, Member
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import UserDB, UserOut
 from app.routers.authentication import get_admin, get_admin_mode
+from app.search.index import index_dataset, index_dataset_files
 from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
 from bson.objectid import ObjectId
@@ -218,6 +221,7 @@ async def add_member(
     group_id: str,
     username: str,
     role: Optional[str] = None,
+    es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
@@ -245,6 +249,20 @@ async def add_member(
                 ).update(
                     Push({AuthorizationDB.user_ids: username}),
                 )
+                # index the datasets in the group
+                group_authorizations = await AuthorizationDB.find(
+                    AuthorizationDB.group_ids == ObjectId(group_id)
+                ).to_list()
+                for auth in group_authorizations:
+                    if (
+                        dataset := await DatasetDB.get(
+                            PydanticObjectId(auth.dataset_id)
+                        )
+                    ) is not None:
+                        await index_dataset(
+                            es, DatasetOut(**dataset.dict()), auth.user_ids
+                        )
+                        await index_dataset_files(es, str(auth.dataset_id), update=True)
             return group.dict()
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -254,6 +272,7 @@ async def add_member(
 async def remove_member(
     group_id: str,
     username: str,
+    es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Remove a user from a group."""
@@ -278,6 +297,16 @@ async def remove_member(
         # Update group itself
         group.users.remove(found_user)
         await group.replace()
+        # index the datasets in the group
+        group_authorizations = await AuthorizationDB.find(
+            AuthorizationDB.group_ids == ObjectId(group_id)
+        ).to_list()
+        for auth in group_authorizations:
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(auth.dataset_id))
+            ) is not None:
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth.user_ids)
+                await index_dataset_files(es, str(auth.dataset_id), update=True)
 
         return group.dict()
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
