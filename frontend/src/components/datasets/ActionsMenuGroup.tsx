@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Button, Stack } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { Download } from "@mui/icons-material";
 import { NewMenu } from "./NewMenu";
@@ -11,6 +11,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
 import { DatasetOut } from "../../openapi/v2";
+import { INCREMENT_DATASET_DOWNLOADS } from "../../actions/dataset";
 
 type ActionsMenuProps = {
 	folderId: string | null;
@@ -23,6 +24,7 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const dispatch = useDispatch();
 
 	return (
 		<Stack
@@ -34,7 +36,13 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 			<Button
 				sx={{ minWidth: "auto" }}
 				variant="contained"
-				href={`${config.hostname}/api/v2/datasets/${dataset.id}/download`}
+				onClick={() => {
+					dispatch({
+						type: INCREMENT_DATASET_DOWNLOADS,
+						receivedAt: Date.now(),
+					});
+					window.location.href = `${config.hostname}/api/v2/datasets/${dataset.id}/download`;
+				}}
 				endIcon={<Download />}
 			>
 				Download

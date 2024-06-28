@@ -148,8 +148,6 @@ export function MetadataDefinitions() {
 				<DialogContent>
 					<CreateMetadataDefinition
 						setCreateMetadataDefinitionOpen={setCreateMetadataDefinitionOpen}
-						setSnackBarOpen={setSnackBarOpen}
-						setSnackBarMessage={setSnackBarMessage}
 					/>
 				</DialogContent>
 			</Dialog>

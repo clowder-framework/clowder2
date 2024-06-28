@@ -226,3 +226,6 @@ export function getPublicFreezeDatasets(datasetId, skip, limit) {
 			});
 	};
 }
+
+export const INCREMENT_PUBLIC_DATASET_DOWNLOADS =
+	"INCREMENT_PUBLIC_DATASET_DOWNLOADS";

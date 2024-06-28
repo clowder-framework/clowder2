@@ -1,5 +1,6 @@
 import {
 	GET_PUBLIC_FREEZE_DATASETS,
+	INCREMENT_PUBLIC_DATASET_DOWNLOADS,
 	RECEIVE_FILES_IN_PUBLIC_DATASET,
 	RECEIVE_PUBLIC_DATASET_ABOUT,
 	RECEIVE_PUBLIC_DATASETS,
@@ -51,6 +52,13 @@ const publicDataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { publicFiles: action.publicFiles });
 		case RECEIVE_PUBLIC_DATASET_ABOUT:
 			return Object.assign({}, state, { publicAbout: action.publicAbout });
+		case INCREMENT_PUBLIC_DATASET_DOWNLOADS:
+			return Object.assign({}, state, {
+				publicAbout: {
+					...state.publicAbout,
+					downloads: state.publicAbout.downloads + 1,
+				},
+			});
 		case RECEIVE_PUBLIC_DATASETS:
 			return Object.assign({}, state, {
 				publicDatasets: action.publicDatasets,

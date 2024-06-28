@@ -7,7 +7,6 @@ import datasetSchema from "../../schema/datasetSchema.json";
 import { FormProps } from "@rjsf/core";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
-import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import { ClowderRjsfTextAreaWidget } from "../styledComponents/ClowderRjsfTextAreaWidget";
 import validator from "@rjsf/validator-ajv8";
 
@@ -35,7 +34,6 @@ export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (
 			onSubmit={({ formData }) => {
 				onSave(formData);
 			}}
-			ErrorList={ClowderRjsfErrorList}
 		>
 			<Box className="inputGroup">
 				<Button variant="contained" type="submit">

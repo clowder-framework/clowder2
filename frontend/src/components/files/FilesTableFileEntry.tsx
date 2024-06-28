@@ -60,9 +60,6 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						)}
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 					</TableCell>
-					<TableCell>
-						<VersionChip selectedVersion={selectedVersion} />
-					</TableCell>
 					<TableCell align="right">{parseDate(file.created)}</TableCell>
 					<TableCell align="right">
 						{file.bytes ? prettyBytes(file.bytes) : "NA"}
