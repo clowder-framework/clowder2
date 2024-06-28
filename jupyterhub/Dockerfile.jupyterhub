@@ -1,4 +1,5 @@
-FROM quay.io/jupyterhub/jupyterhub:latest
+ARG JUPYTERHUB_VERSION
+FROM quay.io/jupyterhub/jupyterhub:$JUPYTERHUB_VERSION
 
 # Install dockerspawner,
 # hadolint ignore=DL3013

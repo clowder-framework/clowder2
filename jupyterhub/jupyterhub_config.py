@@ -72,7 +72,7 @@ c.JupyterHub.authenticator_class = CustomTokenAuthenticator
 # TODO:Change this keycloak_url as required
 
 c.CustomTokenAuthenticator.auth_cookie_header = "Authorization"
-c.CustomTokenAuthenticator.auth_username_key = "email"
+c.CustomTokenAuthenticator.auth_username_key = "preferred_username"
 c.CustomTokenAuthenticator.auth_uid_number_key = "uid_number"
 c.CustomTokenAuthenticator.enable_auth_state = True
 c.CustomTokenAuthenticator.auto_login = True
