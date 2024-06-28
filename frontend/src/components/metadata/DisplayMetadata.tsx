@@ -122,68 +122,83 @@ export const DisplayMetadata = (props: MetadataType) => {
 				if (publicView) currentMetadataDefList = publicMetadataDefinitionList;
 				else currentMetadataDefList = metadataDefinitionList;
 
-				return currentMetadataDefList.map((metadataDef) => {
-					return metadataList.map((metadata, idx) => {
-						if (metadataDef.name === metadata.definition) {
-							return (
-								<Box className="inputGroup" key={idx}>
-									<Typography variant="h6">{metadata.definition}</Typography>
-									<Typography variant="subtitle2">
-										{metadata.description}
-									</Typography>
-									{
-										// construct metadata using its definition
-										metadataDef.fields.map((field, idxx) => {
-											return React.cloneElement(
-												metadataConfig[field.widgetType ?? "NA"] ??
-													metadataConfig["NA"],
-												{
-													widgetName: metadataDef.name,
-													fieldName: field.name,
-													options: field.config.options ?? [],
-													updateMetadata: updateMetadata,
-													initialReadOnly: true,
-													resourceId: resourceId,
-													content: metadata.content ?? null,
-													metadataId: metadata.id ?? null,
-													isRequired: field.required,
-													key: idxx,
-													datasetRole: datasetRole,
-													frozen: about.frozen,
-													frozenVersionNum: about.frozen_version_num,
-												}
-											);
-										})
-									}
-									<Grid container spacing={2}>
-										<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-											<Agent
-												created={metadata.created}
-												agent={metadata.agent}
-											/>
-											<FrozenWrapper
-												frozen={about.frozen}
-												frozenVersionNum={about.frozen_version_num}
-											>
-												<AuthWrapper
-													currRole={datasetRole.role}
-													allowedRoles={["owner", "editor", "uploader"]}
+				if (metadataList.length > 0) {
+					return currentMetadataDefList.map((metadataDef) => {
+						return metadataList.map((metadata, idx) => {
+							if (metadataDef.name === metadata.definition) {
+								return (
+									<Box className="inputGroup" key={idx}>
+										<Typography variant="h6">{metadata.definition}</Typography>
+										<Typography variant="subtitle2">
+											{metadata.description}
+										</Typography>
+										{
+											// construct metadata using its definition
+											metadataDef.fields.map((field, idxx) => {
+												return React.cloneElement(
+													metadataConfig[field.widgetType ?? "NA"] ??
+														metadataConfig["NA"],
+													{
+														widgetName: metadataDef.name,
+														fieldName: field.name,
+														options: field.config.options ?? [],
+														updateMetadata: updateMetadata,
+														initialReadOnly: true,
+														resourceId: resourceId,
+														content: metadata.content ?? null,
+														metadataId: metadata.id ?? null,
+														isRequired: field.required,
+														key: idxx,
+														datasetRole: datasetRole,
+														frozen: about.frozen,
+														frozenVersionNum: about.frozen_version_num,
+													}
+												);
+											})
+										}
+										<Grid container spacing={2}>
+											<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+												<Agent
+													created={metadata.created}
+													agent={metadata.agent}
+												/>
+												<FrozenWrapper
+													frozen={about.frozen}
+													frozenVersionNum={about.frozen_version_num}
 												>
-													<MetadataDeleteButton
-														metadataId={metadata.id ?? null}
-														deleteMetadata={deleteMetadata}
-														resourceId={resourceId}
-														widgetName={metadataDef.name}
-													/>
-												</AuthWrapper>
-											</FrozenWrapper>
+													<AuthWrapper
+														currRole={datasetRole.role}
+														allowedRoles={["owner", "editor", "uploader"]}
+													>
+														<MetadataDeleteButton
+															metadataId={metadata.id ?? null}
+															deleteMetadata={deleteMetadata}
+															resourceId={resourceId}
+															widgetName={metadataDef.name}
+														/>
+													</AuthWrapper>
+												</FrozenWrapper>
+											</Grid>
 										</Grid>
-									</Grid>
-								</Box>
-							);
-						}
+									</Box>
+								);
+							}
+						});
 					});
-				});
+				} else {
+					return (
+						<Box textAlign="center">
+							<p>
+								Currently there is no user metadata provided for this dataset.
+								To start adding some click on the Add metadata button. User
+								metadata is metadata about the dataset added by any user who has
+								write permission to the dataset. The list of available field is
+								defined by the administrators of the system. If you would like
+								to add a new entry please contact one of the administrators.
+							</p>
+						</Box>
+					);
+				}
 			})()}
 		</>
 	);
