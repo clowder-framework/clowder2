@@ -5,6 +5,7 @@ import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } 
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from '../models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
 import type { DatasetBase } from '../models/DatasetBase';
+import type { DatasetFreezeOut } from '../models/DatasetFreezeOut';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { DatasetPatch } from '../models/DatasetPatch';
@@ -204,6 +205,108 @@ export class DatasetsService {
             },
             formData: formData,
             mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Freeze Datasets
+     * @param datasetId
+     * @param skip
+     * @param limit
+     * @returns Paged Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetsApiV2DatasetsDatasetIdFreezeGet(
+        datasetId: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Paged> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/freeze`,
+            query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Freeze Dataset
+     * @param datasetId
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static freezeDatasetApiV2DatasetsDatasetIdFreezePost(
+        datasetId: string,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/freeze`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Freeze Dataset Lastest Version Num
+     * @param datasetId
+     * @returns number Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetLastestVersionNumApiV2DatasetsDatasetIdFreezeLatestVersionNumGet(
+        datasetId: string,
+    ): CancelablePromise<number> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/freeze/latest_version_num`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Freeze Dataset Version
+     * @param datasetId
+     * @param frozenVersionNum
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumGet(
+        datasetId: string,
+        frozenVersionNum: number,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/freeze/${frozenVersionNum}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Delete Freeze Dataset Version
+     * @param datasetId
+     * @param frozenVersionNum
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static deleteFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumDelete(
+        datasetId: string,
+        frozenVersionNum: number,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/datasets/${datasetId}/freeze/${frozenVersionNum}`,
             errors: {
                 422: `Validation Error`,
             },
@@ -431,12 +534,12 @@ export class DatasetsService {
     /**
      * Download Dataset
      * @param datasetId
-     * @returns DatasetOut Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadDatasetApiV2DatasetsDatasetIdDownloadGet(
         datasetId: string,
-    ): CancelablePromise<DatasetOut> {
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,

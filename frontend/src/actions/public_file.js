@@ -122,7 +122,7 @@ export function filePublicDownloaded(
 		if (filename === "") {
 			filename = `${fileId}.zip`;
 		}
-		let endpoint = `${config.hostname}/api/v2/public/files/${fileId}`;
+		let endpoint = `${config.hostname}/api/v2/public_files/${fileId}`;
 		if (fileVersionNum != 0) endpoint = `${endpoint}?version=${fileVersionNum}`;
 		const response = await fetch(endpoint, {
 			method: "GET",
@@ -159,3 +159,6 @@ export function filePublicDownloaded(
 		}
 	};
 }
+
+export const INCREMENT_PUBLIC_FILE_DOWNLOADS =
+	"INCREMENT_PUBLIC_FILE_DOWNLOADS";

@@ -181,4 +181,30 @@ export class PublicDatasetsService {
         });
     }
 
+    /**
+     * Get Freeze Datasets
+     * @param datasetId
+     * @param skip
+     * @param limit
+     * @returns Paged Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetsApiV2PublicDatasetsDatasetIdFreezeGet(
+        datasetId: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Paged> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/public_datasets/${datasetId}/freeze`,
+            query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

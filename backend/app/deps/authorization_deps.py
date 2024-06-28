@@ -1,6 +1,6 @@
 from app.keycloak_auth import get_current_username, get_read_only_user
 from app.models.authorization import AuthorizationDB, RoleType
-from app.models.datasets import DatasetDB, DatasetStatus
+from app.models.datasets import DatasetDBViewList, DatasetStatus
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileStatus
 from app.models.groups import GroupDB
@@ -22,7 +22,9 @@ async def check_public_access(
     if role == RoleType.VIEWER:
         if resource_type == "dataset":
             if (
-                dataset := await DatasetDB.get(PydanticObjectId(resource_id))
+                dataset := await DatasetDBViewList.find_one(
+                    DatasetDBViewList.id == PydanticObjectId(resource_id)
+                )
             ) is not None:
                 if (
                     dataset.status == DatasetStatus.PUBLIC.name
@@ -84,7 +86,9 @@ async def get_role_by_file(
         )
         if authorization is None:
             if (
-                dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+                dataset := await DatasetDBViewList.find_one(
+                    DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+                )
             ) is not None:
                 if (
                     dataset.status == DatasetStatus.AUTHENTICATED.name
@@ -124,7 +128,9 @@ async def get_role_by_metadata(
                 return authorization.role
         elif resource_type == "datasets":
             if (
-                dataset := await DatasetDB.get(PydanticObjectId(resource_id))
+                dataset := await DatasetDBViewList.find_one(
+                    DatasetDBViewList.id == PydanticObjectId(resource_id)
+                )
             ) is not None:
                 authorization = await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == dataset.id,
@@ -166,7 +172,11 @@ async def is_public_dataset(
     dataset_id: str,
 ) -> bool:
     """Checks if a dataset is public."""
-    if (dataset_out := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset_out := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset_out.status == DatasetStatus.PUBLIC:
             return True
     else:
@@ -177,7 +187,11 @@ async def is_authenticated_dataset(
     dataset_id: str,
 ) -> bool:
     """Checks if a dataset is authenticated."""
-    if (dataset_out := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset_out := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset_out.status == DatasetStatus.AUTHENTICATED:
             return True
     else:
@@ -223,7 +237,9 @@ class Authorization:
                 )
         else:
             if (
-                current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+                current_dataset := await DatasetDBViewList.find_one(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                )
             ) is not None:
                 if (
                     current_dataset.status == DatasetStatus.AUTHENTICATED.name
@@ -335,7 +351,9 @@ class MetadataAuthorization:
                         )
             elif resource_type == "datasets":
                 if (
-                    dataset := await DatasetDB.get(PydanticObjectId(resource_id))
+                    dataset := await DatasetDBViewList.find_one(
+                        DatasetDBViewList.id == PydanticObjectId(resource_id)
+                    )
                 ) is not None:
                     authorization = await AuthorizationDB.find_one(
                         AuthorizationDB.dataset_id == dataset.id,
@@ -469,7 +487,11 @@ class CheckStatus:
         self,
         dataset_id: str,
     ):
-        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
+        ) is not None:
             if dataset.status == self.status:
                 return True
             else:
@@ -492,7 +514,9 @@ class CheckFileStatus:
         if (file_out := await FileDB.get(PydanticObjectId(file_id))) is not None:
             dataset_id = file_out.dataset_id
             if (
-                dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+                dataset := await DatasetDBViewList.find_one(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                )
             ) is not None:
                 if dataset.status == self.status:
                     return True

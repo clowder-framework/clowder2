@@ -9,7 +9,10 @@ import {
 	Stack,
 } from "@mui/material";
 import React, { useState } from "react";
-import { fetchPublicFileSummary } from "../../actions/public_file";
+import {
+	fetchPublicFileSummary,
+	INCREMENT_PUBLIC_FILE_DOWNLOADS,
+} from "../../actions/public_file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -56,7 +59,10 @@ export const PublicFileActionsMenu = (
 				sx={{ minWidth: "auto" }}
 				variant="contained"
 				onClick={() => {
-					listFileSummary(fileId);
+					dispatch({
+						type: INCREMENT_PUBLIC_FILE_DOWNLOADS,
+						receivedAt: Date.now(),
+					});
 					window.location.href = `${config.hostname}/api/v2/public_files/${fileId}`;
 				}}
 				endIcon={<Download />}
