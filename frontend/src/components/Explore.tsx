@@ -70,7 +70,6 @@ export const Explore = (): JSX.Element => {
 		} else {
 			setMine(false);
 			setCurrPageNum(1);
-			// listDatasets(0, limit, false);
 		}
 		setSelectedTabIndex(newTabIndex);
 	};
