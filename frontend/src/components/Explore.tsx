@@ -66,7 +66,6 @@ export const Explore = (): JSX.Element => {
 		if (newTabIndex === 1) {
 			setMine(true);
 			setCurrPageNum(1);
-			// listDatasets(0, limit, true);
 		} else {
 			setMine(false);
 			setCurrPageNum(1);
