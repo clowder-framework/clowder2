@@ -28,6 +28,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
 import { PresignedUrlShareModal } from "../sharing/PresignedUrlShareModal";
 import config from "../../app.config";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type FileActionsMenuProps = {
 	fileId?: string;
@@ -42,6 +43,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
 
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const dataset = useSelector((state: RootState) => state.dataset.about);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -119,12 +121,13 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			<ActionModal
 				actionOpen={confirmationOpen}
 				actionTitle="Are you sure?"
-				actionText="Do you really want to delete? This process cannot be undone."
+				actionText="Do you really want to delete this file? This process cannot be undone."
 				actionBtnName="Delete"
 				handleActionBtnClick={deleteSelectedFile}
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<Dialog
 				open={updateFileOpen}
@@ -173,53 +176,58 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			) : (
 				<></>
 			)}
-			{/*owner, editor can update file*/}
-			<AuthWrapper currRole={fileRole} allowedRoles={["owner", "editor"]}>
-				<Button
-					variant="outlined"
-					id="basic-button"
-					aria-controls={open ? "basic-menu" : undefined}
-					aria-haspopup="true"
-					aria-expanded={open ? "true" : undefined}
-					onClick={handleClick}
-					endIcon={<ArrowDropDownIcon />}
-				>
-					<MoreHoriz />
-				</Button>
-				<Menu
-					id="basic-menu"
-					anchorEl={anchorEl}
-					open={open}
-					onClose={handleClose}
-					MenuListProps={{
-						"aria-labelledby": "basic-button",
-					}}
-				>
-					<MenuItem
-						onClick={() => {
-							handleClose();
-							setUpdateFileOpen(true);
+			<FrozenWrapper
+				frozen={dataset.frozen}
+				frozenVersionNum={dataset.frozen_version_num}
+			>
+				{/*owner, editor can update file*/}
+				<AuthWrapper currRole={fileRole} allowedRoles={["owner", "editor"]}>
+					<Button
+						variant="outlined"
+						id="basic-button"
+						aria-controls={open ? "basic-menu" : undefined}
+						aria-haspopup="true"
+						aria-expanded={open ? "true" : undefined}
+						onClick={handleClick}
+						endIcon={<ArrowDropDownIcon />}
+					>
+						<MoreHoriz />
+					</Button>
+					<Menu
+						id="basic-menu"
+						anchorEl={anchorEl}
+						open={open}
+						onClose={handleClose}
+						MenuListProps={{
+							"aria-labelledby": "basic-button",
 						}}
 					>
-						{" "}
-						<ListItemIcon>
-							<Upload fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Update File</ListItemText>
-					</MenuItem>
-					<MenuItem
-						onClick={() => {
-							handleClose();
-							setConfirmationOpen(true);
-						}}
-					>
-						<ListItemIcon>
-							<DeleteIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Delete</ListItemText>
-					</MenuItem>
-				</Menu>
-			</AuthWrapper>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setUpdateFileOpen(true);
+							}}
+						>
+							{" "}
+							<ListItemIcon>
+								<Upload fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Update File</ListItemText>
+						</MenuItem>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setConfirmationOpen(true);
+							}}
+						>
+							<ListItemIcon>
+								<DeleteIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Delete</ListItemText>
+						</MenuItem>
+					</Menu>
+				</AuthWrapper>
+			</FrozenWrapper>
 		</Stack>
 	);
 };

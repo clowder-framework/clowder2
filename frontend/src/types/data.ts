@@ -1,5 +1,6 @@
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
 	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
@@ -133,6 +134,11 @@ export interface DatasetState {
 	newFolder: FolderOut;
 	newFiles: FileOut[];
 	about: DatasetOut;
+	frozenDataset: DatasetFreezeOut;
+	deletedFrozenDataset: DatasetFreezeOut;
+	newFrozenDataset: DatasetFreezeOut;
+	frozenDatasets: Paged;
+	latestFrozenVersionNum: number;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 	license: LicenseOut;
@@ -141,6 +147,7 @@ export interface DatasetState {
 export interface PublicDatasetState {
 	publicFiles: FileOut[];
 	publicDatasets: Paged;
+	publicFrozenDatasets: Paged;
 	publicNewDataset: DatasetOut;
 	publicNewFile: FileOut;
 	publicNewFiles: FileOut[];
@@ -189,7 +196,7 @@ export interface FileState {
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRole: string;
+	fileRole: RoleType;
 	presignedUrl: string;
 	selected_version_num: number;
 }

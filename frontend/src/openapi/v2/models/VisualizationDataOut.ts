@@ -21,11 +21,13 @@ import type { UserOut } from './UserOut';
 export type VisualizationDataOut = {
     name?: string;
     description?: string;
-    id?: string;
     creator: UserOut;
     created?: string;
     modified?: string;
     bytes?: number;
     content_type?: ContentType;
     visualization_config_id: string;
+    origin_id?: string;
+    id?: string;
+    frozen?: boolean;
 }

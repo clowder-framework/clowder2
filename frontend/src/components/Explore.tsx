@@ -109,6 +109,8 @@ export const Explore = (): JSX.Element => {
 												created={dataset.created}
 												description={dataset.description}
 												thumbnailId={dataset.thumbnail_id}
+												frozen={dataset.frozen}
+												frozenVersionNum={dataset.frozen_version_num}
 											/>
 										</Grid>
 									);
