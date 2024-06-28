@@ -1,6 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+
 # Configuration file for JupyterHub
 import os
 
@@ -38,6 +39,7 @@ c.DockerSpawner.network_name = network_name
 # We follow the same convention.
 notebook_dir = os.environ.get("DOCKER_NOTEBOOK_DIR", "/home/jovyan/work")
 c.DockerSpawner.notebook_dir = notebook_dir
+c.Spawner.args = ["--NotebookApp.default_url=/notebooks/Welcome.ipynb"]
 
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
@@ -100,6 +102,9 @@ else:
     )
 
 c.JupyterHub.cookie_secret = os.getenv("JUPYTERHUB_CRYPT_KEY")
+
+# Allow all users to access
+c.Authenticator.allow_all = True
 
 # Allowed admins
 admin = os.environ.get("JUPYTERHUB_ADMIN")
