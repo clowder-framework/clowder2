@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import Layout from "../Layout";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,6 +14,8 @@ import AddMemberModal from "./AddMemberModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ActionModal } from "../dialog/ActionModal";
+import { MainBreadcrumbs } from "../navigation/BreadCrumb";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export function Group() {
 	// path parameter
@@ -43,8 +45,31 @@ export function Group() {
 		fetchCurrentGroupRole(groupId);
 	}, [groupAbout]);
 
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+
+	// for breadcrumb
+	const paths = [
+		{
+			name: "Groups",
+			url: "/groups",
+		},
+		{
+			name: groupAbout.name,
+			url: `/groups/${groupAbout.name}`,
+		},
+	];
+
 	return (
 		<Layout>
+			{/*Error Message dialogue*/}
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			{/*breadcrumb*/}
+			<Grid container>
+				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
+					<MainBreadcrumbs paths={paths} />
+				</Grid>
+			</Grid>
 			{/*Delete group modal*/}
 			<ActionModal
 				actionOpen={deleteGroupConfirmOpen}
