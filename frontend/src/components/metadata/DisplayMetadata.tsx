@@ -13,7 +13,6 @@ import {
 import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
 import { fetchPublicDatasetMetadata } from "../../actions/public_dataset";
-import { Link as RouterLink } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
 
