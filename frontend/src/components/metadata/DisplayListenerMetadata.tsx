@@ -136,7 +136,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					);
 				} else {
 					return (
-						<Box textAlign="center">
+						<Box textAlign="left">
 							<p>
 								Currently there is no machine metadata. This means either no
 								listeners are enabled for this resource, or that this resource

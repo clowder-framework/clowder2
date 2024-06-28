@@ -192,9 +192,9 @@ export const DisplayMetadata = (props: MetadataType) => {
 					});
 				} else {
 					return (
-						<Box textAlign="center">
+						<Box textAlign="left">
 							<p>
-								Currently there is no user metadata provided for this dataset.
+								Currently there is no user metadata provided for this resource.
 								To start adding some click on the Add metadata button. User
 								metadata is metadata about the dataset added by any user who has
 								write permission to the dataset. The list of available field is
