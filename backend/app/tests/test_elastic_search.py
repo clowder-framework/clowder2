@@ -196,8 +196,7 @@ async def test_public_files():
         user_public_clause = {
             "bool": {
                 "should": [
-                    {"term": {"creator": "xyz"}},
-                    {"term": {"status": "PUBLIC"}},
+                    {"term": {"status": "public"}},
                 ]
             }
         }
@@ -252,7 +251,7 @@ async def test_public_datasets():
             "bool": {
                 "should": [
                     {"term": {"creator": "abcd"}},
-                    {"term": {"status": "PUBLIC"}},
+                    {"term": {"status": "public"}},
                 ]
             }
         }

@@ -69,6 +69,7 @@ class EventListenerDB(Document, EventListenerBase):
     modified: datetime = Field(default_factory=datetime.now)
     lastAlive: datetime = None
     alive: Optional[bool] = None  # made up field to indicate if extractor is alive
+    active: bool = False
     properties: Optional[ExtractorInfo] = None
 
     class Settings:
@@ -175,6 +176,7 @@ class EventListenerDatasetJobMessage(BaseModel):
     id: str
     datasetId: str
     job_id: str
+    parameters: Optional[dict] = None
 
 
 class EventListenerJobUpdateBase(BaseModel):

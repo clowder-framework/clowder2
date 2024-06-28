@@ -13,6 +13,15 @@ c = get_config()  # noqa: F821
 # avoid having to rebuild the JupyterHub container every time we change a
 # configuration parameter.
 
+# Base URL of the Hub
+c.JupyterHub.base_url = "/jupyterhub"
+
+
+# Important proxy settings to work with Traefik
+c.JupyterHub.proxy_class = "jupyterhub.proxy.ConfigurableHTTPProxy"
+c.ConfigurableHTTPProxy.command = ["configurable-http-proxy"]
+
+
 # Spawn single-user servers as Docker containers
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 

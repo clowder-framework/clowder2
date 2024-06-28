@@ -25,8 +25,6 @@ export const MetadataDateTimePicker = (props) => {
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
-	console.log(updateMetadata, "datetime");
-	console.log(datasetRole, "datasetRole");
 	const handleChange = (newValue: Date) => {
 		setInputChanged(true);
 

@@ -9,10 +9,10 @@ then
 fi
 if [ "$1" = "jupyter" ] && [ "$2" = "up" ]
 then
-  docker-compose -f docker-compose.dev.yml -f docker-compose.jupyter.yml -p clowder2-dev  up -d --build
+  docker-compose -f docker-compose.dev.yml -f docker-compose.jupyter-dev.yml -p clowder2-dev  up -d --build
 fi
 
 if [ "$1" = "jupyter" ] && [ "$2" = "down" ]
 then
-  docker-compose -f docker-compose.dev.yml -f docker-compose.jupyter.yml -p clowder2-dev  down
+  docker-compose -f docker-compose.dev.yml -f docker-compose.jupyter-dev.yml -p clowder2-dev  down
 fi
