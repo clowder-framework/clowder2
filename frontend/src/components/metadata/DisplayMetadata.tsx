@@ -121,8 +121,13 @@ export const DisplayMetadata = (props: MetadataType) => {
 					metadataList = publicDatasetMetadataList;
 				if (publicView) currentMetadataDefList = publicMetadataDefinitionList;
 				else currentMetadataDefList = metadataDefinitionList;
-
-				if (metadataList.length > 0) {
+				let hasUserMetadata = false;
+				metadataList.map((metadata, idx) => {
+					if (metadata.agent.listener === null) {
+						hasUserMetadata = true;
+					}
+				});
+				if (hasUserMetadata) {
 					return currentMetadataDefList.map((metadataDef) => {
 						return metadataList.map((metadata, idx) => {
 							if (metadataDef.name === metadata.definition) {

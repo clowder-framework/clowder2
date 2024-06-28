@@ -104,7 +104,13 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					metadataList = publicFileMetadataList;
 				else if (resourceType === "dataset" && publicView)
 					metadataList = publicDatasetMetadataList;
-				if (metadataList.length > 0) {
+				let hasAgentMetadata = false;
+				metadataList.map((metadata, idx) => {
+					if (metadata.agent.listener !== null) {
+						hasAgentMetadata = true;
+					}
+				});
+				if (hasAgentMetadata) {
 					return (
 						<Grid container spacing={2}>
 							{metadataList.map((metadata, idx) => {
