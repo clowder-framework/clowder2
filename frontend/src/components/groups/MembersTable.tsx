@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -10,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { MembersTableUserEntry } from "./MembersTableUserEntry";
 import { ActionModal } from "../dialog/ActionModal";
-import { useState } from "react";
 import { deleteGroupMember } from "../../actions/group";
 
 type MembersTableProps = {
@@ -22,9 +22,12 @@ export default function MembersTable(props: MembersTableProps) {
 
 	// mapStateToProps
 	const groupAbout = useSelector((state: RootState) => state.group.about);
-
+	const groupCreatorEmail = useSelector(
+		(state: RootState) => state.group.about.creator
+	);
 	// dispatch
 	const dispatch = useDispatch();
+
 	const groupMemberDeleted = (
 		groupId: string | undefined,
 		username: string | undefined
@@ -47,6 +50,7 @@ export default function MembersTable(props: MembersTableProps) {
 				handleActionCancel={() => {
 					setDeleteMemberConfirmOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<TableContainer component={Paper}>
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -64,6 +68,7 @@ export default function MembersTable(props: MembersTableProps) {
 								<MembersTableUserEntry
 									groupId={groupId}
 									member={member}
+									creatorEmail={groupCreatorEmail}
 									key={member.user.id}
 									setDeleteMemberConfirmOpen={setDeleteMemberConfirmOpen}
 									setSelectMemberUsername={setSelectMemberUsername}
