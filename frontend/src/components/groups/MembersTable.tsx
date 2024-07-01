@@ -50,7 +50,6 @@ export default function MembersTable(props: MembersTableProps) {
 				handleActionCancel={() => {
 					setDeleteMemberConfirmOpen(false);
 				}}
-				actionLevel={"error"}
 			/>
 			<TableContainer component={Paper}>
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
