@@ -53,7 +53,7 @@ const group = (state = defaultState, action: DataAction) => {
 		case RECEIVE_GROUP_ROLE:
 			return Object.assign({}, state, { role: action.role });
 		case DELETE_GROUP_MEMBER:
-			return Object.assign({}, state, { deletedGroup: action.about });
+			return Object.assign({}, state, { deletedGroupMember: action.about });
 		case UPDATE_GROUP:
 			return Object.assign({}, state, { about: action.about });
 		case ADD_GROUP_MEMBER:
