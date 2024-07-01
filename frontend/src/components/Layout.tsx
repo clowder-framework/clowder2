@@ -360,7 +360,7 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
+				{currUserProfile.read_only_user ? <></> : <Divider />}
 				{currUserProfile.admin ? (
 					<>
 						<List>
@@ -377,9 +377,7 @@ export default function PersistentDrawerLeft(props) {
 					</>
 				) : null}
 				<List>
-					{currUserProfile.read_only_user ? (
-						<></>
-					) : (
+					{currUserProfile.read_only_user ? null : (
 						<ListItem key={"groups"} disablePadding>
 							<ListItemButton component={RouterLink} to="/groups">
 								<ListItemIcon>
@@ -390,7 +388,7 @@ export default function PersistentDrawerLeft(props) {
 						</ListItem>
 					)}
 				</List>
-				<Divider />
+				{currUserProfile.read_only_user ? <></> : <Divider />}
 				<List>
 					{currUserProfile.read_only_user ? (
 						<></>
