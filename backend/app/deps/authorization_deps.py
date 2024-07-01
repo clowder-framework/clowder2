@@ -1,3 +1,7 @@
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from fastapi import Depends, HTTPException
+
 from app.keycloak_auth import get_current_username, get_read_only_user
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDBViewList, DatasetStatus
@@ -7,9 +11,6 @@ from app.models.groups import GroupDB
 from app.models.listeners import EventListenerDB
 from app.models.metadata import MetadataDB
 from app.routers.authentication import get_admin, get_admin_mode
-from beanie import PydanticObjectId
-from beanie.operators import Or
-from fastapi import Depends, HTTPException
 
 
 async def check_public_access(
@@ -44,6 +45,7 @@ async def check_public_access(
 async def get_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -70,6 +72,7 @@ async def get_role(
 async def get_role_by_file(
     file_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -107,6 +110,7 @@ async def get_role_by_file(
 async def get_role_by_metadata(
     metadata_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -145,6 +149,7 @@ async def get_role_by_metadata(
 async def get_role_by_group(
     group_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -209,6 +214,7 @@ class Authorization:
         self,
         dataset_id: str,
         current_user: str = Depends(get_current_username),
+        enable_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
         readonly: bool = Depends(get_read_only_user),
@@ -270,6 +276,7 @@ class FileAuthorization:
         self,
         file_id: str,
         current_user: str = Depends(get_current_username),
+        enable_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -316,6 +323,7 @@ class MetadataAuthorization:
         self,
         metadata_id: str,
         current_user: str = Depends(get_current_username),
+        enable_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -385,6 +393,7 @@ class GroupAuthorization:
         self,
         group_id: str,
         current_user: str = Depends(get_current_username),
+        enable_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -422,6 +431,7 @@ class ListenerAuthorization:
         self,
         listener_id: str,
         current_user: str = Depends(get_current_username),
+        enable_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -531,6 +541,7 @@ class CheckFileStatus:
 def access(
     user_role: RoleType,
     role_required: RoleType,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin: bool = Depends(get_admin),
     read_only_user: bool = Depends(get_read_only_user),

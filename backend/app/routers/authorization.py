@@ -71,6 +71,7 @@ async def save_authorization(
 async def get_dataset_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
