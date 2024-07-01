@@ -15,7 +15,6 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
-// import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
 	id?: string;
@@ -25,11 +24,23 @@ type DatasetCardProps = {
 	description?: string;
 	thumbnailId?: string;
 	publicView?: boolean | false;
+	frozen?: string;
+	frozenVersionNum?: number;
 };
 
 export default function DatasetCard(props: DatasetCardProps) {
-	const { id, name, author, created, description, thumbnailId, publicView } =
-		props;
+	const {
+		id,
+		name,
+		author,
+		created,
+		description,
+		thumbnailId,
+		publicView,
+		frozen,
+		frozenVersionNum,
+	} = props;
+
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
@@ -108,7 +119,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 					</CardContent>
 				</CardActionArea>
 			)}
-			<CardActions sx={{ pb: 0 }}>
+			<CardActions sx={{ pb: 0, justifyContent: "space-between" }}>
 				<Tooltip title="Download">
 					<IconButton
 						href={`${config.hostname}/api/v2/datasets/${id}/download`}

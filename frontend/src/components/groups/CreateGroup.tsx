@@ -12,7 +12,6 @@ import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import groupSchema from "../../schema/groupSchema.json";
 import { ClowderRjsfTextAreaWidget } from "../styledComponents/ClowderRjsfTextAreaWidget";
-import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../types/data";
 import validator from "@rjsf/validator-ajv8";
@@ -59,7 +58,6 @@ export const CreateGroup = (props: CreateGroupProps): JSX.Element => {
 					// close modal
 					setCreateGroupOpen(false);
 				}}
-				ErrorList={ClowderRjsfErrorList}
 			>
 				<Box className="inputGroup" sx={{ float: "right" }}>
 					<Button variant="contained" type="submit">

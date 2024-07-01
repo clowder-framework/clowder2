@@ -33,6 +33,7 @@ export default function DeleteGroupModal(props: DeleteGroupModalProps) {
 			handleActionCancel={() => {
 				setDeleteGroupConfirmOpen(false);
 			}}
+			actionLevel={"error"}
 		/>
 	);
 }
