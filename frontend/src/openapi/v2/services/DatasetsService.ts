@@ -245,6 +245,7 @@ export class DatasetsService {
      * @param datasetId
      * @param skip
      * @param limit
+     * @param enableAdmin
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -252,6 +253,7 @@ export class DatasetsService {
         datasetId: string,
         skip?: number,
         limit: number = 10,
+        enableAdmin: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -259,6 +261,7 @@ export class DatasetsService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'enable_admin': enableAdmin,
             },
             errors: {
                 422: `Validation Error`,
@@ -269,15 +272,20 @@ export class DatasetsService {
     /**
      * Freeze Dataset
      * @param datasetId
+     * @param enableAdmin
      * @returns DatasetFreezeOut Successful Response
      * @throws ApiError
      */
     public static freezeDatasetApiV2DatasetsDatasetIdFreezePost(
         datasetId: string,
+        enableAdmin: boolean = false,
     ): CancelablePromise<DatasetFreezeOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/freeze`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -287,15 +295,20 @@ export class DatasetsService {
     /**
      * Get Freeze Dataset Lastest Version Num
      * @param datasetId
+     * @param enableAdmin
      * @returns number Successful Response
      * @throws ApiError
      */
     public static getFreezeDatasetLastestVersionNumApiV2DatasetsDatasetIdFreezeLatestVersionNumGet(
         datasetId: string,
+        enableAdmin: boolean = false,
     ): CancelablePromise<number> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/freeze/latest_version_num`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -306,16 +319,21 @@ export class DatasetsService {
      * Get Freeze Dataset Version
      * @param datasetId
      * @param frozenVersionNum
+     * @param enableAdmin
      * @returns DatasetFreezeOut Successful Response
      * @throws ApiError
      */
     public static getFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumGet(
         datasetId: string,
         frozenVersionNum: number,
+        enableAdmin: boolean = false,
     ): CancelablePromise<DatasetFreezeOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/freeze/${frozenVersionNum}`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -326,16 +344,21 @@ export class DatasetsService {
      * Delete Freeze Dataset Version
      * @param datasetId
      * @param frozenVersionNum
+     * @param enableAdmin
      * @returns DatasetFreezeOut Successful Response
      * @throws ApiError
      */
     public static deleteFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumDelete(
         datasetId: string,
         frozenVersionNum: number,
+        enableAdmin: boolean = false,
     ): CancelablePromise<DatasetFreezeOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/freeze/${frozenVersionNum}`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -596,13 +619,13 @@ export class DatasetsService {
      * Download Dataset
      * @param datasetId
      * @param enableAdmin
-     * @returns DatasetOut Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadDatasetApiV2DatasetsDatasetIdDownloadGet(
         datasetId: string,
         enableAdmin: boolean = false,
-    ): CancelablePromise<DatasetOut> {
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,
