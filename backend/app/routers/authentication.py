@@ -197,6 +197,7 @@ async def revoke_admin(
         else:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
                 user.admin = False
+                user.admin_mode = False  # make sure to disable admin mode as well
                 await user.replace()
                 return user.dict()
             else:
