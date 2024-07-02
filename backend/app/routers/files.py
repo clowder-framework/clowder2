@@ -239,9 +239,12 @@ async def update_file(
 
         await new_version.insert()
         # Update entry to the file index
-        await index_file(es, FileOut(**updated_file.dict()))
+        await index_file(es, FileOut(**updated_file.dict()), update=True)
         await _resubmit_file_extractors(
-            updated_file, rabbitmq_client, user, credentials
+            **updated_file.dict(),
+            rabbitmq_client=rabbitmq_client,
+            user=user,
+            credentials=credentials,
         )
 
         # updating metadata in elasticsearch
