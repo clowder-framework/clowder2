@@ -241,7 +241,7 @@ async def update_file(
         # Update entry to the file index
         await index_file(es, FileOut(**updated_file.dict()), update=True)
         await _resubmit_file_extractors(
-            **updated_file.dict(),
+            FileOut(**updated_file.dict()),
             rabbitmq_client=rabbitmq_client,
             user=user,
             credentials=credentials,
