@@ -111,7 +111,7 @@ async def add_dataset_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_dataset(es, dataset)
+        await index_dataset(es, **dataset.dict(), update=True)
         return md.dict()
 
 
@@ -163,7 +163,7 @@ async def replace_dataset_metadata(
             await md.replace()
 
             # Update entry to the metadata index
-            await index_dataset(es, dataset, update=True)
+            await index_dataset(es, **dataset.dict(), update=True)
             return md.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -229,7 +229,7 @@ async def update_dataset_metadata(
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            await index_dataset(es, dataset, update=True)
+            await index_dataset(es, **dataset.dict(), update=True)
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(
