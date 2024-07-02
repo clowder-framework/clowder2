@@ -73,7 +73,7 @@ export const VisualizationCard = (props: previewProps) => {
 			lg={fullscreen ? 12 : 4}
 			xl={fullscreen ? 12 : 4}
 		>
-			<Card style={{ height: "100%" }}>
+			<Card sx={{ height: "100%" }}>
 				<PresignedUrlShareModal
 					presignedUrl={presignedUrl}
 					presignedUrlShareModalOpen={visShareModalOpen}
