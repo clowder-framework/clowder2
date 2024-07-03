@@ -17,6 +17,7 @@ export class FeedsService {
      * @param skip
      * @param limit
      * @param datasetId
+     * @param enableAdmin
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -25,6 +26,7 @@ export class FeedsService {
         skip?: number,
         limit: number = 10,
         datasetId?: string,
+        enableAdmin: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -34,6 +36,7 @@ export class FeedsService {
                 'skip': skip,
                 'limit': limit,
                 'dataset_id': datasetId,
+                'enable_admin': enableAdmin,
             },
             errors: {
                 422: `Validation Error`,
@@ -66,18 +69,21 @@ export class FeedsService {
      * Get Feed
      * Fetch an existing saved search Feed.
      * @param feedId
+     * @param enableAdmin
      * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static getFeedApiV2FeedsFeedIdGet(
         feedId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/feeds/${feedId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -95,6 +101,7 @@ export class FeedsService {
      * feed_in -- JSON object including updated information
      * @param feedId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
@@ -102,12 +109,14 @@ export class FeedsService {
     public static editFeedApiV2FeedsFeedIdPut(
         feedId: string,
         requestBody: FeedIn,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/feeds/${feedId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -122,18 +131,21 @@ export class FeedsService {
      * Delete Feed
      * Delete an existing saved search Feed.
      * @param feedId
+     * @param enableAdmin
      * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static deleteFeedApiV2FeedsFeedIdDelete(
         feedId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/feeds/${feedId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -151,6 +163,7 @@ export class FeedsService {
      * listener: JSON object with "listener_id" field and "automatic" bool field (whether to auto-trigger on new data)
      * @param feedId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
@@ -158,12 +171,14 @@ export class FeedsService {
     public static associateListenerApiV2FeedsFeedIdListenersPost(
         feedId: string,
         requestBody: FeedListener,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/feeds/${feedId}/listeners`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -183,6 +198,7 @@ export class FeedsService {
      * listener_id: UUID of Event Listener that should be disassociated
      * @param feedId
      * @param listenerId
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -190,12 +206,14 @@ export class FeedsService {
     public static disassociateListenerApiV2FeedsFeedIdListenersListenerIdDelete(
         feedId: string,
         listenerId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/feeds/${feedId}/listeners/${listenerId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
