@@ -85,6 +85,14 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	}, [users, myProfile.email]);
 
 	const onShare = async () => {
+		await setUserRole(datasetId, email, role);
+		// setGroup({ label: "", id: "" });
+		setRole("viewer");
+		setShowSuccessAlert(true);
+		getRoles(datasetId);
+	};
+
+	const onShareOld = async () => {
 		setShowFailAlert(false);
 		setShowSuccessAlert(false);
 		await setUserRole(datasetId, email, role);
