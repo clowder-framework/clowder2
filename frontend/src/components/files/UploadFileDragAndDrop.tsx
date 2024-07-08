@@ -110,8 +110,34 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		setSelectedFiles(newArray);
 	};
 
+	const checkIfMetadataDefFieldsAreFilled = () => {
+		let all_filled = false;
+		const filled_values: boolean[] = [];
+		metadataDefinitionList.every((val) => {
+			val.fields.every((field) => {
+				if (
+					val.required_for_items.files &&
+					field.required &&
+					metadataRequestForms[val.name] !== undefined &&
+					metadataRequestForms[val.name].content[field.name] !== undefined &&
+					metadataRequestForms[val.name].content[field.name] !== ""
+				) {
+					filled_values.push(true);
+				} else {
+					filled_values.push(false);
+				}
+			});
+			if (filled_values.includes(false)) {
+				all_filled = false;
+			} else {
+				all_filled = true;
+			}
+			return all_filled;
+		});
+	};
+
 	const checkIfFieldsAreFilled = () => {
-		return metadataDefinitionList.every((val) => {
+		metadataDefinitionList.every((val) => {
 			return val.fields.every((field) => {
 				return val.required_for_items.files && field.required
 					? metadataRequestForms[val.name] !== undefined &&
