@@ -115,16 +115,16 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		const filled_values: boolean[] = [];
 		metadataDefinitionList.every((val) => {
 			val.fields.every((field) => {
-				if (
-					val.required_for_items.files &&
-					field.required &&
-					metadataRequestForms[val.name] !== undefined &&
-					metadataRequestForms[val.name].content[field.name] !== undefined &&
-					metadataRequestForms[val.name].content[field.name] !== ""
-				) {
-					filled_values.push(true);
-				} else {
-					filled_values.push(false);
+				if (val.required_for_items.files && field.required) {
+					if (
+						metadataRequestForms[val.name] !== undefined &&
+						metadataRequestForms[val.name].content[field.name] !== undefined &&
+						metadataRequestForms[val.name].content[field.name] !== ""
+					) {
+						filled_values.push(true);
+					} else {
+						filled_values.push(false);
+					}
 				}
 			});
 			if (filled_values.includes(false)) {
@@ -132,8 +132,8 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 			} else {
 				all_filled = true;
 			}
-			return all_filled;
 		});
+		return all_filled;
 	};
 
 	const checkIfFieldsAreFilled = () => {
@@ -181,6 +181,13 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	};
 
 	useEffect(() => {
+		const fields_filled: boolean =
+			checkIfMetadataDefFieldsAreFilled(metadataRequestForms);
+		if (fields_filled) {
+			console.log("fields were filled");
+		} else {
+			console.log("no they were not");
+		}
 		if (Object.keys(metadataRequestForms).length > 0) {
 			setAllFilled(checkIfFieldsAreFilled(metadataRequestForms));
 		} else {
@@ -246,9 +253,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 										<Button
 											variant="contained"
 											onClick={handleNext}
-											disabled={
-												!checkIfFieldsAreRequired() ? false : !allFilled
-											}
+											disabled={!checkIfMetadataDefFieldsAreFilled()}
 											sx={{ display: "block", marginLeft: "auto" }}
 										>
 											Next
