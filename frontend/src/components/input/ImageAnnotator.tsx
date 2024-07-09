@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { select, pointer } from "d3-selection";
-import { line, curveLinearClosed } from "d3-shape";
+import React, { useEffect, useState, useRef } from "react";
+import { select } from "d3-selection";
 import {
 	Modal,
 	Box,
@@ -13,25 +12,29 @@ import { V2 } from "../../openapi";
 
 interface ImageAnnotatorImageProps {
 	image: string | null;
-	points: Array<[number, number]>;
-	setPoints: React.Dispatch<React.SetStateAction<Array<[number, number]>>>;
+	setBoundingBox: React.Dispatch<
+		React.SetStateAction<[number, number, number, number] | null>
+	>;
 }
 
 interface ImageAnnotatorModalProps {
 	fileId: string;
 	open: boolean;
 	onClose: () => void;
-	saveAnnotation: (name: string, points: Array<[number, number]>) => void;
+	saveAnnotation: (
+		name: string,
+		boundingBox: [number, number, number, number] | null
+	) => void;
 }
 
 interface ImageAnnotatorProps {
 	fileId: string;
 	onChange: ({
 		name,
-		points,
+		boundingBox,
 	}: {
 		name: string;
-		points: Array<[number, number]>;
+		boundingBox: [number, number, number, number] | null;
 	}) => void;
 }
 
@@ -63,11 +66,15 @@ async function fetchImageData(fileId: string) {
 
 const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
 	image,
-	points,
-	setPoints,
+	setBoundingBox,
 }) => {
+	const [isDrawing, setIsDrawing] = useState(false);
+	const [startPoint, setStartPoint] = useState<[number, number] | null>(null);
+	const svgRef = useRef<SVGSVGElement | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
-		const svg = select("#svg-container")
+		const svg = select(containerRef.current)
 			.append("svg")
 			.attr("width", "100%")
 			.attr("height", "100%");
@@ -76,48 +83,71 @@ const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
 			.append("image")
 			.attr("xlink:href", image)
 			.attr("width", "100%")
-			.attr("height", "100%")
-			.on("click", (event) => {
-				const coords = pointer(event) as [number, number];
-				setPoints((prevPoints) => [...prevPoints, coords]);
-			});
+			.attr("height", "100%");
+
+		svgRef.current = svg.node();
 
 		return () => {
-			select("#svg-container").selectAll("svg").remove();
+			select(containerRef.current).selectAll("svg").remove();
 		};
-	}, [image, setPoints]);
+	}, [image]);
 
-	useEffect(() => {
-		// In case of reset, remove all circles and paths
-		if (points.length === 0) {
-			select("#svg-container").selectAll("circle").remove();
-			select("#svg-container").selectAll("path").remove();
-		}
+	const getMousePosition = (event: React.MouseEvent): [number, number] => {
+		const container = containerRef.current;
+		if (!container) return [0, 0];
+		const rect = container.getBoundingClientRect();
+		return [event.clientX - rect.left, event.clientY - rect.top];
+	};
 
-		const svg = select("#svg-container").select("svg");
+	const handleMouseDown = (event: React.MouseEvent) => {
+		event.preventDefault();
+		setIsDrawing(true);
+		setStartPoint(getMousePosition(event));
+	};
+
+	const handleMouseMove = (event: React.MouseEvent) => {
+		event.preventDefault();
+		if (!isDrawing || !startPoint) return;
+
+		const currentPoint = getMousePosition(event);
+		const svg = select(svgRef.current);
+
+		svg.selectAll("rect").remove();
 		svg
-			.selectAll("circle")
-			.data(points)
-			.join("circle")
-			.attr("cx", (d) => d[0])
-			.attr("cy", (d) => d[1])
-			.attr("r", 5)
-			.attr("fill", "red");
+			.append("rect")
+			.attr("x", Math.min(startPoint[0], currentPoint[0]))
+			.attr("y", Math.min(startPoint[1], currentPoint[1]))
+			.attr("width", Math.abs(currentPoint[0] - startPoint[0]))
+			.attr("height", Math.abs(currentPoint[1] - startPoint[1]))
+			.attr("fill", "none")
+			.attr("stroke", "red")
+			.attr("stroke-width", 2);
+	};
 
-		if (points.length > 1) {
-			svg
-				.selectAll("path")
-				.data([points])
-				.join("path")
-				.attr("d", line().curve(curveLinearClosed))
-				.attr("fill", "none")
-				.attr("stroke", "black")
-				.attr("stroke-width", 2)
-				.attr("stroke-dasharray", "5,5");
-		}
-	}, [points]);
+	const handleMouseUp = (event: React.MouseEvent) => {
+		event.preventDefault();
+		if (!isDrawing || !startPoint) return;
 
-	return <div id="svg-container" style={{ width: "100%", height: "70%" }} />;
+		setIsDrawing(false);
+		const endPoint = getMousePosition(event);
+		const x = Math.min(startPoint[0], endPoint[0]);
+		const y = Math.min(startPoint[1], endPoint[1]);
+		const width = Math.abs(endPoint[0] - startPoint[0]);
+		const height = Math.abs(endPoint[1] - startPoint[1]);
+
+		setBoundingBox([x, y, width, height]);
+	};
+
+	return (
+		<div
+			ref={containerRef}
+			style={{ width: "100%", height: "70%", position: "relative" }}
+			onMouseDown={handleMouseDown}
+			onMouseMove={handleMouseMove}
+			onMouseUp={handleMouseUp}
+			onMouseLeave={handleMouseUp} // Handle case where mouse leaves the container
+		/>
+	);
 };
 
 const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
@@ -126,7 +156,9 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 	onClose,
 	saveAnnotation,
 }) => {
-	const [points, setPoints] = useState<Array<[number, number]>>([]);
+	const [boundingBox, setBoundingBox] = useState<
+		[number, number, number, number] | null
+	>(null);
 	const [annotationName, setAnnotationName] = useState("");
 	const [isImage, setIsImage] = useState(true);
 	const [image, setImage] = useState<string | null>(null);
@@ -159,19 +191,17 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 	};
 
 	const handleSaveAnnotation = () => {
-		if (points.length > 2 && annotationName.trim() !== "") {
-			saveAnnotation(annotationName, points);
+		if (boundingBox && annotationName.trim() !== "") {
+			saveAnnotation(annotationName, boundingBox);
 			onClose();
 		} else {
-			alert(
-				"Please enter a name for the annotation and ensure it has more than two points."
-			);
+			alert("Please enter a name for the annotation and draw a bounding box.");
 		}
 	};
 
 	const handleReset = () => {
-		setPoints([]);
-		saveAnnotation(annotationName, []);
+		setBoundingBox(null);
+		saveAnnotation(annotationName, null);
 	};
 
 	return (
@@ -198,8 +228,7 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 					<>
 						<ImageAnnotatorImage
 							image={image}
-							points={points}
-							setPoints={setPoints}
+							setBoundingBox={setBoundingBox}
 						/>
 						<TextField
 							fullWidth
@@ -232,11 +261,14 @@ const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
 	const [open, setOpen] = useState(false);
 	const [annotation, setAnnotation] = useState<{
 		name: string;
-		points: Array<[number, number]>;
+		boundingBox: [number, number, number, number] | null;
 	} | null>(null);
 
-	const saveAnnotation = (name: string, points: Array<[number, number]>) => {
-		setAnnotation({ name, points });
+	const saveAnnotation = (
+		name: string,
+		boundingBox: [number, number, number, number] | null
+	) => {
+		setAnnotation({ name, boundingBox });
 	};
 
 	// Set annotation, this is the output of the image annotator
@@ -244,7 +276,7 @@ const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
 		if (annotation) {
 			onChange(annotation);
 		}
-	}, [annotation]);
+	}, [annotation, onChange]);
 
 	return (
 		<Box
@@ -256,13 +288,18 @@ const ImageAnnotator: React.FC<ImageAnnotatorProps> = ({
 				p: 2,
 			}}
 		>
-			{annotation && annotation.points.length !== 0 && (
+			{annotation && annotation.boundingBox && (
 				<Box sx={{ p: 1 }}>
 					<Typography sx={{ fontWeight: "bold" }} component="div">
 						Annotation:
 					</Typography>
 					<Typography>Name - {annotation.name}</Typography>
-					<Typography>Number of Points: {annotation.points.length}</Typography>
+					<Typography>
+						Bounding Box: x={annotation.boundingBox[0].toFixed(2)}, y=
+						{annotation.boundingBox[1].toFixed(2)}, width=
+						{annotation.boundingBox[2].toFixed(2)}, height=
+						{annotation.boundingBox[3].toFixed(2)}
+					</Typography>
 				</Box>
 			)}
 			<Button variant="contained" onClick={() => setOpen(true)}>
