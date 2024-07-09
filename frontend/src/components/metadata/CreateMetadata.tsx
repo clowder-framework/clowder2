@@ -4,6 +4,7 @@ import { metadataConfig } from "../../metadata.config";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchMetadataDefinitions } from "../../actions/metadata";
+import metadata from "../../reducers/metadata";
 
 type MetadataType = {
 	setMetadata: any;
@@ -15,7 +16,7 @@ Uses only registered metadata definition to populate the form
  */
 export const CreateMetadata = (props: MetadataType) => {
 	const { setMetadata, sourceItem } = props;
-
+	console.log("We are creating metadata here");
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (
 		name: string | null,
@@ -32,6 +33,25 @@ export const CreateMetadata = (props: MetadataType) => {
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
+
+	const checkIfRequiredFieldsAreFilled = () => {
+		const requiredFilled = false;
+		const fieldValues: Array<boolean> = [];
+		metadataDefinitionList.forEach((metadata) => {
+			if (metadata.required_for_items.files && sourceItem === "files") {
+				metadata.map((field, idxx) => {
+					console.log("field", field);
+				});
+			} else if (
+				metadata.required_for_items.datasets &&
+				sourceItem === "datasets"
+			) {
+				metadata.map((field, idxx) => {
+					console.log("field", field);
+				});
+			}
+		});
+	};
 
 	return (
 		<>
@@ -56,6 +76,12 @@ export const CreateMetadata = (props: MetadataType) => {
 								{metadata.description}
 							</Typography>
 							{metadata.fields.map((field, idxx) => {
+								console.log(
+									"field stuff",
+									field.required,
+									field,
+									field.config.options
+								);
 								return React.cloneElement(
 									// if nothing match fall back to default widget
 									metadataConfig[field.widgetType ?? "NA"] ??
