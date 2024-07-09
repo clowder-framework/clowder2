@@ -17,7 +17,7 @@ import {
 	fetchMetadataDefinitions,
 	postFileMetadata,
 } from "../../actions/metadata";
-import { MetadataIn } from "../../openapi/v2";
+import { MetadataIn, MetadataDefinitionIn } from "../../openapi/v2";
 import { useNavigate } from "react-router-dom";
 import {
 	createFiles as createFilesAction,
@@ -26,6 +26,7 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 import FileUploadDrop from "./FileUploadDrop";
+import { bool } from "prop-types";
 
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
@@ -110,34 +111,8 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		setSelectedFiles(newArray);
 	};
 
-	const checkIfMetadataDefFieldsAreFilled = () => {
-		let all_filled = false;
-		const filled_values: boolean[] = [];
-		metadataDefinitionList.every((val) => {
-			val.fields.every((field) => {
-				if (val.required_for_items.files && field.required) {
-					if (
-						metadataRequestForms[val.name] !== undefined &&
-						metadataRequestForms[val.name].content[field.name] !== undefined &&
-						metadataRequestForms[val.name].content[field.name] !== ""
-					) {
-						filled_values.push(true);
-					} else {
-						filled_values.push(false);
-					}
-				}
-			});
-			if (filled_values.includes(false)) {
-				all_filled = false;
-			} else {
-				all_filled = true;
-			}
-		});
-		return all_filled;
-	};
-
 	const checkIfFieldsAreFilled = () => {
-		metadataDefinitionList.every((val) => {
+		return metadataDefinitionList.every((val) => {
 			return val.fields.every((field) => {
 				return val.required_for_items.files && field.required
 					? metadataRequestForms[val.name] !== undefined &&
@@ -147,6 +122,28 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 					: true;
 			});
 		});
+	};
+
+	const checkIfRequiredFieldsAreFilled = () => {
+		let requiredFilled = false;
+		const fieldValues: Array<boolean> = [];
+		metadataDefinitionList.forEach((val) => {
+			val.fields.forEach((field) => {
+				if (val.required_for_items.files && field.required) {
+					if (
+						metadataRequestForms[val.name] !== undefined &&
+						metadataRequestForms[val.name].content[field.name] !== undefined &&
+						metadataRequestForms[val.name].content[field.name] !== ""
+					) {
+						fieldValues.push(true);
+					} else {
+						fieldValues.push(false);
+					}
+				}
+			});
+		});
+		requiredFilled = !fieldValues.includes(false);
+		return requiredFilled;
 	};
 
 	const checkIfMetadataNeeded = () => {
@@ -181,15 +178,8 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	};
 
 	useEffect(() => {
-		const fields_filled: boolean =
-			checkIfMetadataDefFieldsAreFilled(metadataRequestForms);
-		if (fields_filled) {
-			console.log("fields were filled");
-		} else {
-			console.log("no they were not");
-		}
 		if (Object.keys(metadataRequestForms).length > 0) {
-			setAllFilled(checkIfFieldsAreFilled(metadataRequestForms));
+			setAllFilled(checkIfRequiredFieldsAreFilled(metadataRequestForms));
 		} else {
 			setAllFilled(false);
 		}
@@ -253,7 +243,9 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 										<Button
 											variant="contained"
 											onClick={handleNext}
-											disabled={!checkIfMetadataDefFieldsAreFilled()}
+											disabled={
+												!checkIfFieldsAreRequired() ? false : !allFilled
+											}
 											sx={{ display: "block", marginLeft: "auto" }}
 										>
 											Next
