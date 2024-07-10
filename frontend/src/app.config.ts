@@ -9,6 +9,7 @@ interface Config {
 	hostname: string;
 	apikey: string;
 	GHIssueBaseURL: string;
+	jupyterHubURL: string;
 	KeycloakBaseURL: string;
 	KeycloakLogin: string;
 	KeycloakLogout: string;
@@ -65,6 +66,10 @@ config["KeycloakRegister"] = `${config.KeycloakBaseURL}/register`;
 // elasticsearch
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 config["publicSearchEndpoint"] = `${hostname}/api/v2/public_elasticsearch`;
+
+// jupterhub
+const localJupyterhubURL: string = `${config.hostname}/jupyterhub`;
+config["jupyterHubURL"] = process.env.JUPYTERHUB_URL || localJupyterhubURL;
 
 // refresh token time interval
 config["refreshTokenInterval"] = 1000 * 60; // 1 minute

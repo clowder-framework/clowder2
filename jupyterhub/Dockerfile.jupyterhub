@@ -1,0 +1,14 @@
+ARG JUPYTERHUB_VERSION
+FROM quay.io/jupyterhub/jupyterhub:$JUPYTERHUB_VERSION
+
+# Install dockerspawner,
+# hadolint ignore=DL3013
+RUN python3 -m pip install --no-cache-dir \
+    dockerspawner
+
+# Install custom authenticator
+WORKDIR /tmp/authenticator/
+COPY authenticator /tmp/authenticator/
+RUN pip3 install /tmp/authenticator
+
+CMD ["jupyterhub", "-f", "/srv/jupyterhub/jupyterhub_config.py"]

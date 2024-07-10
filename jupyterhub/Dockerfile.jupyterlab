@@ -1,0 +1,23 @@
+# Base Image
+FROM quay.io/jupyter/base-notebook:latest
+
+# Install additional packages
+USER root
+RUN apt-get -qq update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    zip unzip \
+    nano \
+    vim-tiny \
+    lsof && \
+  rm -rf /var/lib/apt/lists/*
+
+USER $NB_USER
+
+COPY Clowder_APIs.ipynb /home/jovyan/work/
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    requests \
+    pyclowder \
+    pandas
