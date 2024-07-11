@@ -1,5 +1,9 @@
 import { V2 } from "../openapi";
-import { handleErrors } from "./common";
+import {
+	handleErrors,
+	handleErrorsAuthorization,
+	resetFailedReason,
+} from "./common";
 
 export const RECEIVE_PUBLIC_DATASET_METADATA =
 	"RECEIVE_PUBLIC_DATASET_METADATA";
@@ -192,3 +196,36 @@ export function fetchPublicFoldersFilesInDataset(
 			});
 	};
 }
+
+export const GET_PUBLIC_FREEZE_DATASETS = "GET_PUBLIC_FREEZE_DATASETS";
+
+export function getPublicFreezeDatasets(datasetId, skip, limit) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.getFreezeDatasetsApiV2PublicDatasetsDatasetIdFreezeGet(
+			datasetId,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_PUBLIC_FREEZE_DATASETS,
+					publicFrozenDatasets: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(
+						reason,
+						getPublicFreezeDatasets(datasetId, skip, limit)
+					)
+				);
+			});
+	};
+}
+
+export const INCREMENT_PUBLIC_DATASET_DOWNLOADS =
+	"INCREMENT_PUBLIC_DATASET_DOWNLOADS";

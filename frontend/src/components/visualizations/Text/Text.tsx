@@ -4,8 +4,8 @@ import { readTextFromFile } from "../../../utils/common";
 
 import {
 	downloadVisData,
-	publicFileDownloaded,
 	fileDownloaded,
+	publicFileDownloaded,
 } from "../../../utils/visualization";
 import { downloadPublicVisData } from "../../../actions/public_visualization";
 
@@ -30,13 +30,9 @@ export default function Text(props: TextProps) {
 					}
 				} else {
 					if (publicView) {
-						console.log("public file download blob");
 						blob = await publicFileDownloaded(fileId);
-						console.log(blob);
 					} else {
-						console.log("downloading blob here");
 						blob = await fileDownloaded(fileId);
-						console.log(blob);
 					}
 				}
 				const file = new File([blob], "text.tmp");

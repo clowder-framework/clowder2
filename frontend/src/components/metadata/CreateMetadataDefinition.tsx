@@ -36,18 +36,12 @@ interface SupportedInputs {
 
 type CreateMetadataDefinitionProps = {
 	setCreateMetadataDefinitionOpen: any;
-	setSnackBarOpen: any;
-	setSnackBarMessage: any;
 };
 
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const {
-		setCreateMetadataDefinitionOpen,
-		setSnackBarOpen,
-		setSnackBarMessage,
-	} = props;
+	const { setCreateMetadataDefinitionOpen } = props;
 
 	const dispatch = useDispatch();
 	const history = useNavigate();
@@ -334,9 +328,6 @@ export const CreateMetadataDefinition = (
 		});
 
 		setContextMap([{ term: "", iri: "" }]);
-		// TODO add snackbar here
-		setSnackBarMessage("Successfully added metadata definition");
-		setSnackBarOpen(true);
 	};
 
 	const handleNext = () => {

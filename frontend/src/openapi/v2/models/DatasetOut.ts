@@ -21,13 +21,17 @@ export type DatasetOut = {
     name?: string;
     description?: string;
     status?: string;
-    id?: string;
     creator: UserOut;
     created?: string;
     modified?: string;
     user_views?: number;
     downloads?: number;
     thumbnail_id?: string;
+    origin_id?: string;
     standard_license?: boolean;
     license_id?: string;
+    id?: string;
+    frozen?: boolean;
+    frozen_version_num?: number;
+    deleted?: boolean;
 }

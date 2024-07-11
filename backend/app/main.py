@@ -5,12 +5,12 @@ from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.config import ConfigEntryDB
-from app.models.datasets import DatasetDB, DatasetDBViewList
+from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetFreezeDB
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
-from app.models.files import FileDB, FileDBViewList, FileVersionDB
+from app.models.files import FileDB, FileDBViewList, FileFreezeDB, FileVersionDB
 from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import FolderDB, FolderDBViewList
+from app.models.folders import FolderDB, FolderDBViewList, FolderFreezeDB
 from app.models.groups import GroupDB
 from app.models.licenses import LicenseDB
 from app.models.listeners import (
@@ -20,12 +20,25 @@ from app.models.listeners import (
     EventListenerJobUpdateViewList,
     EventListenerJobViewList,
 )
-from app.models.metadata import MetadataDB, MetadataDefinitionDB
-from app.models.thumbnails import ThumbnailDB
+from app.models.metadata import (
+    MetadataDB,
+    MetadataDBViewList,
+    MetadataDefinitionDB,
+    MetadataFreezeDB,
+)
+from app.models.thumbnails import ThumbnailDB, ThumbnailDBViewList, ThumbnailFreezeDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
-from app.models.visualization_config import VisualizationConfigDB
-from app.models.visualization_data import VisualizationDataDB
+from app.models.visualization_config import (
+    VisualizationConfigDB,
+    VisualizationConfigDBViewList,
+    VisualizationConfigFreezeDB,
+)
+from app.models.visualization_data import (
+    VisualizationDataDB,
+    VisualizationDataDBViewList,
+    VisualizationDataFreezeDB,
+)
 from app.routers import (
     authentication,
     authorization,
@@ -47,6 +60,7 @@ from app.routers import (
     public_files,
     public_folders,
     public_metadata,
+    public_thumbnails,
     public_visualization,
     status,
     thumbnails,
@@ -232,6 +246,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_thumbnails.router,
+    prefix="/public_thumbnails",
+    tags=["public_thumbnails"],
+)
+api_router.include_router(
     licenses.router,
     prefix="/licenses",
     tags=["licenses"],
@@ -259,15 +278,21 @@ async def startup_beanie():
         document_models=[
             ConfigEntryDB,
             DatasetDB,
+            DatasetFreezeDB,
             DatasetDBViewList,
             AuthorizationDB,
             MetadataDB,
+            MetadataFreezeDB,
+            MetadataDBViewList,
             MetadataDefinitionDB,
             FolderDB,
+            FolderFreezeDB,
             FolderDBViewList,
             FileDB,
+            FileFreezeDB,
             FileVersionDB,
             FileDBViewList,
+            FolderFileViewList,
             FeedDB,
             EventListenerDB,
             EventListenerJobDB,
@@ -281,9 +306,14 @@ async def startup_beanie():
             TokenDB,
             ErrorDB,
             VisualizationConfigDB,
+            VisualizationConfigFreezeDB,
+            VisualizationConfigDBViewList,
             VisualizationDataDB,
+            VisualizationDataFreezeDB,
+            VisualizationDataDBViewList,
             ThumbnailDB,
-            FolderFileViewList,
+            ThumbnailFreezeDB,
+            ThumbnailDBViewList,
             LicenseDB,
         ],
         recreate_views=True,

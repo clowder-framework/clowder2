@@ -183,6 +183,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 										) : (
 											<Container>
 												<Form
+													widgets={widgets}
+													validator={validator}
 													schema={{ properties: {} }}
 													uiSchema={uiSchema}
 													onSubmit={({ formData }) => {
@@ -222,7 +224,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 								</Step>
 								{/*step 2 results*/}
 								<Step key="results">
-									<StepLabel>Extracted Results</StepLabel>
+									{/*<StepLabel>Extracted Results</StepLabel>*/}
 									<StepContent>
 										{/*buttons*/}
 										<Box sx={{ mb: 2 }}>

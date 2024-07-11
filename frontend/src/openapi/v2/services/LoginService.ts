@@ -73,13 +73,22 @@ export class LoginService {
     /**
      * Get Admin Mode
      * Get Admin mode from User Object.
+     * @param enableAdmin
      * @returns boolean Successful Response
      * @throws ApiError
      */
-    public static getAdminModeApiV2UsersMeAdminModeGet(): CancelablePromise<boolean> {
+    public static getAdminModeApiV2UsersMeAdminModeGet(
+        enableAdmin: boolean = false,
+    ): CancelablePromise<boolean> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/me/admin_mode`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
