@@ -5,7 +5,7 @@ import {
 	Grid,
 	Link,
 	Pagination,
-	Stack,
+	Snackbar,
 	Tab,
 	Tabs,
 	Typography,
@@ -39,6 +39,8 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import { FreezeVersionChip } from "../versions/FeezeVersionChip";
+import { PublicDatasetVersions } from "./versions/PublicDatasetVersions";
 import { fetchPublicStandardLicenseUrl } from "../../utils/licenses";
 
 export const PublicDataset = (): JSX.Element => {
@@ -78,7 +80,7 @@ export const PublicDataset = (): JSX.Element => {
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
-	const about = useSelector(
+	const dataset = useSelector(
 		(state: RootState) => state.publicDataset.publicAbout
 	);
 	const publicFolderPath = useSelector(
@@ -102,6 +104,10 @@ export const PublicDataset = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
+	// Snackbar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
+
 	const pageMetadata = useSelector(
 		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata
 	);
@@ -120,19 +126,26 @@ export const PublicDataset = (): JSX.Element => {
 		listPublicDatasetAbout(datasetId);
 		getPublicFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams]);
+	}, [datasetId, searchParams]);
 
 	useEffect(() => {
-		if (about && about.license_id !== undefined)
-			fetchStandardLicenseUrlData(about.license_id);
-	}, [about]);
+		if (dataset && dataset.license_id !== undefined)
+			fetchStandardLicenseUrlData(dataset.license_id);
+
+		if (dataset.frozen && dataset.id !== dataset.origin_id) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Viewing dataset version ${dataset.frozen_version_num}.`
+			);
+		}
+	}, [dataset]);
 
 	// for breadcrumb
 	useEffect(() => {
 		// for breadcrumb
 		const tmpPaths = [
 			{
-				name: about["name"],
+				name: dataset["name"],
 				url: `/public_datasets/${datasetId}`,
 			},
 		];
@@ -140,8 +153,15 @@ export const PublicDataset = (): JSX.Element => {
 		if (publicFolderPath != null) {
 			for (const folderBread of publicFolderPath) {
 				tmpPaths.push({
-					name: folderBread["folder_name"],
-					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					name:
+						folderBread && folderBread["folder_name"]
+							? folderBread["folder_name"]
+							: "",
+					url: `/public_datasets/${datasetId}?folder=${
+						folderBread && folderBread["folder_id"]
+							? folderBread["folder_id"]
+							: ""
+					}`,
 				});
 			}
 		} else {
@@ -149,7 +169,7 @@ export const PublicDataset = (): JSX.Element => {
 		}
 
 		setPaths(tmpPaths);
-	}, [about, publicFolderPath]);
+	}, [dataset, publicFolderPath]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -168,27 +188,36 @@ export const PublicDataset = (): JSX.Element => {
 		<PublicLayout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<Stack>
-						<Box
-							sx={{
-								display: "inline-flex",
-								justifyContent: "space-between",
-								alignItems: "baseline",
-							}}
-						>
-							<Typography variant="h3" paragraph>
-								{about["name"]}
-							</Typography>
-						</Box>
-						<Box>
-							<Typography variant="body1" paragraph>
-								{about["description"]}
-							</Typography>
-						</Box>
-					</Stack>
+					<Grid container spacing={2} alignItems="flex-start">
+						<Grid item>
+							<FreezeVersionChip
+								frozenVersionNum={dataset.frozen_version_num}
+								frozen={dataset.frozen}
+							/>
+						</Grid>
+						<Grid item xs>
+							<Box>
+								<Typography variant="h5" paragraph sx={{ marginBottom: 0 }}>
+									{dataset["name"]}
+								</Typography>
+								<Typography variant="body1" paragraph>
+									{dataset["description"]}
+								</Typography>
+							</Box>
+						</Grid>
+					</Grid>
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -286,23 +315,24 @@ export const PublicDataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
+					<PublicDatasetVersions currDataset={dataset} />
 					<Typography variant="h5" gutterBottom>
 						License
 					</Typography>
-					{about.standard_license && about.license_id !== undefined ? (
+					{dataset.standard_license && dataset.license_id !== undefined ? (
 						<Typography>
 							<Link href={standardLicenseUrl} target="_blank">
 								<img
 									className="logo"
-									src={`public/${about.license_id}.png`}
-									alt={about.license_id}
+									src={`public/${dataset.license_id}.png`}
+									alt={dataset.license_id}
 								/>
 							</Link>
 						</Typography>
 					) : (
 						<></>
 					)}
-					{!about.standard_license &&
+					{!dataset.standard_license &&
 					license !== undefined &&
 					license.name !== undefined ? (
 						<div>
@@ -315,7 +345,7 @@ export const PublicDataset = (): JSX.Element => {
 					) : (
 						<></>
 					)}
-					<DatasetDetails details={about} />
+					<DatasetDetails details={dataset} />
 				</Grid>
 			</Grid>
 		</PublicLayout>

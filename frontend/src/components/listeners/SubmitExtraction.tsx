@@ -183,6 +183,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 										) : (
 											<Container>
 												<Form
+													widgets={widgets}
+													validator={validator}
 													schema={{ properties: {} }}
 													uiSchema={uiSchema}
 													onSubmit={({ formData }) => {

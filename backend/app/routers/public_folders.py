@@ -1,4 +1,4 @@
-from app.models.folders import FolderDB
+from app.models.folders import FolderDBViewList
 from beanie import PydanticObjectId
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException
@@ -10,14 +10,16 @@ router = APIRouter()
 async def download_folder(
     folder_id: str,
 ):
-    folder = await FolderDB.get(PydanticObjectId(folder_id))
+    folder = await FolderDBViewList.find_one(
+        FolderDBViewList.id == PydanticObjectId(folder_id)
+    )
     if folder is not None:
         path = []
         current_folder_id = folder_id
         # TODO switch to $graphLookup
         while (
-            current_folder := await FolderDB.find_one(
-                FolderDB.id == PydanticObjectId(current_folder_id)
+            current_folder := await FolderDBViewList.find_one(
+                FolderDBViewList.id == PydanticObjectId(current_folder_id)
             )
         ) is not None:
             folder_info = {

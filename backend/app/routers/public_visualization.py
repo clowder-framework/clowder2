@@ -4,10 +4,14 @@ from typing import List, Optional
 from app import dependencies
 from app.config import settings
 from app.models.visualization_config import (
-    VisualizationConfigDB,
+    VisualizationConfigDBViewList,
     VisualizationConfigOut,
 )
-from app.models.visualization_data import VisualizationDataDB, VisualizationDataOut
+from app.models.visualization_data import (
+    VisualizationDataDB,
+    VisualizationDataDBViewList,
+    VisualizationDataOut,
+)
 from beanie import PydanticObjectId
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
@@ -38,11 +42,16 @@ async def download_visualization(
 ):
     # If visualization exists in MongoDB, download from Minio
     if (
-        visualization := await VisualizationDataDB.get(
-            PydanticObjectId(visualization_id)
+        visualization := await VisualizationDataDBViewList.find_one(
+            VisualizationDataDBViewList.id == PydanticObjectId(visualization_id)
         )
     ) is not None:
-        content = fs.get_object(settings.MINIO_BUCKET_NAME, visualization_id)
+        bytes_visualization_id = (
+            str(visualization.origin_id)
+            if visualization.origin_id
+            else str(visualization.id)
+        )
+        content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_visualization_id)
 
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
@@ -63,7 +72,16 @@ async def download_visualization_url(
     external_fs: Minio = Depends(dependencies.get_external_fs),
 ):
     # If visualization exists in MongoDB, download from Minio
-    if (await VisualizationDataDB.get(PydanticObjectId(visualization_id))) is not None:
+    if (
+        visualization := await VisualizationDataDBViewList.find_one(
+            VisualizationDataDBViewList.id == PydanticObjectId(visualization_id)
+        )
+    ) is not None:
+        bytes_visualization_id = (
+            str(visualization.origin_id)
+            if visualization.origin_id
+            else str(visualization.id)
+        )
         if expires_in_seconds is None:
             expires = timedelta(seconds=settings.MINIO_EXPIRES)
         else:
@@ -72,7 +90,7 @@ async def download_visualization_url(
         # Generate a signed URL with expiration time
         presigned_url = external_fs.presigned_get_object(
             bucket_name=settings.MINIO_BUCKET_NAME,
-            object_name=visualization_id,
+            object_name=bytes_visualization_id,
             expires=expires,
         )
 
@@ -88,13 +106,16 @@ async def get_resource_visconfig(
     resource_id: PydanticObjectId,
 ):
     query = [
-        VisualizationConfigDB.resource.resource_id == PydanticObjectId(resource_id)
+        VisualizationConfigDBViewList.resource.resource_id
+        == PydanticObjectId(resource_id)
     ]
     visconfigs = []
-    async for vzconfig in VisualizationConfigDB.find(*query):
+    async for vzconfig in VisualizationConfigDBViewList.find(*query):
         config_visdata = []
-        visdata_query = [VisualizationDataDB.visualization_config_id == vzconfig.id]
-        async for vis_data in VisualizationDataDB.find(*visdata_query):
+        visdata_query = [
+            VisualizationDataDBViewList.visualization_config_id == vzconfig.id
+        ]
+        async for vis_data in VisualizationDataDBViewList.find(*visdata_query):
             config_visdata.append(vis_data.dict())
         visconfig_out = VisualizationConfigOut(**vzconfig.dict())
         visconfig_out.visualization_data = config_visdata
@@ -108,11 +129,13 @@ async def get_visconfig(
     config_id: PydanticObjectId,
 ):
     if (
-        vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
+        vis_config := await VisualizationConfigDBViewList.find_one(
+            VisualizationConfigDBViewList.id == PydanticObjectId(config_id)
+        )
     ) is not None:
         config_visdata = []
-        query = [VisualizationDataDB.visualization_config_id == config_id]
-        async for vis_data in VisualizationDataDB.find(*query):
+        query = [VisualizationDataDBViewList.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDBViewList.find(*query):
             config_visdata.append(vis_data.dict())
         # TODO
         vis_config_out = VisualizationConfigOut(**vis_config.dict())
@@ -127,9 +150,13 @@ async def get_visdata_from_visconfig(
     config_id: PydanticObjectId,
 ):
     config_visdata = []
-    if (await VisualizationConfigDB.get(PydanticObjectId(config_id))) is not None:
-        query = [VisualizationDataDB.visualization_config_id == config_id]
-        async for vis_data in VisualizationDataDB.find(*query):
+    if (
+        await VisualizationConfigDBViewList.find_one(
+            VisualizationConfigDBViewList.id == PydanticObjectId(config_id)
+        )
+    ) is not None:
+        query = [VisualizationDataDBViewList.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDBViewList.find(*query):
             config_visdata.append(vis_data)
         return config_visdata
     else:

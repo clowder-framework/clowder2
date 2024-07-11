@@ -4,6 +4,7 @@ import {
 	RECEIVE_PUBLIC_PREVIEWS,
 	RECEIVE_PUBLIC_VERSIONS,
 	CHANGE_PUBLIC_SELECTED_VERSION,
+	INCREMENT_PUBLIC_FILE_DOWNLOADS,
 } from "../actions/public_file";
 import { DataAction } from "../types/action";
 import { FileOut as FileSummary } from "../openapi/v2";
@@ -24,6 +25,13 @@ const publicFile = (state = defaultState, action: DataAction) => {
 		case RECEIVE_PUBLIC_FILE_SUMMARY:
 			return Object.assign({}, state, {
 				publicFileSummary: action.publicFileSummary,
+			});
+		case INCREMENT_PUBLIC_FILE_DOWNLOADS:
+			return Object.assign({}, state, {
+				publicFileSummary: {
+					...state.publicFileSummary,
+					downloads: state.publicFileSummary.downloads + 1,
+				},
 			});
 		case RECEIVE_PUBLIC_PREVIEWS:
 			return Object.assign({}, state, {

@@ -203,6 +203,7 @@ async def search_listeners(
     process: Optional[str] = None,
     dataset_id: Optional[str] = None,
     admin=Depends(get_admin),
+    enable_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
 ):
     """Search all Event Listeners in the db based on text.
@@ -350,6 +351,7 @@ async def get_listeners(
     dataset_id: Optional[str] = None,
     all: Optional[bool] = False,
     admin=Depends(get_admin),
+    enable_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
 ):
     """Get a list of all Event Listeners in the db.

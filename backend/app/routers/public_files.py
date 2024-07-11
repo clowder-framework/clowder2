@@ -2,16 +2,17 @@ from typing import List, Optional
 
 from app import dependencies
 from app.config import settings
-from app.models.datasets import DatasetDB, DatasetStatus
-from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB
+from app.db.file.download import _increment_file_downloads
+from app.models.datasets import DatasetDBViewList, DatasetStatus
+from app.models.files import FileDBViewList, FileOut, FileVersion, FileVersionDB
 from app.models.metadata import (
-    MetadataDB,
+    MetadataDBViewList,
     MetadataDefinitionDB,
     MetadataDefinitionOut,
     MetadataOut,
 )
 from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
+from beanie.odm.operators.find.logical import Or
 from bson import ObjectId
 from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import StreamingResponse
@@ -26,12 +27,18 @@ security = HTTPBearer()
 async def get_file_summary(
     file_id: str,
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file.views += 1
         # await file.replace()
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 return file.dict()
@@ -44,14 +51,23 @@ async def get_file_version_details(
     file_id: str,
     version_num: Optional[int] = 0,
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         # TODO: Incrementing too often (3x per page view)
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 file_vers = await FileVersionDB.find_one(
-                    FileVersionDB.file_id == PydanticObjectId(file_id),
+                    Or(
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == version_num,
                 )
                 file_vers_dict = file_vers.dict()
@@ -70,10 +86,12 @@ async def get_file_versions(
     skip: int = 0,
     limit: int = 20,
 ):
-    file = await FileDB.get(PydanticObjectId(file_id))
+    file = await FileDBViewList.find_one(FileDBViewList.id == PydanticObjectId(file_id))
     if file is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 mongo_versions = []
@@ -98,22 +116,36 @@ async def download_file(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
+        # find the bytes id
+        # if it's working draft file_id == origin_id
+        # if it's published origin_id points to the raw bytes
+        bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
+
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 if version is not None:
                     # Version is specified, so get the minio ID from versions table if possible
                     file_vers = await FileVersionDB.find_one(
-                        FileVersionDB.file_id == PydanticObjectId(file_id),
+                        Or(
+                            FileVersionDB.file_id == PydanticObjectId(file_id),
+                            FileVersionDB.file_id == file.origin_id,
+                        ),
                         FileVersionDB.version_num == version,
                     )
                     if file_vers is not None:
                         vers = FileVersion(**file_vers.dict())
                         content = fs.get_object(
                             settings.MINIO_BUCKET_NAME,
-                            file_id,
+                            bytes_file_id,
                             version_id=vers.version_id,
                         )
                     else:
@@ -123,7 +155,7 @@ async def download_file(
                         )
                 else:
                     # If no version specified, get latest version directly
-                    content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                    content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
 
                 # Get content type & open file stream
                 response = StreamingResponse(
@@ -134,7 +166,8 @@ async def download_file(
                 )
                 if increment:
                     # Increment download count
-                    await file.update(Inc({FileDB.downloads: 1}))
+                    await _increment_file_downloads(file_id)
+
                 return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -146,9 +179,15 @@ async def download_file_thumbnail(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 if file.thumbnail_id is not None:
@@ -184,19 +223,30 @@ async def get_file_metadata(
     listener_version: Optional[float] = Form(None),
 ):
     """Get file metadata."""
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
-                query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
+                query = [
+                    MetadataDBViewList.resource.resource_id == PydanticObjectId(file_id)
+                ]
 
                 # Validate specified version, or use latest by default
                 if not all_versions:
                     if version is not None:
                         if (
                             await FileVersionDB.find_one(
-                                FileVersionDB.file_id == PydanticObjectId(file_id),
+                                Or(
+                                    FileVersionDB.file_id == PydanticObjectId(file_id),
+                                    FileVersionDB.file_id == file.origin_id,
+                                ),
                                 FileVersionDB.version_num == version,
                             )
                         ) is None:
@@ -207,19 +257,23 @@ async def get_file_metadata(
                         target_version = version
                     else:
                         target_version = file.version_num
-                    query.append(MetadataDB.resource.version == target_version)
+                    query.append(MetadataDBViewList.resource.version == target_version)
 
                 if definition is not None:
                     # TODO: Check if definition exists in database and raise error if not
-                    query.append(MetadataDB.definition == definition)
+                    query.append(MetadataDBViewList.definition == definition)
 
                 if listener_name is not None:
-                    query.append(MetadataDB.agent.extractor.name == listener_name)
+                    query.append(
+                        MetadataDBViewList.agent.extractor.name == listener_name
+                    )
                 if listener_version is not None:
-                    query.append(MetadataDB.agent.extractor.version == listener_version)
+                    query.append(
+                        MetadataDBViewList.agent.extractor.version == listener_version
+                    )
 
                 metadata = []
-                async for md in MetadataDB.find(*query):
+                async for md in MetadataDBViewList.find(*query):
                     if md.definition is not None:
                         if (
                             md_def := await MetadataDefinitionDB.find_one(
