@@ -22,6 +22,7 @@ import { RootState } from "../types/data";
 import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -39,6 +40,8 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
+
+import config from "../app.config";
 
 const drawerWidth = 240;
 
@@ -419,6 +422,22 @@ export default function PersistentDrawerLeft(props) {
 								<BuildIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Extractors"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				{/*TODO: Need to make link dynamic */}
+				<List>
+					<ListItem key={"jupyter"} disablePadding>
+						<ListItemButton
+							component={RouterLink}
+							to={config.jupyterHubURL}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<ListItemIcon>
+								<MenuBookIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Jupyter Notebook"} />
 						</ListItemButton>
 					</ListItem>
 				</List>

@@ -36,7 +36,9 @@ There is a few other documentation links available on the [website](https://clow
 ## Installation
 
 The easiest way of running Clowder v2 is checking out the [code](https://github.com/clowder-framework/clowder2)
-and running `docker compose up` in the main directory.
+and running `docker compose up` in the main directory. If you would like to run Clowder with JupyterHub,
+you can use our script `docker-prod.sh` to start the services. Run `./docker-prod.sh prod up` to start the services
+and `./docker-prod.sh prod down` to stop them.
 
 Helm charts are available for running Clowder v2 on Kubernetes. See the [helm](https://github.com/clowder-framework/clowder2/tree/main/deployments/kubernetes/charts) directory for more information.
 
