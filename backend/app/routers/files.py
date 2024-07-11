@@ -1,7 +1,7 @@
 import io
 import time
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from app import dependencies
 from app.config import settings
