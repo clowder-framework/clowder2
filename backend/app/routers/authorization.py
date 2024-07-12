@@ -21,7 +21,6 @@ from app.models.datasets import (
     GroupAndRole,
     UserAndRole,
 )
-from app.models.files import FileDB, FileOut
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode

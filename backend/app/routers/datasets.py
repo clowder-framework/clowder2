@@ -8,6 +8,7 @@ import zipfile
 from collections.abc import Iterable, Mapping
 from typing import List, Optional
 
+import aiofiles
 from app import dependencies
 from app.config import settings
 from app.db.dataset.download import _increment_data_downloads
@@ -1164,6 +1165,7 @@ async def create_dataset_from_zip(
     return dataset.dict()
 
 
+# Modify the following function to create a separate thread to handle this function
 @router.get("/{dataset_id}/download")
 async def download_dataset(
     dataset_id: str,
@@ -1191,13 +1193,13 @@ async def download_dataset(
         with open(manifest_path, "w") as f:
             pass  # Create empty file so no errors later if the dataset is empty
 
-        with open(bagit_path, "w") as f:
-            f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
-            f.write("Bagging-Date: " + str(datetime.datetime.now()) + "\n")
+        async with aiofiles.open(bagit_path, "w") as f:
+            await f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
+            await f.write("Bagging-Date: " + str(datetime.datetime.now()) + "\n")
 
-        with open(bag_info_path, "w") as f:
-            f.write("BagIt-Version: 0.97" + "\n")
-            f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
+        async with aiofiles.open(bag_info_path, "w") as f:
+            await f.write("BagIt-Version: 0.97" + "\n")
+            await f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
         # Write dataset metadata if found
         metadata = await MetadataDB.find(
@@ -1208,8 +1210,8 @@ async def download_dataset(
                 current_temp_dir, "_dataset_metadata.json"
             )
             metadata_content = json_util.dumps(metadata)
-            with open(datasetmetadata_path, "w") as f:
-                f.write(metadata_content)
+            async with aiofiles.open(datasetmetadata_path, "w") as f:
+                await f.write(metadata_content)
             crate.add_file(
                 datasetmetadata_path,
                 dest_path="metadata/_dataset_metadata.json",
@@ -1238,10 +1240,10 @@ async def download_dataset(
 
             content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
             file_md5_hash = hashlib.md5(content.data).hexdigest()
-            with open(current_file_path, "wb") as f1:
-                f1.write(content.data)
-            with open(manifest_path, "a") as mpf:
-                mpf.write(file_md5_hash + " " + file_name + "\n")
+            async with aiofiles.open(current_file_path, "wb") as f1:
+                await f1.write(content.data)
+            async with aiofiles.open(manifest_path, "a") as mpf:
+                await mpf.write(file_md5_hash + " " + file_name + "\n")
             crate.add_file(
                 current_file_path,
                 dest_path="data/" + file_name,
@@ -1262,8 +1264,8 @@ async def download_dataset(
                     current_temp_dir, metadata_filename
                 )
                 metadata_content = json_util.dumps(metadata)
-                with open(metadata_filename_temp_path, "w") as f:
-                    f.write(metadata_content)
+                async with aiofiles.open(metadata_filename_temp_path, "w") as f:
+                    await f.write(metadata_content)
                 crate.add_file(
                     metadata_filename_temp_path,
                     dest_path="metadata/" + metadata_filename,
@@ -1272,13 +1274,15 @@ async def download_dataset(
 
         bag_size_kb = bag_size / 1024
 
-        with open(bagit_path, "a") as f:
-            f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
-            f.write("Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n")
-            f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
-            f.write("Internal-Sender-Description: " + dataset.description + "\n")
-            f.write("Contact-Name: " + user_full_name + "\n")
-            f.write("Contact-Email: " + user.email + "\n")
+        async with aiofiles.open(bagit_path, "a") as f:
+            await f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
+            await f.write(
+                "Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n"
+            )
+            await f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
+            await f.write("Internal-Sender-Description: " + dataset.description + "\n")
+            await f.write("Contact-Name: " + user_full_name + "\n")
+            await f.write("Contact-Email: " + user.email + "\n")
         crate.add_file(
             bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
         )
@@ -1296,10 +1300,10 @@ async def download_dataset(
         bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
         bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
 
-        with open(tagmanifest_path, "w") as f:
-            f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
-            f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
-            f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
+        async with aiofiles.open(tagmanifest_path, "w") as f:
+            await f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
+            await f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
+            await f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
         crate.add_file(
             tagmanifest_path,
             dest_path="tagmanifest-md5.txt",
@@ -1314,8 +1318,8 @@ async def download_dataset(
         zip_name = dataset.name + version_name + ".zip"
         path_to_zip = os.path.join(current_temp_dir, zip_name)
         crate.write_zip(path_to_zip)
-        f = open(path_to_zip, "rb", buffering=0)
-        zip_bytes = f.read()
+        async with aiofiles.open(path_to_zip, "rb", buffering=0) as f:
+            zip_bytes = await f.read()
         stream = io.BytesIO(zip_bytes)
         f.close()
         try:
@@ -1341,6 +1345,7 @@ async def download_dataset(
             await index_folder(es, FolderOut(**folder.dict()), update=True)
 
         return response
+
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 

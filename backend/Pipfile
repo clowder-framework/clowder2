@@ -32,6 +32,7 @@ autoflake = "*"
 isort = "*"
 shellcheck-py = "*"
 pre-commit = "*"
+aiofiles = "==0.6.0"
 
 [dev-packages]
 requests = "2.28.2"
