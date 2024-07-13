@@ -23,8 +23,8 @@ def _add_permissions_clause(
             "should": [
                 {"term": {"creator": username}},
                 {"term": {"user_ids": username}},
-                {"term": {"status": "AUTHENTICATED"}},
-                {"term": {"status": "PUBLIC"}},
+                {"term": {"status": "authenticated"}},
+                {"term": {"status": "public"}},
             ]
         }
     }
@@ -52,6 +52,7 @@ async def search(
     query: str,
     username=Depends(get_current_username),
     admin=Depends(get_admin),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()
@@ -64,6 +65,7 @@ async def msearch(
     request: Request,
     username=Depends(get_current_username),
     admin=Depends(get_admin),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()

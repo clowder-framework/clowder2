@@ -1,13 +1,19 @@
 import {
 	CREATE_DATASET,
 	DELETE_DATASET,
+	DELETE_FREEZE_DATASET,
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
+	FREEZE_DATASET,
+	GET_FREEZE_DATASET,
+	GET_FREEZE_DATASETS,
+	INCREMENT_DATASET_DOWNLOADS,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FOLDERS_FILES_IN_DATASET,
+	RECEIVE_MY_DATASETS,
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
@@ -29,7 +35,8 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
-	DatasetOut as Dataset,
+	DatasetFreezeOut,
+	DatasetOut,
 	DatasetRoles,
 	FileOut,
 	FolderOut,
@@ -45,13 +52,22 @@ const defaultState: DatasetState = {
 		metadata: <PageMetadata>{},
 		data: <FileOut | FolderOut[]>[],
 	},
-	deletedDataset: <Dataset>{},
+	about: <DatasetOut>{ creator: <UserOut>{} },
+	frozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	deletedFrozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	newFrozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	frozenDatasets: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <DatasetFreezeOut[]>[],
+	},
+	latestFrozenVersionNum: -999,
+	deletedDataset: <DatasetOut>{},
 	deletedFolder: <FolderOut>{},
 	deletedFile: <FileOut>{},
-	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
-	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
-	newDataset: <Dataset>{},
+	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
+	newDataset: <DatasetOut>{},
+	myDatasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
 	newFolder: <FolderOut>{},
@@ -100,6 +116,13 @@ const dataset = (state = defaultState, action: DataAction) => {
 			});
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, { about: action.about });
+		case INCREMENT_DATASET_DOWNLOADS:
+			return Object.assign({}, state, {
+				about: {
+					...state.about,
+					downloads: state.about.downloads + 1,
+				},
+			});
 		case RECEIVE_DATASET_LICENSE:
 			return Object.assign({}, state, { license: action.license });
 		case UPDATE_DATASET_LICENSE:
@@ -110,8 +133,25 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { roles: action.roles });
 		case UPDATE_DATASET:
 			return Object.assign({}, state, { about: action.about });
+		case FREEZE_DATASET:
+			return Object.assign({}, state, {
+				latestFrozenVersionNum: action.newFrozenDataset.frozen_version_num,
+				newFrozenDataset: action.newFrozenDataset,
+			});
+		case GET_FREEZE_DATASET:
+			return Object.assign({}, state, { frozenDataset: action.frozenDataset });
+		case DELETE_FREEZE_DATASET:
+			return Object.assign({}, state, {
+				deletedFrozenDataset: action.frozenDataset,
+			});
+		case GET_FREEZE_DATASETS:
+			return Object.assign({}, state, {
+				frozenDatasets: action.frozenDatasets,
+			});
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
+		case RECEIVE_MY_DATASETS:
+			return Object.assign({}, state, { myDatasets: action.myDatasets });
 		case CREATE_DATASET:
 			return Object.assign({}, state, { newDataset: action.dataset });
 		case RESET_CREATE_DATASET:

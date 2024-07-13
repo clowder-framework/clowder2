@@ -2,13 +2,13 @@ import React from "react";
 
 import { Box, Button } from "@mui/material";
 
-import Form from "@rjsf/material-ui";
+import Form from "@rjsf/mui";
 import datasetSchema from "../../schema/datasetSchema.json";
 import { FormProps } from "@rjsf/core";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
-import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import { ClowderRjsfTextAreaWidget } from "../styledComponents/ClowderRjsfTextAreaWidget";
+import validator from "@rjsf/validator-ajv8";
 
 type CreateDatasetModalProps = {
 	onSave: any;
@@ -30,10 +30,10 @@ export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (
 			widgets={widgets}
 			schema={datasetSchema["schema"] as FormProps<any>["schema"]}
 			uiSchema={datasetSchema["uiSchema"] as FormProps<any>["uiSchema"]}
+			validator={validator}
 			onSubmit={({ formData }) => {
 				onSave(formData);
 			}}
-			ErrorList={ClowderRjsfErrorList}
 		>
 			<Box className="inputGroup">
 				<Button variant="contained" type="submit">

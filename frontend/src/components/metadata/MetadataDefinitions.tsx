@@ -33,10 +33,13 @@ import { Link } from "react-router-dom";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import { MetadataDefinitionOut } from "../../openapi/v2";
 import config from "../../app.config";
+import { fetchUserProfile } from "../../actions/user";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
 	const listMetadataDefinitions = (
 		name: string | undefined | null,
 		skip: number | undefined,
@@ -77,6 +80,13 @@ export function MetadataDefinitions() {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
+
+	// component did mount
+	// user profile
+	useEffect(() => {
+		listMetadataDefinitions(null, 0, limit);
+		fetchCurrUserProfile();
+	}, []);
 
 	// Admin mode will fetch all datasets
 	useEffect(() => {
@@ -138,26 +148,28 @@ export function MetadataDefinitions() {
 				<DialogContent>
 					<CreateMetadataDefinition
 						setCreateMetadataDefinitionOpen={setCreateMetadataDefinitionOpen}
-						setSnackBarOpen={setSnackBarOpen}
-						setSnackBarMessage={setSnackBarMessage}
 					/>
 				</DialogContent>
 			</Dialog>
 			<div className="outer-container">
-				<Grid container>
-					<Grid item xs={8} />
-					<Grid item xs={4}>
-						<Button
-							variant="contained"
-							onClick={() => {
-								setCreateMetadataDefinitionOpen(true);
-							}}
-							sx={{ float: "right" }}
-						>
-							New Metadata Definition
-						</Button>
+				{currUserProfile.read_only_user ? (
+					<></>
+				) : (
+					<Grid container>
+						<Grid item xs={8} />
+						<Grid item xs={4}>
+							<Button
+								variant="contained"
+								onClick={() => {
+									setCreateMetadataDefinitionOpen(true);
+								}}
+								sx={{ float: "right" }}
+							>
+								New Metadata Definition
+							</Button>
+						</Grid>
 					</Grid>
-				</Grid>
+				)}
 				<br />
 				<Grid container spacing={2}>
 					<Grid item xs={12}>
@@ -224,16 +236,20 @@ export function MetadataDefinitions() {
 													key={`${mdd.id}-delete`}
 													align="left"
 												>
-													<IconButton
-														aria-label="delete"
-														size="small"
-														onClick={() => {
-															setSelectedMetadataDefinition(mdd.id);
-															setDeleteMetadataDefinitionConfirmOpen(true);
-														}}
-													>
-														<DeleteIcon fontSize="small" />
-													</IconButton>
+													{currUserProfile.read_only_user ? (
+														<></>
+													) : (
+														<IconButton
+															aria-label="delete"
+															size="small"
+															onClick={() => {
+																setSelectedMetadataDefinition(mdd.id);
+																setDeleteMetadataDefinitionConfirmOpen(true);
+															}}
+														>
+															<DeleteIcon fontSize="small" />
+														</IconButton>
+													)}
 												</TableCell>
 											</TableRow>
 										);

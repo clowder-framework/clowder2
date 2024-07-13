@@ -5,6 +5,10 @@ export function generateThumbnailUrl(thumbnailId) {
 	return `${config.hostname}/api/v2/thumbnails/${thumbnailId}`;
 }
 
+export function generatePublicThumbnailUrl(thumbnailId) {
+	return `${config.hostname}/api/v2/public_thumbnails/${thumbnailId}`;
+}
+
 export function generateVisDataDownloadUrl(visualizationId) {
 	return `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 }

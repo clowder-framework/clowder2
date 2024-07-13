@@ -35,7 +35,7 @@ import {
 	getAdminModeStatus as getAdminModeStatusAction,
 	toggleAdminMode as toggleAdminModeAction,
 } from "../actions/user";
-import { AdminPanelSettings } from "@mui/icons-material";
+import { AdminPanelSettings, SavedSearch } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
@@ -155,7 +155,6 @@ export default function PersistentDrawerLeft(props) {
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-
 	// @ts-ignore
 	return (
 		<Box
@@ -378,25 +377,33 @@ export default function PersistentDrawerLeft(props) {
 					</>
 				) : null}
 				<List>
-					<ListItem key={"groups"} disablePadding>
-						<ListItemButton component={RouterLink} to="/groups">
-							<ListItemIcon>
-								<GroupIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Groups"} />
-						</ListItemButton>
-					</ListItem>
+					{currUserProfile.read_only_user ? (
+						<></>
+					) : (
+						<ListItem key={"groups"} disablePadding>
+							<ListItemButton component={RouterLink} to="/groups">
+								<ListItemIcon>
+									<GroupIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Groups"} />
+							</ListItemButton>
+						</ListItem>
+					)}
 				</List>
 				<Divider />
 				<List>
-					<ListItem key={"newdataset"} disablePadding>
-						<ListItemButton component={RouterLink} to="/create-dataset">
-							<ListItemIcon>
-								<AddBox />
-							</ListItemIcon>
-							<ListItemText primary={"New Dataset"} />
-						</ListItemButton>
-					</ListItem>
+					{currUserProfile.read_only_user ? (
+						<></>
+					) : (
+						<ListItem key={"newdataset"} disablePadding>
+							<ListItemButton component={RouterLink} to="/create-dataset">
+								<ListItemIcon>
+									<AddBox />
+								</ListItemIcon>
+								<ListItemText primary={"New Dataset"} />
+							</ListItemButton>
+						</ListItem>
+					)}
 				</List>
 				<Divider />
 				<List>
@@ -428,6 +435,17 @@ export default function PersistentDrawerLeft(props) {
 								<BuildIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Extractors"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"feeds"} disablePadding>
+						<ListItemButton component={RouterLink} to="/feeds">
+							<ListItemIcon>
+								<SavedSearch />
+							</ListItemIcon>
+							<ListItemText primary={"Feeds"} />
 						</ListItemButton>
 					</ListItem>
 				</List>

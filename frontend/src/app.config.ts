@@ -15,6 +15,7 @@ interface Config {
 	KeycloakRefresh: string;
 	KeycloakRegister: string;
 	searchEndpoint: string;
+	publicSearchEndpoint: string;
 	refreshTokenInterval: number;
 	extractorStatusInterval: number;
 	extractorLivelihoodInterval: number;
@@ -27,8 +28,10 @@ interface Config {
 	defaultUserPerPage: number;
 	defaultApikeyPerPage: number;
 	defaultExtractors: number;
+	defaultFeeds: number;
 	defaultExtractionJobs: number;
 	defaultMetadataDefintionPerPage: number;
+	defaultVersionPerPage: number;
 }
 
 const config: Config = <Config>{};
@@ -61,6 +64,7 @@ config["KeycloakRegister"] = `${config.KeycloakBaseURL}/register`;
 
 // elasticsearch
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
+config["publicSearchEndpoint"] = `${hostname}/api/v2/public_elasticsearch`;
 
 // refresh token time interval
 config["refreshTokenInterval"] = 1000 * 60; // 1 minute
@@ -87,7 +91,9 @@ config["defaultGroupPerPage"] = 5;
 config["defaultUserPerPage"] = 5;
 config["defaultApikeyPerPage"] = 5;
 config["defaultExtractors"] = 5;
+config["defaultFeeds"] = 5;
 config["defaultExtractionJobs"] = 5;
 config["defaultMetadataDefintionPerPage"] = 5;
+config["defaultVersionPerPage"] = 3;
 
 export default config;

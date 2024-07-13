@@ -57,6 +57,7 @@ export default function FolderMenu(props: FolderMenuProps) {
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<EditFolderNameModal
 				datasetId={folder.dataset_id}

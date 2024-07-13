@@ -22,7 +22,6 @@ import type { UserOut } from './UserOut';
 export type FileOut = {
     name?: string;
     status?: string;
-    id?: string;
     creator: UserOut;
     created?: string;
     version_id?: string;
@@ -37,4 +36,7 @@ export type FileOut = {
     storage_type?: StorageType;
     storage_path?: string;
     object_type?: string;
+    origin_id?: string;
+    id?: string;
+    frozen?: boolean;
 }

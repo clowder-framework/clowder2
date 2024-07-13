@@ -1,8 +1,10 @@
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
 	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
+	FeedOut,
 	FileOut,
 	FileVersion,
 	FolderOut,
@@ -123,6 +125,7 @@ export interface DatasetState {
 	files: Paged;
 	folders: Paged;
 	datasets: Paged;
+	myDatasets: Paged;
 	deletedDataset: DatasetOut;
 	deletedFolder: FolderOut;
 	deletedFile: FileOut;
@@ -131,6 +134,11 @@ export interface DatasetState {
 	newFolder: FolderOut;
 	newFiles: FileOut[];
 	about: DatasetOut;
+	frozenDataset: DatasetFreezeOut;
+	deletedFrozenDataset: DatasetFreezeOut;
+	newFrozenDataset: DatasetFreezeOut;
+	frozenDatasets: Paged;
+	latestFrozenVersionNum: number;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 	license: LicenseOut;
@@ -139,6 +147,7 @@ export interface DatasetState {
 export interface PublicDatasetState {
 	publicFiles: FileOut[];
 	publicDatasets: Paged;
+	publicFrozenDatasets: Paged;
 	publicNewDataset: DatasetOut;
 	publicNewFile: FileOut;
 	publicNewFiles: FileOut[];
@@ -187,7 +196,7 @@ export interface FileState {
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRole: string;
+	fileRole: RoleType;
 	presignedUrl: string;
 	selected_version_num: number;
 }
@@ -213,6 +222,7 @@ export interface UserState {
 	deletedApiKey: UserAPIKeyOut;
 	profile: UserOut;
 	adminMode: boolean;
+	read_only_user: boolean;
 }
 
 export interface ErrorState {
@@ -263,6 +273,12 @@ export interface EventListenerJobStatus {
 	resubmitted: string;
 }
 
+export interface FeedState {
+	feeds: Paged;
+	feed: FeedOut;
+	deletedFeed: FeedOut;
+}
+
 export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
@@ -276,4 +292,5 @@ export interface RootState {
 	folder: FolderState;
 	visualization: VisualizationState;
 	publicVisualization: PublicVisualizationState;
+	feed: FeedState;
 }

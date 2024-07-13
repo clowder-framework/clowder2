@@ -1,13 +1,5 @@
 import json
 
-from app.keycloak_auth import (
-    create_user,
-    enable_disable_user,
-    get_current_user,
-    keycloak_openid,
-)
-from app.models.datasets import DatasetDB
-from app.models.users import UserDB, UserIn, UserLogin, UserOut
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from keycloak.exceptions import (
@@ -16,6 +8,15 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
+
+from app.keycloak_auth import (
+    create_user,
+    enable_disable_user,
+    get_current_user,
+    keycloak_openid,
+)
+from app.models.datasets import DatasetDBViewList
+from app.models.users import UserDB, UserIn, UserLogin, UserOut
 
 router = APIRouter()
 
@@ -106,7 +107,11 @@ async def get_admin(
             return current_user.admin
     elif (
         dataset_id
-        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
+        and (
+            dataset_db := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
+        )
         is not None
     ):
         # TODO: question regarding resource creator is considered as admin of the resource?
@@ -116,13 +121,20 @@ async def get_admin(
 
 
 @router.get("/users/me/admin_mode")
-async def get_admin_mode(current_username=Depends(get_current_user)) -> bool:
+async def get_admin_mode(
+    enable_admin: bool = False, current_username=Depends(get_current_user)
+) -> bool:
     """Get Admin mode from User Object."""
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
-        if current_user.admin_mode is not None:
-            return current_user.admin_mode
+        if current_user.admin:
+            if enable_admin:
+                return True
+            elif current_user.admin_mode is not None:
+                return current_user.admin_mode
+            else:
+                return False
         else:
             return False
     else:
@@ -193,6 +205,7 @@ async def revoke_admin(
         else:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
                 user.admin = False
+                user.admin_mode = False  # make sure to disable admin mode as well
                 await user.replace()
                 return user.dict()
             else:
@@ -203,6 +216,54 @@ async def revoke_admin(
         raise HTTPException(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can revoke admin access.",
+        )
+
+
+@router.post("/users/enable_readonly/{useremail}", response_model=UserOut)
+async def enable_readonly_user(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            if not user.admin:
+                user.read_only_user = True
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {useremail} is admin cannot be read only",
+                )
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
+@router.post("/users/disable_readonly/{useremail}", response_model=UserOut)
+async def disable_readonly_user(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            if not user.admin:
+                user.read_only_user = False
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {useremail} is admin cannot be read only",
+                )
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
         )
 
 

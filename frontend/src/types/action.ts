@@ -1,16 +1,13 @@
-import {
-	ExtractedMetadata,
-	FilePreview,
-	Folder,
-	ListenerState,
-	MetadataJsonld,
-} from "./data";
+import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
+	DatasetOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	FeedOut,
 	EventListenerOut,
 	FileOut,
 	FileOut as FileSummary,
@@ -32,11 +29,6 @@ import {
 	PREFIX_SEARCH_USERS,
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
-import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
-import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
-import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
-import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
-import { RECEIVE_FOLDERS_FILES_IN_DATASET } from "../actions/dataset";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -55,7 +47,11 @@ interface DELETE_FILE {
 
 interface RECEIVE_DATASET_ABOUT {
 	type: "RECEIVE_DATASET_ABOUT";
-	about: Dataset;
+	about: DatasetOut;
+}
+
+interface INCREMENT_DATASET_DOWNLOADS {
+	type: "INCREMENT_DATASET_DOWNLOADS";
 }
 
 interface RECEIVE_DATASET_LICENSE {
@@ -88,6 +84,11 @@ interface RECEIVE_DATASETS {
 	datasets: Paged;
 }
 
+interface RECEIVE_MY_DATASETS {
+	type: "RECEIVE_MY_DATASETS";
+	myDatasets: Paged;
+}
+
 interface RECEIVE_PUBLIC_DATASETS {
 	type: "RECEIVE_PUBLIC_DATASETS";
 	publicDatasets: Dataset[];
@@ -96,6 +97,10 @@ interface RECEIVE_PUBLIC_DATASETS {
 interface RECEIVE_PUBLIC_DATASET_ABOUT {
 	type: "RECEIVE_PUBLIC_DATASET_ABOUT";
 	publicAbout: Dataset;
+}
+
+interface INCREMENT_PUBLIC_DATASET_DOWNLOADS {
+	type: "INCREMENT_PUBLIC_DATASET_DOWNLOADS";
 }
 
 interface RECEIVE_FILES_IN_PUBLIC_DATASET {
@@ -308,9 +313,17 @@ interface RECEIVE_FILE_SUMMARY {
 	fileSummary: FileSummary;
 }
 
+interface INCREMENT_FILE_DOWNLOADS {
+	type: "INCREMENT_FILE_DOWNLOADS";
+}
+
 interface RECEIVE_PUBLIC_FILE_SUMMARY {
 	type: "RECEIVE_PUBLIC_FILE_SUMMARY";
 	publicFileSummary: FileSummary;
+}
+
+interface INCREMENT_PUBLIC_FILE_DOWNLOADS {
+	type: "INCREMENT_PUBLIC_FILE_DOWNLOADS";
 }
 
 interface RECEIVE_DATASET_METADATA {
@@ -385,6 +398,11 @@ interface SEARCH_METADATA_DEFINITIONS {
 
 interface DELETE_METADATA_DEFINITION {
 	type: "DELETE_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
+interface EDIT_METADATA_DEFINITION {
+	type: "EDIT_METADATA_DEFINITION";
 	metadataDefinition: MetadataDefinition;
 }
 
@@ -596,6 +614,21 @@ interface REVOKE_ADMIN {
 	profile: UserOut;
 }
 
+interface SET_READONLY {
+	type: "SET_READONLY";
+	profile: UserOut;
+}
+
+interface ENABLE_READONLY {
+	type: "ENABLE_READONLY";
+	profile: UserOut;
+}
+
+interface DISABLE_READONLY {
+	type: "DISABLE_READONLY";
+	profile: UserOut;
+}
+
 interface GET_PUBLIC_VIS_DATA {
 	type: "GET_PUBLIC_VIS_DATA";
 	publicVisData: VisualizationDataOut;
@@ -636,6 +669,61 @@ interface FOLDER_UPDATED {
 	folder: FolderOut;
 }
 
+interface FREEZE_DATASET {
+	type: "FREEZE_DATASET";
+	newFrozenDataset: any;
+}
+
+interface GET_FREEZE_DATASET_LATEST_VERSION_NUM {
+	type: "GET_FREEZE_DATASET_LATEST";
+	latestFrozenVersionNum: number;
+}
+
+interface GET_FREEZE_DATASET {
+	type: "GET_FREEZE_DATASET";
+	frozenDataset: DatasetFreezeOut;
+}
+
+interface DELETE_FREEZE_DATASET {
+	type: "DELETE_FREEZE_DATASET";
+	frozenDataset: DatasetFreezeOut;
+}
+
+interface GET_FREEZE_DATASETS {
+	type: "GET_FREEZE_DATASETS";
+	frozenDatasets: Paged;
+}
+
+interface GET_PUBLIC_FREEZE_DATASETS {
+	type: "GET_PUBLIC_FREEZE_DATASETS";
+	publicFrozenDatasets: Paged;
+}
+
+interface CREATE_FEED {
+	type: "CREATE_FEED";
+	feed: FeedOut;
+}
+
+interface EDIT_FEED {
+	type: "EDIT_FEED";
+	feed: FeedOut;
+}
+
+interface RECEIVE_FEEDS {
+	type: "RECEIVE_FEEDS";
+	feeds: Paged;
+}
+
+interface RECEIVE_FEED {
+	type: "RECEIVE_FEED";
+	feed: FeedOut;
+}
+
+interface DELETE_FEED {
+	type: "DELETE_FEED";
+	feed: FeedOut;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -644,14 +732,19 @@ export type DataAction =
 	| RECEIVE_FOLDERS_IN_PUBLIC_DATASET
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
+	| INCREMENT_DATASET_DOWNLOADS
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
+	| RECEIVE_MY_DATASETS
 	| RECEIVE_PUBLIC_DATASETS
 	| RECEIVE_PUBLIC_DATASET_ABOUT
+	| INCREMENT_PUBLIC_DATASET_DOWNLOADS
 	| RECEIVE_FILES_IN_PUBLIC_DATASET
 	| DELETE_DATASET
 	| UPDATE_DATASET
 	| RECEIVE_FILE_SUMMARY
+	| INCREMENT_FILE_DOWNLOADS
+	| INCREMENT_FILE_DOWNLOADS
 	| RECEIVE_FILE_ROLE
 	| RECEIVE_FILE_EXTRACTED_METADATA
 	| RECEIVE_FILE_METADATA_JSONLD
@@ -659,6 +752,8 @@ export type DataAction =
 	| RECEIVE_VERSIONS
 	| CHANGE_SELECTED_VERSION
 	| RECEIVE_PUBLIC_FILE_SUMMARY
+	| INCREMENT_PUBLIC_FILE_DOWNLOADS
+	| INCREMENT_PUBLIC_FILE_DOWNLOADS
 	| RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA
 	| RECEIVE_PUBLIC_FILE_METADATA_JSONLD
 	| RECEIVE_PUBLIC_PREVIEWS
@@ -696,6 +791,7 @@ export type DataAction =
 	| SEARCH_METADATA_DEFINITIONS
 	| DELETE_METADATA_DEFINITION
 	| SAVE_METADATA_DEFINITION
+	| EDIT_METADATA_DEFINITION
 	| RESET_SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
 	| RECEIVE_PUBLIC_DATASET_METADATA
@@ -745,6 +841,9 @@ export type DataAction =
 	| UPDATE_FILE
 	| SET_ADMIN
 	| REVOKE_ADMIN
+	| SET_READONLY
+	| ENABLE_READONLY
+	| DISABLE_READONLY
 	| GET_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_CONFIG
 	| DOWNLOAD_PUBLIC_VIS_DATA
@@ -753,5 +852,16 @@ export type DataAction =
 	| RECEIVE_FOLDERS_FILES_IN_DATASET
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
 	| FOLDER_UPDATED
+	| FREEZE_DATASET
+	| GET_FREEZE_DATASET_LATEST_VERSION_NUM
+	| GET_FREEZE_DATASET
+	| DELETE_FREEZE_DATASET
+	| GET_FREEZE_DATASETS
+	| GET_PUBLIC_FREEZE_DATASETS
 	| RECEIVE_DATASET_LICENSE
-	| UPDATE_DATASET_LICENSE;
+	| UPDATE_DATASET_LICENSE
+	| CREATE_FEED
+	| EDIT_FEED
+	| RECEIVE_FEEDS
+	| RECEIVE_FEED
+	| DELETE_FEED;
