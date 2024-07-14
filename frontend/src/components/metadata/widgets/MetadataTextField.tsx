@@ -39,6 +39,7 @@ export const MetadataTextField = (props) => {
 					value={
 						readOnly && content ? content[fieldName] : localContent[fieldName]
 					}
+					// TODO this is probably where I need to add a new check
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 						setInputChanged(true);
 						const tempContents: { [key: string]: string | number } = {};
