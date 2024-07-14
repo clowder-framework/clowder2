@@ -25,6 +25,7 @@ export const MetadataTextField = (props) => {
 	);
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	const [inputChanged, setInputChanged] = useState(false);
+	const [inputBlank, setInputBlank] = useState(true);
 
 	return (
 		<Grid container spacing={2} sx={{ alignItems: "center" }}>
@@ -45,6 +46,12 @@ export const MetadataTextField = (props) => {
 						const tempContents: { [key: string]: string | number } = {};
 						tempContents[fieldName] = event.target.value;
 						setLocalContent(tempContents);
+						// TODO set other here
+						if (event.target.value !== "") {
+							setInputBlank(false);
+						} else {
+							setInputBlank(true);
+						}
 						setMetadata
 							? metadataId
 								? setMetadata({
