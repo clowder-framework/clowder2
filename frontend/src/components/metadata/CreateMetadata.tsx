@@ -92,6 +92,7 @@ export const CreateMetadata = (props: MetadataType) => {
 										options: field.config.options ?? [],
 										setMetadata: setMetadata,
 										initialReadOnly: false,
+										initialInputBlank: true,
 										isRequired: field.required,
 										datasetRole: datasetRole,
 										key: idxx,
