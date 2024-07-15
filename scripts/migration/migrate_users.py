@@ -1,31 +1,25 @@
-import os
-
-from bson import ObjectId
-from faker import Faker
-from dotenv import dotenv_values, load_dotenv
-import requests
 import asyncio
-from pymongo import MongoClient
-from app.config import settings
-from itsdangerous.url_safe import URLSafeSerializer
+import os
 from secrets import token_urlsafe
-from app.routers.files import add_file_entry
-from app.models.files import (
-    FileOut,
-    FileDB,
-    FileDBViewList,
-    LocalFileIn,
-    StorageType,
-)
-from minio import Minio
+
 import nest_asyncio
+import requests
+from app.config import settings
+from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
+from app.routers.files import add_file_entry
+from bson import ObjectId
+from dotenv import dotenv_values, load_dotenv
+from faker import Faker
+from itsdangerous.url_safe import URLSafeSerializer
+from minio import Minio
+from pymongo import MongoClient
 
 nest_asyncio.apply()
-from app.models.users import UserDB, UserOut, UserAPIKeyDB
-from beanie import init_beanie
-from fastapi import FastAPI, APIRouter, Depends
-from elasticsearch import Elasticsearch
 from app import dependencies
+from app.models.users import UserAPIKeyDB, UserDB, UserOut
+from beanie import init_beanie
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from pika.adapters.blocking_connection import BlockingChannel
 
@@ -370,10 +364,10 @@ async def process_user(
                     current_headers=user_headers_v2,
                 )
                 dataset_files_endpoint = (
-                        CLOWDER_V1
-                        + "api/datasets/"
-                        + dataset["id"]
-                        + "/files?=superAdmin=true"
+                    CLOWDER_V1
+                    + "api/datasets/"
+                    + dataset["id"]
+                    + "/files?=superAdmin=true"
                 )
                 r_files = requests.get(
                     dataset_files_endpoint, headers=clowder_headers_v1, verify=False
@@ -387,12 +381,10 @@ async def process_user(
                         file_folder = file["folders"]
                     # TODO download the file from v1 using api routes
                     v1_download_url = (
-                            CLOWDER_V1 + "api/files/" + file_id + "?superAdmin=true"
+                        CLOWDER_V1 + "api/files/" + file_id + "?superAdmin=true"
                     )
                     print("downloading file", filename)
-                    download = requests.get(
-                        v1_download_url, headers=clowder_headers_v1
-                    )
+                    download = requests.get(v1_download_url, headers=clowder_headers_v1)
                     with open(filename, "wb") as f:
                         f.write(download.content)
                     file_data = {"file": open(filename, "rb")}
@@ -404,11 +396,11 @@ async def process_user(
                     if matching_folder:
                         upload_files = {"files": open(filename, "rb")}
                         dataset_file_upload_endpoint = (
-                                CLOWDER_V2
-                                + "api/v2/datasets/"
-                                + dataset_v2_id
-                                + "/filesMultiple?folder_id="
-                                + matching_folder["id"]
+                            CLOWDER_V2
+                            + "api/v2/datasets/"
+                            + dataset_v2_id
+                            + "/filesMultiple?folder_id="
+                            + matching_folder["id"]
                         )
                         response = requests.post(
                             dataset_file_upload_endpoint,
@@ -418,10 +410,7 @@ async def process_user(
 
                     else:
                         dataset_file_upload_endpoint = (
-                                CLOWDER_V2
-                                + "api/v2/datasets/"
-                                + dataset_v2_id
-                                + "/files"
+                            CLOWDER_V2 + "api/v2/datasets/" + dataset_v2_id + "/files"
                         )
                         response = requests.post(
                             dataset_file_upload_endpoint,
