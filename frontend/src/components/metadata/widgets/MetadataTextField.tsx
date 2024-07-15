@@ -16,6 +16,7 @@ export const MetadataTextField = (props) => {
 		resourceId,
 		initialReadOnly,
 		isRequired,
+		initialInputBlank,
 		datasetRole,
 		frozen,
 		frozenVersionNum,
@@ -25,7 +26,7 @@ export const MetadataTextField = (props) => {
 	);
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	const [inputChanged, setInputChanged] = useState(false);
-	const [inputBlank, setInputBlank] = useState(true);
+	const [inputBlank, setInputBlank] = useState(initialInputBlank);
 
 	return (
 		<Grid container spacing={2} sx={{ alignItems: "center" }}>
