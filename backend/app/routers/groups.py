@@ -267,7 +267,7 @@ async def add_member(
                         )
                     ) is not None:
                         await index_dataset(
-                            es, DatasetOut(**dataset.dict()), auth.user_ids
+                            es, DatasetOut(**dataset.dict()), auth.user_ids, update=True
                         )
                         await index_dataset_files(es, str(auth.dataset_id), update=True)
             return group.dict()
@@ -312,7 +312,9 @@ async def remove_member(
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(auth.dataset_id))
             ) is not None:
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth.user_ids, update=True
+                )
                 await index_dataset_files(es, str(auth.dataset_id), update=True)
 
         return group.dict()
