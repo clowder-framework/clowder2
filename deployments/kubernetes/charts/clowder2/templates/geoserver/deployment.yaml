@@ -29,10 +29,7 @@ spec:
           imagePullPolicy: {{ .Values.geoserver.image.pullPolicy }}
           env:
             - name: GEOSERVER_ADMIN_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-services
-                  key: GEOSERVER_USER
+              value: {{ .Values.geoserver.username }}
             - name: GEOSERVER_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
