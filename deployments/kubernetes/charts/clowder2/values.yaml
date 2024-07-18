@@ -60,7 +60,7 @@ backend:
 # GEOSERVER
 # ----------------------------------------------------------------------
 geoserver:
-  enabled : true
+  enabled : false
   username: admin
   password: admin
   workspace: clowder2
@@ -97,12 +97,12 @@ minio:
 
   # enable ingress for webui
   ingress:
-    enabled: true
+    enabled: false
     hostname: minio.clowder2.localhost
 
   # enable ingress for api
   apiIngress:
-    enabled: true
+    enabled: false
     hostname: minio-api.clowder2.localhost
 
   # enabled distributed mode (or standalone)
@@ -165,7 +165,7 @@ rabbitmq:
 
   # enable webfrontend
   ingress:
-    enabled: true
+    enabled: false
     hostname: rabbitmq.clowder2.localhost
 
   persistence:
