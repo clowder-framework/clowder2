@@ -43,7 +43,7 @@ spec:
             - name: MINIO_EXTERNAL_SERVER_URL
               value: minio-api.{{ .Values.hostname }}
             - name: MINIO_SECURE
-              value: {{ .Values.backend.env.MINIO_SECURE }}
+              value: {{ .Values.backend.env.MINIO_SECURE | quote }}
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.backend.env.MINIO_BUCKET_NAME }}
             - name: MINIO_ACCESS_KEY
@@ -54,7 +54,7 @@ spec:
                   name: {{ include "clowder2.fullname" . }}-minio
                   key: root-password
             - name: MINIO_UPLOAD_CHUNK_SIZE
-              value: {{ .Values.backend.env.MINIO_UPLOAD_CHUNK_SIZE}}
+              value: {{ .Values.backend.env.MINIO_UPLOAD_CHUNK_SIZE | quote}}
             - name: MONGODB_URL
               value: {{ .Values.backend.env.MONGODB_URL }}
             - name: MONGO_DATABASE
