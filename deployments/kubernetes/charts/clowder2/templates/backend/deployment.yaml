@@ -76,7 +76,7 @@ spec:
             - name: auth_register_url
               value: $(CLOWDER2_URL){{ .Values.backend.env.auth_register_url }}
             - name: auth_token_url
-              value: {{ .Values.backend.env.auth_token_url }}}
+              value: {{ .Values.backend.env.auth_token_url }}
             - name: auth_server_url
               value: $(CLOWDER2_URL)/keycloak/
             - name: keycloak_base
