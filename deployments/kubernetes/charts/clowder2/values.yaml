@@ -197,19 +197,19 @@ heartbeat:
 ## image        : dokeer/image:tag - the extractor docker image
 ## replicaCount : number - the number of this extractor to install
 ## env          : additional environment variables to pass to extractor.
-extractors:
-  wordcount:
-    image: clowder/extractors-wordcount:latest
-  image-preview:
-    image: clowder/extractors-image-preview:latest
-  image-metadata:
-    image: clowder/extractors-image-metadata:latest
-  audio-preview:
-    image: clowder/extractors-audio-preview:latest
-  file-digest:
-    image: clowder/extractors-digest:latest
-  geotiff-preview:
-    image: clowder/extractors-geotiff-preview:latest
+#extractors:
+#  wordcount:
+#    image: clowder/extractors-wordcount:latest
+#  image-preview:
+#    image: clowder/extractors-image-preview:latest
+#  image-metadata:
+#    image: clowder/extractors-image-metadata:latest
+#  audio-preview:
+#    image: clowder/extractors-audio-preview:latest
+#  file-digest:
+#    image: clowder/extractors-digest:latest
+#  geotiff-preview:
+#    image: clowder/extractors-geotiff-preview:latest
 
 # ----------------------------------------------------------------------
 # ELASTICSEARCH
