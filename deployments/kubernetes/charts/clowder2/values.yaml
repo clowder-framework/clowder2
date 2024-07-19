@@ -191,13 +191,19 @@ message:
     repository: clowder/clowder2-messages
 #    tag: main
     pullPolicy: Always
+  env:
+    MONGODB_URL: mongodb://clowder2-mongodb:27017
+    RABBITMQ_HOST: clowder2-rabbitmq
+
 
 heartbeat:
   image:
     repository: clowder/clowder2-heartbeat
 #    tag: main
     pullPolicy: Always
-
+  env:
+    MONGODB_URL: mongodb://clowder2-mongodb:27017
+    RABBITMQ_HOST: clowder2-rabbitmq
 
 # ----------------------------------------------------------------------
 # EXTRACTORS
