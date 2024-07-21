@@ -13,11 +13,6 @@ import type { UserOut } from './UserOut';
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
- *
- * Inherited from:
- *
- * - Pydantic BaseModel
- * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type MetadataDefinitionOut = {
     name: string;
@@ -28,6 +23,9 @@ export type MetadataDefinitionOut = {
     context_url?: string;
     fields: Array<MetadataField>;
     modified?: string;
+    /**
+     * MongoDB document ObjectID
+     */
     id?: string;
     creator: UserOut;
 }

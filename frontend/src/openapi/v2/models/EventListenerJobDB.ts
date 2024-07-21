@@ -20,5 +20,8 @@ export type EventListenerJobDB = {
     duration?: number;
     latest_message?: string;
     status?: string;
+    /**
+     * MongoDB document ObjectID
+     */
     _id?: string;
 }
