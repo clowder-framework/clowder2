@@ -11,6 +11,11 @@ import type { Member } from './Member';
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type GroupOut = {
     creator: string;
@@ -19,9 +24,6 @@ export type GroupOut = {
     name: string;
     description?: string;
     users?: Array<Member>;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
     views?: number;
 }

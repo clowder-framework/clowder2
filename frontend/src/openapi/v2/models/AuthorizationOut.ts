@@ -15,8 +15,5 @@ export type AuthorizationOut = {
     user_ids?: Array<string>;
     role: RoleType;
     group_ids?: Array<string>;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
 }
