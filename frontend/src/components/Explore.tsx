@@ -49,9 +49,14 @@ export const Explore = (): JSX.Element => {
 
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		if (adminMode) listDatasets(0, limit, true);
-		else listDatasets((currPageNum - 1) * limit, limit, mine);
-	}, [adminMode, deletedDataset, mine, currPageNum, limit]);
+		if (adminMode) {
+			if (selectedTabIndex === 1) {
+				listDatasets((currPageNum - 1) * limit, limit, true);
+			} else {
+				listDatasets((currPageNum - 1) * limit, limit, false);
+			}
+		} else listDatasets((currPageNum - 1) * limit, limit, mine);
+	}, [adminMode, deletedDataset, mine, currPageNum, selectedTabIndex, limit]);
 
 	// switch tabs
 	const handleTabChange = (
@@ -61,11 +66,9 @@ export const Explore = (): JSX.Element => {
 		if (newTabIndex === 1) {
 			setMine(true);
 			setCurrPageNum(1);
-			listDatasets(0, limit, true);
 		} else {
 			setMine(false);
 			setCurrPageNum(1);
-			listDatasets(0, limit, false);
 		}
 		setSelectedTabIndex(newTabIndex);
 	};
@@ -106,6 +109,8 @@ export const Explore = (): JSX.Element => {
 												created={dataset.created}
 												description={dataset.description}
 												thumbnailId={dataset.thumbnail_id}
+												frozen={dataset.frozen}
+												frozenVersionNum={dataset.frozen_version_num}
 											/>
 										</Grid>
 									);

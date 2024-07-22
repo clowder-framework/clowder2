@@ -218,6 +218,18 @@
         "summary": "Get Admin Mode",
         "description": "Get Admin mode from User Object.",
         "operationId": "get_admin_mode_api_v2_users_me_admin_mode_get",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -226,6 +238,16 @@
                 "schema": {
                   "title": "Response Get Admin Mode Api V2 Users Me Admin Mode Get",
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1161,6 +1183,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -1225,6 +1257,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1279,6 +1321,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1331,6 +1383,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1383,6 +1445,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -1450,6 +1522,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -1509,6 +1591,16 @@
             },
             "name": "group_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -1593,6 +1685,16 @@
             },
             "name": "role",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1664,6 +1766,16 @@
             },
             "name": "role",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1731,6 +1843,16 @@
             },
             "name": "group_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1794,6 +1916,16 @@
             },
             "name": "username",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1848,6 +1980,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -2269,6 +2411,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -2324,6 +2476,16 @@
             },
             "name": "metadata_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -2616,6 +2778,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -2670,6 +2842,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -2743,6 +2925,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -2836,6 +3028,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -2892,6 +3094,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -2963,6 +3175,16 @@
               "default": 0
             },
             "name": "version_num",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           },
           {
@@ -3050,6 +3272,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -3120,6 +3352,16 @@
               "type": "string"
             },
             "name": "extractorName",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           },
           {
@@ -3199,6 +3441,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -3258,6 +3510,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -3327,6 +3589,16 @@
             },
             "name": "thumbnail_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -3747,6 +4019,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -3817,6 +4099,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -3892,6 +4184,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -3958,6 +4260,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -4029,6 +4341,16 @@
             },
             "name": "file_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -4121,6 +4443,16 @@
               "default": false
             },
             "name": "mine",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           },
           {
@@ -4245,6 +4577,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4296,6 +4638,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -4357,6 +4709,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4406,6 +4768,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -4498,6 +4870,16 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4558,6 +4940,16 @@
             },
             "name": "folder_id",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -4577,6 +4969,356 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/datasets/{dataset_id}/freeze": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Freeze Datasets",
+        "operationId": "get_freeze_datasets_api_v2_datasets__dataset_id__freeze_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paged"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Freeze Dataset",
+        "operationId": "freeze_dataset_api_v2_datasets__dataset_id__freeze_post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreezeOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/datasets/{dataset_id}/freeze/latest_version_num": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Freeze Dataset Lastest Version Num",
+        "operationId": "get_freeze_dataset_lastest_version_num_api_v2_datasets__dataset_id__freeze_latest_version_num_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Freeze Dataset Lastest Version Num Api V2 Datasets  Dataset Id  Freeze Latest Version Num Get",
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/datasets/{dataset_id}/freeze/{frozen_version_num}": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Freeze Dataset Version",
+        "operationId": "get_freeze_dataset_version_api_v2_datasets__dataset_id__freeze__frozen_version_num__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Frozen Version Num",
+              "type": "integer"
+            },
+            "name": "frozen_version_num",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreezeOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Delete Freeze Dataset Version",
+        "operationId": "delete_freeze_dataset_version_api_v2_datasets__dataset_id__freeze__frozen_version_num__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Frozen Version Num",
+              "type": "integer"
+            },
+            "name": "frozen_version_num",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreezeOut"
                 }
               }
             }
@@ -4650,6 +5392,16 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4701,6 +5453,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -4793,6 +5555,16 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4855,6 +5627,16 @@
             },
             "name": "folder_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4913,6 +5695,16 @@
             },
             "name": "folder_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4971,6 +5763,16 @@
             },
             "name": "folder_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -5042,6 +5844,16 @@
               "type": "string"
             },
             "name": "folder_id",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           }
         ],
@@ -5118,6 +5930,16 @@
               "type": "string"
             },
             "name": "folder_id",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           }
         ],
@@ -5234,6 +6056,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -5241,9 +6073,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DatasetOut"
-                }
+                "schema": {}
               }
             }
           },
@@ -5295,6 +6125,16 @@
               "type": "string"
             },
             "name": "extractorName",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           }
         ],
@@ -5357,6 +6197,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -5417,6 +6267,16 @@
             },
             "name": "thumbnail_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -5867,6 +6727,68 @@
         }
       }
     },
+    "/api/v2/public_datasets/{dataset_id}/freeze": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Freeze Datasets",
+        "operationId": "get_freeze_datasets_api_v2_public_datasets__dataset_id__freeze_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paged"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/datasets/{dataset_id}/metadata": {
       "get": {
         "tags": [
@@ -5883,6 +6805,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -5948,6 +6880,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -6010,6 +6952,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -6071,6 +7023,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -6133,6 +7095,16 @@
             },
             "name": "dataset_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -6390,6 +7362,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -6544,6 +7526,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -6681,6 +7673,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -6738,6 +7740,16 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -6813,6 +7825,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -6884,6 +7906,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -6948,6 +7980,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -7007,6 +8049,16 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -7364,6 +8416,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -7415,6 +8477,16 @@
         "summary": "Msearch",
         "operationId": "msearch_api_v2_elasticsearch_all__msearch_post",
         "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
           {
             "required": false,
             "schema": {
@@ -7575,6 +8647,16 @@
             },
             "name": "dataset_id",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7684,6 +8766,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -7741,6 +8833,16 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -7816,6 +8918,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -7875,6 +8987,16 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -7961,6 +9083,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -8028,6 +9160,16 @@
               "default": 10
             },
             "name": "limit",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           },
           {
@@ -8166,6 +9308,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -8228,6 +9380,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -8284,6 +9446,16 @@
             },
             "name": "group_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -8354,6 +9526,16 @@
             },
             "name": "group_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -8439,6 +9621,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -8507,6 +9699,16 @@
             },
             "name": "username",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -8587,6 +9789,16 @@
               "type": "string"
             },
             "name": "role",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
             "in": "query"
           },
           {
@@ -9657,6 +10869,56 @@
         ]
       }
     },
+    "/api/v2/public_thumbnails/{thumbnail_id}": {
+      "get": {
+        "tags": [
+          "public_thumbnails"
+        ],
+        "summary": "Download Thumbnail",
+        "operationId": "download_thumbnail_api_v2_public_thumbnails__thumbnail_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Thumbnail Id",
+              "type": "string"
+            },
+            "name": "thumbnail_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Increment",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "increment",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/licenses": {
       "post": {
         "tags": [
@@ -9780,6 +11042,16 @@
           {
             "required": false,
             "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "Dataset Id",
               "type": "string"
             },
@@ -9846,6 +11118,16 @@
             },
             "name": "license_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
           },
           {
             "required": false,
@@ -10670,6 +11952,101 @@
           }
         }
       },
+      "DatasetFreezeOut": {
+        "title": "DatasetFreezeOut",
+        "required": [
+          "creator",
+          "frozen_version_num"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "default": "N/A"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "PRIVATE"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserOut"
+          },
+          "created": {
+            "title": "Created",
+            "type": "string",
+            "format": "date-time"
+          },
+          "modified": {
+            "title": "Modified",
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_views": {
+            "title": "User Views",
+            "type": "integer",
+            "default": 0
+          },
+          "downloads": {
+            "title": "Downloads",
+            "type": "integer",
+            "default": 0
+          },
+          "thumbnail_id": {
+            "title": "Thumbnail Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "standard_license": {
+            "title": "Standard License",
+            "type": "boolean",
+            "default": true
+          },
+          "license_id": {
+            "title": "License Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
+          },
+          "frozen_version_num": {
+            "title": "Frozen Version Num",
+            "type": "integer"
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
+      },
       "DatasetIn": {
         "title": "DatasetIn",
         "type": "object",
@@ -10711,14 +12088,6 @@
             "type": "string",
             "default": "PRIVATE"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
           },
@@ -10750,6 +12119,14 @@
               "5eb7cfb05e32e07750a1756a"
             ]
           },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
           "standard_license": {
             "title": "Standard License",
             "type": "boolean",
@@ -10758,6 +12135,29 @@
           "license_id": {
             "title": "License Id",
             "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": false
+          },
+          "frozen_version_num": {
+            "title": "Frozen Version Num",
+            "type": "integer",
+            "default": -999
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean",
+            "default": false
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -11295,14 +12695,6 @@
             "type": "string",
             "default": "PRIVATE"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
           },
@@ -11388,6 +12780,27 @@
             "title": "Object Type",
             "type": "string",
             "default": "file"
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -11465,14 +12878,6 @@
             "type": "string",
             "default": "N/A"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "dataset_id": {
             "title": "Dataset Id",
             "type": "string",
@@ -11506,6 +12911,27 @@
             "title": "Object Type",
             "type": "string",
             "default": "folder"
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -12292,14 +13718,6 @@
             "title": "Description",
             "type": "string"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "resource": {
             "$ref": "#/components/schemas/MongoDBRef"
           },
@@ -12310,6 +13728,27 @@
             "title": "Created",
             "type": "string",
             "format": "date-time"
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -12555,14 +13994,6 @@
         ],
         "type": "object",
         "properties": {
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
           },
@@ -12597,6 +14028,27 @@
             "title": "Downloads",
             "type": "integer",
             "default": 0
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -12861,6 +14313,14 @@
             "title": "Visualization Mimetype",
             "type": "string"
           },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
           "id": {
             "title": "Id",
             "type": "string",
@@ -12868,6 +14328,11 @@
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           },
           "visualization_data": {
             "title": "Visualization Data",
@@ -12896,14 +14361,6 @@
           "description": {
             "title": "Description",
             "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
           },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
@@ -12942,6 +14399,27 @@
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"

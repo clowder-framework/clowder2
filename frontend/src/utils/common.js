@@ -278,3 +278,43 @@ export const handleErrorReport = (reason, stack) => {
 export const authCheck = (adminMode, currRole, allowedRoles = []) => {
 	return adminMode || (currRole && allowedRoles.includes(currRole));
 };
+
+export const frozenCheck = (frozen, frozen_version_num) => {
+	return frozen && frozen_version_num && frozen_version_num > 0;
+};
+
+export const selectedHighlightStyles = (currentId, selectedId, theme) => {
+	return {
+		color: theme.palette.primary.main,
+		pointerEvents: currentId === selectedId ? "none" : "auto",
+		textDecoration: "none",
+		fontWeight: currentId === selectedId ? "bold" : "normal",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	};
+};
+
+export const highlightLatestStyles = (
+	frozen,
+	frozenVersionNum,
+	currentId,
+	originId,
+	theme
+) => {
+	return {
+		color: theme.palette.primary.main,
+		pointerEvents:
+			(frozen === false && frozenVersionNum === -999) || currentId === originId
+				? "none"
+				: "auto",
+		textDecoration: "none",
+		fontWeight:
+			(frozen === false && frozenVersionNum === -999) || currentId === originId
+				? "bold"
+				: "normal",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	};
+};

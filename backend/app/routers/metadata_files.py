@@ -4,11 +4,12 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import UserOut, get_current_user
-from app.models.files import FileDB, FileOut, FileVersionDB
+from app.models.files import FileDB, FileDBViewList, FileOut, FileVersionDB
 from app.models.listeners import EventListenerDB
 from app.models.metadata import (
     MetadataAgent,
     MetadataDB,
+    MetadataDBViewList,
     MetadataDefinitionDB,
     MetadataDefinitionOut,
     MetadataDelete,
@@ -22,6 +23,7 @@ from app.models.metadata import (
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
 from beanie import PydanticObjectId
+from beanie.operators import Or
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, Form, HTTPException
@@ -51,7 +53,10 @@ async def _build_metadata_db_obj(
         if file_version is not None and file_version > 0:
             if (
                 await FileVersionDB.find_one(
-                    FileVersionDB.file_id == file.id,
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file.id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == file_version,
                 )
             ) is None:
@@ -143,7 +148,7 @@ async def add_file_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_file(es, FileOut(**file.dict()))
+        await index_file(es, FileOut(**file.dict()), update=True)
         return md.dict()
 
 
@@ -168,7 +173,10 @@ async def replace_file_metadata(
         if version is not None:
             if (
                 await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == version,
                 )
             ) is None:
@@ -273,7 +281,10 @@ async def update_file_metadata(
         if metadata_in.file_version is not None:
             if (
                 await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == metadata_in.file_version,
                 )
             ) is None:
@@ -329,15 +340,22 @@ async def get_file_metadata(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     """Get file metadata."""
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
+        query = [MetadataDBViewList.resource.resource_id == ObjectId(file_id)]
 
         # Validate specified version, or use latest by default
         if not all_versions:
             if version is not None and version > 0:
                 if (
                     await FileVersionDB.find_one(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        Or(
+                            FileVersionDB.file_id == ObjectId(file_id),
+                            FileVersionDB.file_id == file.origin_id,
+                        ),
                         FileVersionDB.version_num == version,
                     )
                 ) is None:
@@ -348,19 +366,19 @@ async def get_file_metadata(
                 target_version = version
             else:
                 target_version = file.version_num
-            query.append(MetadataDB.resource.version == target_version)
+            query.append(MetadataDBViewList.resource.version == target_version)
 
         if definition is not None:
             # TODO: Check if definition exists in database and raise error if not
-            query.append(MetadataDB.definition == definition)
+            query.append(MetadataDBViewList.definition == definition)
 
         if listener_name is not None:
-            query.append(MetadataDB.agent.extractor.name == listener_name)
+            query.append(MetadataDBViewList.agent.extractor.name == listener_name)
         if listener_version is not None:
-            query.append(MetadataDB.agent.extractor.version == listener_version)
+            query.append(MetadataDBViewList.agent.extractor.version == listener_version)
 
         metadata = []
-        async for md in MetadataDB.find(*query):
+        async for md in MetadataDBViewList.find(*query):
             if md.definition is not None:
                 if (
                     md_def := await MetadataDefinitionDB.find_one(

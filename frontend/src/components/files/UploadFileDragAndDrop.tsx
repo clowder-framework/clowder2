@@ -123,6 +123,24 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		});
 	};
 
+	const checkIfMetadataNeeded = () => {
+		// This function checks if Step 1 to upload metadata is needed when users upload new file
+		let required = false;
+
+		metadataDefinitionList.forEach((val, _) => {
+			if (val.required_for_items.files) {
+				val.fields.forEach((field) => {
+					if (field.required) {
+						required = true;
+						return;
+					}
+				});
+			}
+		});
+
+		return required;
+	};
+
 	// step 1
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
@@ -184,32 +202,37 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 				<Stepper activeStep={activeStep} orientation="vertical">
 					{/*<Stepper activeStep={activeStep}>*/}
 					{/*step 1 Metadata*/}
-					<Step key="fill-in-metadata">
-						<StepLabel>Fill In Metadata</StepLabel>
-						<StepContent TransitionProps={{ unmountOnExit: false }}>
-							<Typography>Provide us the metadata about your file.</Typography>
-							<Box>
-								<CreateMetadata
-									setMetadata={setMetadata}
-									sourceItem={"files"}
-								/>
-							</Box>
-							{/*buttons*/}
-							<Grid container>
-								<Grid xs={11}>
-									<Button
-										variant="contained"
-										onClick={handleNext}
-										disabled={!checkIfFieldsAreRequired() ? false : !allFilled}
-										sx={{ display: "block", marginLeft: "auto" }}
-									>
-										Next
-									</Button>
+					{checkIfMetadataNeeded() && (
+						<Step key="fill-in-metadata">
+							<StepLabel>Fill In Metadata</StepLabel>
+							<StepContent TransitionProps={{ unmountOnExit: false }}>
+								<Typography>
+									Provide us the metadata about your file.
+								</Typography>
+								<Box>
+									<CreateMetadata
+										setMetadata={setAllFilled}
+										sourceItem={"files"}
+									/>
+								</Box>
+								<Grid container>
+									<Grid item xs={11}>
+										<Button
+											variant="contained"
+											onClick={handleNext}
+											disabled={
+												!checkIfFieldsAreRequired() ? false : !allFilled
+											}
+											sx={{ display: "block", marginLeft: "auto" }}
+										>
+											Next
+										</Button>
+									</Grid>
+									<Grid item xs={1} />
 								</Grid>
-								<Grid xs={1} />
-							</Grid>
-						</StepContent>
-					</Step>
+							</StepContent>
+						</Step>
+					)}
 					{/* step 2 attach files */}
 					<Step key="attach-files">
 						<StepLabel>Attach Files</StepLabel>
@@ -224,9 +247,11 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 									selectedFiles={selectedFiles}
 								/>
 								<Box className="inputGroup">
-									<Button onClick={handleBack} sx={{ float: "right" }}>
-										Back
-									</Button>
+									{checkIfMetadataNeeded() && (
+										<Button onClick={handleBack} sx={{ float: "right" }}>
+											Back
+										</Button>
+									)}
 									<Button
 										variant="contained"
 										onClick={handleFinishMultiple}

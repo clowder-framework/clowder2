@@ -5,6 +5,8 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { ClowderMetadataTextField } from "../../styledComponents/ClowderMetadataTextField";
 import { MetadataEditButton } from "./MetadataEditButton";
 import { Grid } from "@mui/material";
+import { AuthWrapper } from "../../auth/AuthWrapper";
+import { FrozenWrapper } from "../../auth/FrozenWrapper";
 
 export const MetadataDateTimePicker = (props) => {
 	const {
@@ -17,6 +19,8 @@ export const MetadataDateTimePicker = (props) => {
 		resourceId,
 		updateMetadata,
 		datasetRole,
+		frozen,
+		frozenVersionNum,
 	} = props;
 	const [localContent, setLocalContent] = useState(
 		content && content[fieldName] ? content : {}
@@ -25,6 +29,7 @@ export const MetadataDateTimePicker = (props) => {
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
+
 	const handleChange = (newValue: Date) => {
 		setInputChanged(true);
 
@@ -75,21 +80,24 @@ export const MetadataDateTimePicker = (props) => {
 					</LocalizationProvider>
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<MetadataEditButton
-							readOnly={readOnly}
-							setReadOnly={setReadOnly}
-							updateMetadata={updateMetadata}
-							content={localContent}
-							metadataId={metadataId}
-							resourceId={resourceId}
-							widgetName={widgetName}
-							setInputChanged={setInputChanged}
-							setMetadata={setMetadata}
-						/>
-					) : (
-						<></>
-					)}
+					<FrozenWrapper frozen={frozen} frozenVersionNum={frozenVersionNum}>
+						<AuthWrapper
+							currRole={datasetRole.role}
+							allowedRoles={["owner", "editor", "uploader"]}
+						>
+							<MetadataEditButton
+								readOnly={readOnly}
+								setReadOnly={setReadOnly}
+								updateMetadata={updateMetadata}
+								content={localContent}
+								metadataId={metadataId}
+								resourceId={resourceId}
+								widgetName={widgetName}
+								setInputChanged={setInputChanged}
+								setMetadata={setMetadata}
+							/>
+						</AuthWrapper>
+					</FrozenWrapper>
 				</Grid>
 			</Grid>
 		</div>

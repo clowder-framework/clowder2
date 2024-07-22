@@ -5,11 +5,12 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import UserOut, get_current_user
-from app.models.datasets import DatasetDB, DatasetOut
+from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetOut
 from app.models.listeners import EventListenerDB
 from app.models.metadata import (
     MetadataAgent,
     MetadataDB,
+    MetadataDBViewList,
     MetadataDefinitionDB,
     MetadataDelete,
     MetadataIn,
@@ -110,7 +111,7 @@ async def add_dataset_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_dataset(es, dataset)
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
         return md.dict()
 
 
@@ -162,7 +163,7 @@ async def replace_dataset_metadata(
             await md.replace()
 
             # Update entry to the metadata index
-            await index_dataset(es, dataset, update=True)
+            await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
             return md.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -228,8 +229,9 @@ async def update_dataset_metadata(
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            await index_dataset(es, dataset, update=True)
-            return await patch_metadata(md, content, es)
+            patched_metadata = await patch_metadata(md, content, es)
+            await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+            return patched_metadata
         else:
             raise HTTPException(
                 status_code=404, detail="Metadata matching the query not found"
@@ -245,16 +247,20 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+    if (
+        await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
+        query = [MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:
-            query.append(MetadataDB.agent.listener.name == listener_name)
+            query.append(MetadataDBViewList.agent.listener.name == listener_name)
         if listener_version is not None:
-            query.append(MetadataDB.agent.listener.version == listener_version)
+            query.append(MetadataDBViewList.agent.listener.version == listener_version)
 
         metadata = []
-        async for md in MetadataDB.find(*query):
+        async for md in MetadataDBViewList.find(*query):
             if md.definition is not None:
                 if (
                     md_def := await MetadataDefinitionDB.find_one(

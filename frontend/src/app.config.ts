@@ -9,6 +9,7 @@ interface Config {
 	hostname: string;
 	apikey: string;
 	GHIssueBaseURL: string;
+	jupyterHubURL: string;
 	KeycloakBaseURL: string;
 	KeycloakLogin: string;
 	KeycloakLogout: string;
@@ -31,6 +32,7 @@ interface Config {
 	defaultFeeds: number;
 	defaultExtractionJobs: number;
 	defaultMetadataDefintionPerPage: number;
+	defaultVersionPerPage: number;
 }
 
 const config: Config = <Config>{};
@@ -65,6 +67,10 @@ config["KeycloakRegister"] = `${config.KeycloakBaseURL}/register`;
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 config["publicSearchEndpoint"] = `${hostname}/api/v2/public_elasticsearch`;
 
+// jupterhub
+const localJupyterhubURL: string = `${config.hostname}/jupyterhub`;
+config["jupyterHubURL"] = process.env.JUPYTERHUB_URL || localJupyterhubURL;
+
 // refresh token time interval
 config["refreshTokenInterval"] = 1000 * 60; // 1 minute
 // updated extractor logs
@@ -93,5 +99,6 @@ config["defaultExtractors"] = 5;
 config["defaultFeeds"] = 5;
 config["defaultExtractionJobs"] = 5;
 config["defaultMetadataDefintionPerPage"] = 5;
+config["defaultVersionPerPage"] = 3;
 
 export default config;

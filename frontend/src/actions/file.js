@@ -393,3 +393,5 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 // 			document.body.removeChild(anchor);
 // 		}
 // 	});
+
+export const INCREMENT_FILE_DOWNLOADS = "INCREMENT_FILE_DOWNLOADS";

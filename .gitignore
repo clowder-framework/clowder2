@@ -82,3 +82,4 @@ secrets.yaml
 # faker
 official.csv
 fact.png
+jupyterhub/.env-dev
