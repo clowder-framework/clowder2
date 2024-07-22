@@ -9,6 +9,7 @@ import {
 	CircularProgress,
 } from "@mui/material";
 import { V2 } from "../../openapi";
+import config from "../../app.config";
 
 interface ImageAnnotatorImageProps {
 	image: string | null;
@@ -53,16 +54,6 @@ async function checkFileIsImage(fileId: string) {
 	}
 }
 
-// Function to fetch file data
-async function fetchImageData(fileId: string) {
-	try {
-		const response =
-			await V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(fileId);
-		return response["presigned_url"];
-	} catch (error) {
-		console.error("Error fetching image data", error);
-	}
-}
 
 const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
 	image,
@@ -173,9 +164,9 @@ const ImageAnnotatorModal: React.FC<ImageAnnotatorModalProps> = ({
 	// Fetch image data
 	useEffect(() => {
 		if (isImage) {
-			fetchImageData(fileId).then((response) => {
-				setImage(response);
-			});
+			// Image download link
+			const imageURL = `${config.hostname}/api/v2/files/${fileId}?increment=false`;
+			setImage(imageURL);
 		}
 	}, [isImage, fileId]);
 
