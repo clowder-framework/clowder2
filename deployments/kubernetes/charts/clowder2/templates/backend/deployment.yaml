@@ -49,10 +49,17 @@ spec:
             - name: MINIO_ACCESS_KEY
               value: {{ .Values.minio.auth.rootUser }}
             - name: MINIO_SECRET_KEY
+              {{- if .Values.backend.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.existingSecret }}
+                  key: {{ .Values.backend.existingMinioSecretKey | default "root-password" }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
                   name: {{ include "clowder2.fullname" . }}-minio
                   key: root-password
+              {{- end }}
             - name: MINIO_UPLOAD_CHUNK_SIZE
               value: {{ .Values.backend.env.MINIO_UPLOAD_CHUNK_SIZE | quote}}
             - name: MONGODB_URL
@@ -96,6 +103,18 @@ spec:
                 secretKeyRef:
                   name: {{ include "clowder2.fullname" . }}-rabbitmq
                   key: rabbitmq-password
+            - name: RABBITMQ_PASS
+              {{- if .Values.backend.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.existingSecret }}
+                  key: {{ .Values.backend.existingRabbitMQSecretKey | default "rabbitmq-password" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clowder2.fullname" . }}-rabbitmq
+                  key: rabbitmq-password
+              {{- end }}
             - name: RABBITMQ_HOST
               value: {{ .Values.backend.env.RABBITMQ_HOST }}
             - name: HEARTBEAT_EXCHANGE

@@ -38,10 +38,17 @@ spec:
             - name: RABBITMQ_USER
               value: {{ .Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
+              {{- if .Values.heartbeat.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-rabbitmq
+                  name: {{.Values.heartbeat.existingSecret }}
+                  key: {{.Values.heartbeat.existingRabbitMQSecretKey | default "rabbitmq-password" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "clowder2.fullname" . }}-rabbitmq
                   key: rabbitmq-password
+              {{- end }}
             - name: RABBITMQ_HOST
               value: {{ .Values.heartbeat.env.RABBITMQ_HOST }}
       {{- with .Values.nodeSelector }}

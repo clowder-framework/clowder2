@@ -38,10 +38,17 @@ spec:
             - name: RABBITMQ_USER
               value: {{ $.Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
+              {{- if $val.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $val.existingSecret }}
+                  key: {{ $val.existingRabbitMQSecretKey | default "rabbitmq-password" }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
                   name: {{ $fullname }}-rabbitmq
                   key: rabbitmq-password
+              {{- end }}
             - name: CLOWDER_VERSION
               value: "2"
             - name: RABBITMQ_URI

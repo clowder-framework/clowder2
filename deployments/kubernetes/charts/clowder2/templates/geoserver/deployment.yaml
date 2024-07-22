@@ -31,10 +31,17 @@ spec:
             - name: GEOSERVER_ADMIN_USER
               value: {{ .Values.geoserver.username }}
             - name: GEOSERVER_ADMIN_PASSWORD
+              {{- if .Values.geoserver.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-services
+                  name: {{.Values.geoserver.existingSecret }}
+                  key: {{.Values.geoserver.existingGeoserverSecretKey | default "GEOSERVER_PW" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "clowder2.fullname" . }}-services
                   key: GEOSERVER_PW
+              {{- end }}
           ports:
             - containerPort: 8080
               name: geoserver
