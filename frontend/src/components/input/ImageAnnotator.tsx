@@ -54,7 +54,6 @@ async function checkFileIsImage(fileId: string) {
 	}
 }
 
-
 const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
 	image,
 	setBoundingBox,
