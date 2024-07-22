@@ -99,11 +99,6 @@ spec:
             - name: RABBITMQ_USER
               value: {{ .Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-rabbitmq
-                  key: rabbitmq-password
-            - name: RABBITMQ_PASS
               {{- if .Values.backend.existingSecret }}
               valueFrom:
                 secretKeyRef:
