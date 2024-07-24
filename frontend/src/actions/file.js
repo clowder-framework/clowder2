@@ -369,7 +369,13 @@ export function submitFileExtractionAction(
 				dispatch(
 					handleErrors(
 						reason,
-						submitFileExtractionAction(fileId, extractorName, requestBody)
+						submitFileExtractionAction(
+							fileId,
+							extractorName,
+							null,
+							datasetId,
+							requestBody
+						)
 					)
 				);
 			});
