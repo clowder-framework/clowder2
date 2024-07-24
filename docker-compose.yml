@@ -50,7 +50,7 @@ services:
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
-      API_HOST: ${API_HOST:-http://localhost}
+      API_HOST: ${API_HOST:-http://backend}
       elasticsearch_url: http://elasticsearch:9200
       auth_base: http://localhost
       auth_realm: clowder
