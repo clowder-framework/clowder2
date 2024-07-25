@@ -57,8 +57,12 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const submitFileExtraction = (
 		fileId: string | undefined,
 		extractorName: string | undefined,
+		datasetId: string | undefined,
 		requestBody: FormData
-	) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
+	) =>
+		dispatch(
+			submitFileExtractionAction(fileId, extractorName, datasetId, requestBody)
+		);
 	const submitDatasetExtraction = (
 		datasetId: string | undefined,
 		extractorName: string | undefined,
@@ -76,7 +80,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 			submitDatasetExtraction(datasetId, extractorName, formData);
 			handleNext();
 		} else if (fileId !== undefined) {
-			submitFileExtraction(fileId, extractorName, formData);
+			submitFileExtraction(fileId, extractorName, datasetId, formData);
 			handleNext();
 		}
 	};
