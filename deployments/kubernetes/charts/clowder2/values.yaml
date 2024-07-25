@@ -51,7 +51,18 @@ backend:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
+  env:
+    MINIO_SERVER_URL: clowder2-minio:9000
+    MINIO_SECURE: "true"
+    MINIO_UPLOAD_CHUNK_SIZE: "10485760"
+    MINIO_BUCKET_NAME: clowder
+    MONGODB_URL: mongodb://clowder2-mongodb:27017
+    oauth2_scheme_auth_url: http://clowder2-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+    auth_register_url: /keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=$(auth_redirect_uri)&scope=openid%20email
+    auth_token_url: http://clowder2-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
+    elasticsearch_url: http://clowder2-elasticsearch:9200
+    RABBITMQ_HOST: clowder2-rabbitmq
+    API_HOST: http://clowder2-backend:80
   service:
     type: ClusterIP
     port: 80
@@ -60,7 +71,7 @@ backend:
 # GEOSERVER
 # ----------------------------------------------------------------------
 geoserver:
-  enabled : true
+  enabled : false
   username: admin
   password: admin
   workspace: clowder2
@@ -97,12 +108,12 @@ minio:
 
   # enable ingress for webui
   ingress:
-    enabled: true
+    enabled: false
     hostname: minio.clowder2.localhost
 
   # enable ingress for api
   apiIngress:
-    enabled: true
+    enabled: false
     hostname: minio-api.clowder2.localhost
 
   # enabled distributed mode (or standalone)
@@ -165,7 +176,7 @@ rabbitmq:
 
   # enable webfrontend
   ingress:
-    enabled: true
+    enabled: false
     hostname: rabbitmq.clowder2.localhost
 
   persistence:
@@ -175,28 +186,33 @@ rabbitmq:
 # ----------------------------------------------------------------------
 # DEFAULT EXTRACTOR SERVICES
 # ----------------------------------------------------------------------
-message:
-  image:
-    repository: clowder/clowder2-messages
-#    tag: main
-    pullPolicy: Always
-
-heartbeat:
-  image:
-    repository: clowder/clowder2-heartbeat
-#    tag: main
-    pullPolicy: Always
 
 
 # ----------------------------------------------------------------------
 # EXTRACTORS
-# ----------------------------------------------------------------------
+message:
+  image:
+    repository: clowder/clowder2-messages
+    pullPolicy: Always
+  env:
+    MONGODB_URL: mongodb://clowder2-mongodb:27017
+    RABBITMQ_HOST: clowder2-rabbitmq
+
+heartbeat:
+  image:
+    repository: clowder/clowder2-heartbeat
+    pullPolicy: Always
+  env:
+    MONGODB_URL: mongodb://clowder2-mongodb:27017
+    RABBITMQ_HOST: clowder2-rabbitmq
+
 ## list of extractors to be installed. Each extractor should have the
 ## following fields:
 ## enabled      : true/false - should the extractor be installed
 ## image        : dokeer/image:tag - the extractor docker image
 ## replicaCount : number - the number of this extractor to install
 ## env          : additional environment variables to pass to extractor.
+
 extractors:
   wordcount:
     image: clowder/extractors-wordcount:latest
