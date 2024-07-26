@@ -215,16 +215,22 @@ heartbeat:
 
 extractors:
   wordcount:
+    enabled: false
     image: clowder/extractors-wordcount:latest
   image-preview:
+    enabled: false
     image: clowder/extractors-image-preview:latest
   image-metadata:
+    enabled: false
     image: clowder/extractors-image-metadata:latest
   audio-preview:
+    enabled: false
     image: clowder/extractors-audio-preview:latest
   file-digest:
+    enabled: false
     image: clowder/extractors-digest:latest
   geotiff-preview:
+    enabled: false
     image: clowder/extractors-geotiff-preview:latest
 
 # ----------------------------------------------------------------------
