@@ -241,6 +241,29 @@ export class DatasetsService {
     }
 
     /**
+     * Mint Doi
+     * @param datasetId
+     * @param enableAdmin
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static mintDoiApiV2DatasetsDatasetIdDoiPost(
+        datasetId: string,
+        enableAdmin: boolean = false,
+    ): CancelablePromise<string> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/doi`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Freeze Datasets
      * @param datasetId
      * @param skip

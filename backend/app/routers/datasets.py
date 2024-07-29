@@ -74,6 +74,8 @@ from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
+from backend.app.routers.doi import DataCiteClient
+
 router = APIRouter()
 security = HTTPBearer()
 
@@ -480,6 +482,44 @@ async def delete_dataset(
         return {"deleted": dataset_id}
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/doi", response_model=str)
+async def mint_doi(
+    dataset_id: str,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization(RoleType.OWNER)),
+):
+    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
+    if dataset is None:
+        return f"Dataset {dataset_id} not found"
+    dataset_db = dataset.dict()
+    metadata = {
+        "data": {
+            "type": "dois",
+            "attributes": {
+                "prefix": "10.1234",
+                "doi": "10.1234/your-doi-suffix",
+                "url": "https://your.url",
+                "titles": [{"title": dataset_db["name"]}],
+                "creators": [
+                    {"name": dataset_db["creator"]["first_name"]["last_name"]}
+                ],
+                "publisher": "DataCite e.V.",
+                "publicationYear": datetime.now().year,
+            },
+        }
+    }
+    dataCiteClient = DataCiteClient()
+    response = dataCiteClient.create_doi(metadata)
+    dataset_db["doi"] = response.json()["data"]["id"]
+    dataset_db["modified"] = datetime.datetime.utcnow()
+    await dataset_db.save()
+
+    # Update entry to the dataset index
+    await index_dataset(es, DatasetOut(dataset_db), update=True)
 
 
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)

@@ -44,6 +44,7 @@ class DatasetBaseCommon(DatasetBase):
     origin_id: Optional[PydanticObjectId] = None
     standard_license: bool = True
     license_id: Optional[str] = None
+    doi: Optional[str] = None
 
 
 class DatasetPatch(BaseModel):
