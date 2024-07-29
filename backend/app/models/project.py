@@ -10,6 +10,10 @@ from beanie import Document, PydanticObjectId, View
 from pydantic import BaseModel, Field
 
 
+class Member(BaseModel):
+    user: UserOut
+    editor: bool = False
+
 class ProjectBase(BaseModel):
     id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
     name: str
@@ -20,6 +24,7 @@ class ProjectBase(BaseModel):
     folder_ids: Optional[List[PydanticObjectId]] = None
     file_ids: Optional[List[PydanticObjectId]] = None
     creator: UserOut
+    users: List[Member] = []
 
 class ProjectDB(Document, ProjectBase):
     class Settings:
