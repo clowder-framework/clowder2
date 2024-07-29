@@ -10,7 +10,7 @@ from beanie import Document, PydanticObjectId, View
 from pydantic import BaseModel, Field
 
 
-class Project(BaseModel):
+class ProjectBase(BaseModel):
     id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
     name: str
     description: Optional[str] = None
@@ -20,3 +20,14 @@ class Project(BaseModel):
     folder_ids: Optional[List[PydanticObjectId]] = None
     file_ids: Optional[List[PydanticObjectId]] = None
     creator: UserOut
+
+class ProjectDB(Document, ProjectBase):
+    class Settings:
+        name = "projects"
+
+class ProjectIn(ProjectBase):
+    pass
+
+class ProjectOut(ProjectDB):
+    class Config:
+        fields = {"id": "id"}
