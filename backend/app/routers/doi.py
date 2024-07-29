@@ -1,11 +1,14 @@
-from app.config import settings
-from fastapi import requests
+import os
+
+import requests
 from requests.auth import HTTPBasicAuth
 
 
 class DataCiteClient:
-    def __init__(self, test_mode=True):
-        self.auth = HTTPBasicAuth(settings.USERNAME, settings.PASSWORD)
+    def __init__(self, test_mode=False):
+        self.auth = HTTPBasicAuth(
+            os.getenv("DATACITE_USERNAME"), os.getenv("DATACITE_PASSWORD")
+        )
         self.headers = {"Content-Type": "application/vnd.api+json"}
         self.base_url = (
             "https://api.test.datacite.org/"

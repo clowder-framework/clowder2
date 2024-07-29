@@ -243,19 +243,19 @@ export class DatasetsService {
     /**
      * Mint Doi
      * @param datasetId
-     * @param enableAdmin
-     * @returns string Successful Response
+     * @param allow
+     * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static mintDoiApiV2DatasetsDatasetIdDoiPost(
         datasetId: string,
-        enableAdmin: boolean = false,
-    ): CancelablePromise<string> {
+        allow: boolean = true,
+    ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/doi`,
             query: {
-                'enable_admin': enableAdmin,
+                'allow': allow,
             },
             errors: {
                 422: `Validation Error`,
@@ -295,18 +295,21 @@ export class DatasetsService {
     /**
      * Freeze Dataset
      * @param datasetId
+     * @param publishDoi
      * @param enableAdmin
      * @returns DatasetFreezeOut Successful Response
      * @throws ApiError
      */
     public static freezeDatasetApiV2DatasetsDatasetIdFreezePost(
         datasetId: string,
+        publishDoi: boolean = false,
         enableAdmin: boolean = false,
     ): CancelablePromise<DatasetFreezeOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/freeze`,
             query: {
+                'publish_doi': publishDoi,
                 'enable_admin': enableAdmin,
             },
             errors: {

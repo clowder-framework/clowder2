@@ -52,6 +52,7 @@ from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.authentication import get_admin, get_admin_mode
+from app.routers.doi import DataCiteClient
 from app.routers.files import add_file_entry, add_local_file_entry
 from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
@@ -73,8 +74,6 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
-
-from app.routers.doi import DataCiteClient
 
 router = APIRouter()
 security = HTTPBearer()
@@ -148,12 +147,12 @@ def _describe_zip_contents(file_list: list):
 
 
 async def _create_folder_structure(
-        dataset_id: str,
-        contents: dict,
-        folder_path: str,
-        folder_lookup: dict,
-        user: UserOut,
-        parent_folder_id: Optional[str] = None,
+    dataset_id: str,
+    contents: dict,
+    folder_path: str,
+    folder_lookup: dict,
+    user: UserOut,
+    parent_folder_id: Optional[str] = None,
 ):
     """Recursively create folders encountered in folder_path until the target folder is created.
     Arguments:
@@ -189,10 +188,10 @@ async def _create_folder_structure(
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
-        dataset_in: DatasetIn,
-        license_id: str,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    dataset_in: DatasetIn,
+    license_id: str,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     standard_license = False
     standard_license_ids = [license.id for license in standard_licenses]
@@ -221,13 +220,13 @@ async def save_dataset(
 
 @router.get("", response_model=Paged)
 async def get_datasets(
-        user_id=Depends(get_user),
-        skip: int = 0,
-        limit: int = 10,
-        mine: bool = False,
-        admin=Depends(get_admin),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
+    user_id=Depends(get_user),
+    skip: int = 0,
+    limit: int = 10,
+    mine: bool = False,
+    admin=Depends(get_admin),
+    enable_admin: bool = False,
+    admin_mode: bool = Depends(get_admin_mode),
 ):
     query = [DatasetDBViewList.frozen == False]  # noqa: E712
 
@@ -282,18 +281,18 @@ async def get_datasets(
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
-        dataset_id: str,
-        authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
-        public: bool = Depends(CheckStatus("PUBLIC")),
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if authenticated or public or allow:
         if (
-                dataset := await DatasetDBViewList.find_one(
-                    Or(
-                        DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                    )
+            dataset := await DatasetDBViewList.find_one(
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
                 )
+            )
         ) is not None:
             return dataset.dict()
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -303,24 +302,24 @@ async def get_dataset(
 
 @router.get("/{dataset_id}/files", response_model=Paged)
 async def get_dataset_files(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
-        public: bool = Depends(CheckStatus("PUBLIC")),
-        user_id=Depends(get_user),
-        skip: int = 0,
-        limit: int = 10,
-        admin=Depends(get_admin),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    user_id=Depends(get_user),
+    skip: int = 0,
+    limit: int = 10,
+    admin=Depends(get_admin),
+    enable_admin: bool = False,
+    admin_mode: bool = Depends(get_admin_mode),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
-            await DatasetDBViewList.find_one(
-                Or(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                )
+        await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
             )
+        )
     ) is not None:
         if authenticated or public or (admin and admin_mode):
             query = [
@@ -359,11 +358,11 @@ async def get_dataset_files(
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
 async def edit_dataset(
-        dataset_id: str,
-        dataset_info: DatasetBase,
-        user=Depends(get_current_user),
-        es=Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    dataset_info: DatasetBase,
+    user=Depends(get_current_user),
+    es=Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # TODO: Refactor this with permissions checks etc.
@@ -376,7 +375,7 @@ async def edit_dataset(
 
         # Update folders index since its using dataset downloads and status to index
         async for folder in FolderDB.find(
-                FolderDB.dataset_id == PydanticObjectId(dataset_id)
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             await index_folder(es, FolderOut(**folder.dict()), update=True)
 
@@ -386,11 +385,11 @@ async def edit_dataset(
 
 @router.patch("/{dataset_id}", response_model=DatasetOut)
 async def patch_dataset(
-        dataset_id: str,
-        dataset_info: DatasetPatch,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    dataset_info: DatasetPatch,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # TODO: Update method not working properly
@@ -410,7 +409,7 @@ async def patch_dataset(
             files_views = await FileDBViewList.find(*query).to_list()
             for file_view in files_views:
                 if (
-                        file := await FileDB.get(PydanticObjectId(file_view.id))
+                    file := await FileDB.get(PydanticObjectId(file_view.id))
                 ) is not None:
                     file.status = dataset_info.status
                     await file.save()
@@ -421,7 +420,7 @@ async def patch_dataset(
 
         # Update folders index since its using dataset downloads and status to index
         async for folder in FolderDB.find(
-                FolderDB.dataset_id == PydanticObjectId(dataset_id)
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             await index_folder(es, FolderOut(**folder.dict()), update=True)
 
@@ -430,10 +429,10 @@ async def patch_dataset(
 
 @router.delete("/{dataset_id}")
 async def delete_dataset(
-        dataset_id: str,
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
@@ -441,7 +440,7 @@ async def delete_dataset(
 
         # find associate frozen datasets and delete them iteratively
         async for frozen_dataset in DatasetFreezeDB.find(
-                DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
         ):
             await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=True)
 
@@ -464,7 +463,7 @@ async def delete_dataset(
 
         # delete files and its associate resources
         async for file in FileDB.find(
-                FileDB.dataset_id == PydanticObjectId(dataset_id)
+            FileDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             await remove_file_entry(file.id, fs, es)
 
@@ -484,51 +483,56 @@ async def delete_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.post("/{dataset_id}/doi", response_model=str)
+@router.post("/{dataset_id}/doi", response_model=DatasetOut)
 async def mint_doi(
-        dataset_id: str,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization(RoleType.OWNER)),
+    dataset_id: str,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization(RoleType.OWNER)) and settings.DOI_ENABLED,
 ):
-    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
-    if dataset is None:
-        return f"Dataset {dataset_id} not found"
-    dataset_db = dataset.dict()
-    metadata = {
-        "data": {
-            "type": "dois",
-            "attributes": {
-                "prefix": "10.1234",
-                "doi": "10.1234/your-doi-suffix",
-                "url": "https://your.url",
-                "titles": [{"title": dataset_db["name"]}],
-                "creators": [
-                    {"name": dataset_db["creator"]["first_name"]["last_name"]}
-                ],
-                "publisher": "DataCite e.V.",
-                "publicationYear": datetime.now().year,
-            },
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        dataset_db = dataset.dict()
+        metadata = {
+            "data": {
+                "type": "dois",
+                "attributes": {
+                    "prefix": os.getenv("DATACITE_PREFIX"),
+                    "url": f"{settings.API_HOST}{settings.API_V2_STR}/datasets/{dataset_id}",
+                    "titles": [{"title": dataset_db["name"]}],
+                    "creators": [
+                        {
+                            "name": dataset_db["creator"]["first_name"]
+                            + dataset_db["creator"]["last_name"]
+                        }
+                    ],
+                    "publisher": "DataCite e.V.",
+                    "publicationYear": datetime.datetime.now().year,
+                },
+            }
         }
-    }
-    dataCiteClient = DataCiteClient()
-    response = dataCiteClient.create_doi(metadata)
-    dataset_db["doi"] = response.json()["data"]["id"]
-    dataset_db["modified"] = datetime.datetime.utcnow()
-    await dataset_db.save()
+        dataCiteClient = DataCiteClient()
+        response = dataCiteClient.create_doi(metadata)
+        dataset_db["doi"] = response.get("data").get("id")
+        dataset_db["modified"] = datetime.datetime.utcnow()
+        dataset.update(dataset_db)
+        await dataset.save()
 
-    # Update entry to the dataset index
-    await index_dataset(es, DatasetOut(dataset_db), update=True)
+        # Update entry to the dataset index
+        await index_dataset(es, DatasetOut(**dataset_db), update=True)
+        return dataset_db
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
 async def freeze_dataset(
-        dataset_id: str,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization(RoleType.OWNER)),
+    dataset_id: str,
+    publish_doi: bool = False,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization(RoleType.OWNER)),
 ):
     # Retrieve the dataset by ID
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -551,7 +555,7 @@ async def freeze_dataset(
             frozen_dataset_data["frozen_version_num"] = 1
         else:
             frozen_dataset_data["frozen_version_num"] = (
-                    latest_frozen_dataset.frozen_version_num + 1
+                latest_frozen_dataset.frozen_version_num + 1
             )
 
         # start freezing associate information
@@ -585,6 +589,8 @@ async def freeze_dataset(
 
         # TODO thumbnails, visualizations
 
+        await mint_doi(frozen_dataset.dict()["id"])
+
         return frozen_dataset.dict()
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -592,13 +598,13 @@ async def freeze_dataset(
 
 @router.get("/{dataset_id}/freeze", response_model=Paged)
 async def get_freeze_datasets(
-        dataset_id: str,
-        skip: int = 0,
-        limit: int = 10,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("owner")),
+    dataset_id: str,
+    skip: int = 0,
+    limit: int = 10,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
 ):
     frozen_datasets_and_count = (
         await DatasetFreezeDB.find(
@@ -627,11 +633,11 @@ async def get_freeze_datasets(
 
 @router.get("/{dataset_id}/freeze/latest_version_num", response_model=int)
 async def get_freeze_dataset_lastest_version_num(
-        dataset_id: str,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("owner")),
+    dataset_id: str,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
 ):
     freeze_dataset_latest_version_num = -999
     latest_frozen_dataset = (
@@ -651,19 +657,19 @@ async def get_freeze_dataset_lastest_version_num(
     "/{dataset_id}/freeze/{frozen_version_num}", response_model=DatasetFreezeOut
 )
 async def get_freeze_dataset_version(
-        dataset_id: str,
-        frozen_version_num: int,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("owner")),
+    dataset_id: str,
+    frozen_version_num: int,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
 ):
     # Retrieve the dataset by ID
     if (
-            frozen_dataset := await DatasetFreezeDB.find_one(
-                DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
-                DatasetFreezeDB.frozen_version_num == frozen_version_num,
-            )
+        frozen_dataset := await DatasetFreezeDB.find_one(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
+        )
     ) is not None:
         if frozen_dataset.deleted is True:
             raise HTTPException(
@@ -683,19 +689,19 @@ async def get_freeze_dataset_version(
     "/{dataset_id}/freeze/{frozen_version_num}", response_model=DatasetFreezeOut
 )
 async def delete_freeze_dataset_version(
-        dataset_id: str,
-        frozen_version_num: int,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("owner")),
+    dataset_id: str,
+    frozen_version_num: int,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
 ):
     # Retrieve the frozen dataset by ID
     if (
-            frozen_dataset := await DatasetFreezeDB.find_one(
-                DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
-                DatasetFreezeDB.frozen_version_num == frozen_version_num,
-            )
+        frozen_dataset := await DatasetFreezeDB.find_one(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
+        )
     ) is not None:
         return await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False)
 
@@ -707,11 +713,11 @@ async def delete_freeze_dataset_version(
 
 @router.post("/{dataset_id}/folders", response_model=FolderOut)
 async def add_folder(
-        dataset_id: str,
-        folder_in: FolderIn,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("uploader")),
+    dataset_id: str,
+    folder_in: FolderIn,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         parent_folder = folder_in.parent_folder
@@ -731,21 +737,21 @@ async def add_folder(
 
 @router.get("/{dataset_id}/folders", response_model=Paged)
 async def get_dataset_folders(
-        dataset_id: str,
-        parent_folder: Optional[str] = None,
-        user_id=Depends(get_user),
-        authenticated: bool = Depends(CheckStatus("authenticated")),
-        public: bool = Depends(CheckStatus("PUBLIC")),
-        skip: int = 0,
-        limit: int = 10,
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    parent_folder: Optional[str] = None,
+    user_id=Depends(get_user),
+    authenticated: bool = Depends(CheckStatus("authenticated")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    skip: int = 0,
+    limit: int = 10,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
-            await DatasetDBViewList.find_one(
-                Or(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                )
+        await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
             )
+        )
     ) is not None:
         if authenticated or public:
             query = [
@@ -787,24 +793,24 @@ async def get_dataset_folders(
 
 @router.get("/{dataset_id}/folders_and_files", response_model=Paged)
 async def get_dataset_folders_and_files(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
-        public: bool = Depends(CheckStatus("PUBLIC")),
-        user_id=Depends(get_user),
-        skip: int = 0,
-        limit: int = 10,
-        admin=Depends(get_admin),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    user_id=Depends(get_user),
+    skip: int = 0,
+    limit: int = 10,
+    admin=Depends(get_admin),
+    enable_admin: bool = False,
+    admin_mode: bool = Depends(get_admin_mode),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
-            await DatasetDBViewList.find_one(
-                Or(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                )
+        await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
             )
+        )
     ) is not None:
         if authenticated or public or (admin and admin_mode):
             query = [
@@ -869,11 +875,11 @@ async def get_dataset_folders_and_files(
 
 @router.delete("/{dataset_id}/folders/{folder_id}")
 async def delete_folder(
-        dataset_id: str,
-        folder_id: str,
-        fs: Minio = Depends(dependencies.get_fs),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    folder_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -884,14 +890,14 @@ async def delete_folder(
             # recursively delete child folder and files
             async def _delete_nested_folders(parent_folder_id):
                 while (
-                        await FolderDB.find_one(
-                            FolderDB.dataset_id == ObjectId(dataset_id),
-                            FolderDB.parent_folder == ObjectId(parent_folder_id),
-                        )
+                    await FolderDB.find_one(
+                        FolderDB.dataset_id == ObjectId(dataset_id),
+                        FolderDB.parent_folder == ObjectId(parent_folder_id),
+                    )
                 ) is not None:
                     async for subfolder in FolderDB.find(
-                            FolderDB.dataset_id == PydanticObjectId(dataset_id),
-                            FolderDB.parent_folder == PydanticObjectId(parent_folder_id),
+                        FolderDB.dataset_id == PydanticObjectId(dataset_id),
+                        FolderDB.parent_folder == PydanticObjectId(parent_folder_id),
                     ):
                         async for file in FileDB.find(FileDB.folder_id == subfolder.id):
                             await remove_file_entry(file.id, fs, es)
@@ -910,16 +916,16 @@ async def delete_folder(
 
 @router.get("/{dataset_id}/folders/{folder_id}")
 async def get_folder(
-        dataset_id: str,
-        folder_id: str,
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    folder_id: str,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
-            await DatasetDBViewList.find_one(
-                Or(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                )
+        await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
             )
+        )
     ) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             return folder.dict()
@@ -930,12 +936,12 @@ async def get_folder(
 
 @router.patch("/{dataset_id}/folders/{folder_id}", response_model=FolderOut)
 async def patch_folder(
-        dataset_id: str,
-        folder_id: str,
-        folder_info: FolderPatch,
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        user=Depends(get_current_user),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    folder_id: str,
+    folder_info: FolderPatch,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    user=Depends(get_current_user),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if await DatasetDB.get(PydanticObjectId(dataset_id)) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -945,8 +951,8 @@ async def patch_folder(
             # allow moving folder around within the hierarchy
             if folder_info.parent_folder is not None:
                 if (
-                        await FolderDB.get(PydanticObjectId(folder_info.parent_folder))
-                        is not None
+                    await FolderDB.get(PydanticObjectId(folder_info.parent_folder))
+                    is not None
                 ):
                     folder.parent_folder = folder_info.parent_folder
             folder.modified = datetime.datetime.utcnow()
@@ -965,14 +971,14 @@ async def patch_folder(
 
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        file: UploadFile = File(...),
-        es=Depends(dependencies.get_elasticsearchclient),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-        allow: bool = Depends(Authorization("uploader")),
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    file: UploadFile = File(...),
+    es=Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
@@ -1017,14 +1023,14 @@ async def save_file(
 
 @router.post("/{dataset_id}/filesMultiple", response_model=List[FileOut])
 async def save_files(
-        dataset_id: str,
-        files: List[UploadFile],
-        folder_id: Optional[str] = None,
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        es=Depends(dependencies.get_elasticsearchclient),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-        allow: bool = Depends(Authorization("uploader")),
+    dataset_id: str,
+    files: List[UploadFile],
+    folder_id: Optional[str] = None,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es=Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         files_added = []
@@ -1044,7 +1050,7 @@ async def save_files(
 
             if folder_id is not None:
                 if (
-                        folder := await FolderDB.get(PydanticObjectId(folder_id))
+                    folder := await FolderDB.get(PydanticObjectId(folder_id))
                 ) is not None:
                     new_file.folder_id = folder.id
                 else:
@@ -1078,13 +1084,13 @@ async def save_files(
 
 @router.post("/{dataset_id}/local_files", response_model=FileOut)
 async def save_local_file(
-        localfile_in: LocalFileIn,
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        user=Depends(get_current_user),
-        es=Depends(dependencies.get_elasticsearchclient),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-        allow: bool = Depends(Authorization("uploader")),
+    localfile_in: LocalFileIn,
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    user=Depends(get_current_user),
+    es=Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
@@ -1133,12 +1139,12 @@ async def save_local_file(
 
 @router.post("/createFromZip", response_model=DatasetOut)
 async def create_dataset_from_zip(
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        file: UploadFile = File(...),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-        token: str = Depends(get_token),
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    file: UploadFile = File(...),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    token: str = Depends(get_token),
 ):
     if file.filename.endswith(".zip") is False:
         raise HTTPException(status_code=404, detail="File is not a zip file")
@@ -1206,16 +1212,16 @@ async def create_dataset_from_zip(
 
 @router.get("/{dataset_id}/download")
 async def download_dataset(
-        dataset_id: str,
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        user=Depends(get_current_user),
-        fs: Minio = Depends(dependencies.get_fs),
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
-            dataset := await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
-            )
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
     ) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
@@ -1260,7 +1266,7 @@ async def download_dataset(
         file_count = 0
 
         async for file in FileDBViewList.find(
-                FileDBViewList.dataset_id == ObjectId(dataset_id)
+            FileDBViewList.dataset_id == ObjectId(dataset_id)
         ):
             # find the bytes id
             # if it's working draft file_id == origin_id
@@ -1376,7 +1382,7 @@ async def download_dataset(
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
         # Update folders index since its using dataset downloads and status to index
         async for folder in FolderDB.find(
-                FolderDB.dataset_id == PydanticObjectId(dataset_id)
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             await index_folder(es, FolderOut(**folder.dict()), update=True)
 
@@ -1388,14 +1394,14 @@ async def download_dataset(
 # can handle parameeters pass in as key/values in info
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
-        dataset_id: str,
-        extractorName: str,
-        request: Request,
-        # parameters don't have a fixed model shape
-        parameters: dict = None,
-        user=Depends(get_current_user),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-        allow: bool = Depends(Authorization("uploader")),
+    dataset_id: str,
+    extractorName: str,
+    request: Request,
+    # parameters don't have a fixed model shape
+    parameters: dict = None,
+    user=Depends(get_current_user),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail="No extractorName specified")
@@ -1415,17 +1421,17 @@ async def get_dataset_extract(
 
 @router.get("/{dataset_id}/thumbnail")
 async def download_dataset_thumbnail(
-        dataset_id: str,
-        fs: Minio = Depends(dependencies.get_fs),
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     # If dataset exists in MongoDB, download from Minio
     if (
-            dataset := await DatasetDBViewList.find_one(
-                Or(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                )
+        dataset := await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
             )
+        )
     ) is not None:
         if dataset.thumbnail_id is not None:
             content = fs.get_object(
@@ -1448,9 +1454,9 @@ async def download_dataset_thumbnail(
 
 @router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
 async def add_dataset_thumbnail(
-        dataset_id: str,
-        thumbnail_id: str,
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    thumbnail_id: str,
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:

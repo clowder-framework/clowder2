@@ -33,6 +33,7 @@ interface Config {
 	defaultExtractionJobs: number;
 	defaultMetadataDefintionPerPage: number;
 	defaultVersionPerPage: number;
+	enableDOI: boolean;
 }
 
 const config: Config = <Config>{};
@@ -100,5 +101,6 @@ config["defaultFeeds"] = 5;
 config["defaultExtractionJobs"] = 5;
 config["defaultMetadataDefintionPerPage"] = 5;
 config["defaultVersionPerPage"] = 3;
+config["enableDOI"] = true;
 
 export default config;

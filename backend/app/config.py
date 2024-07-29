@@ -89,10 +89,9 @@ class Settings(BaseSettings):
     listener_heartbeat_interval = 5 * 60
 
     # DOI datacite details
+    DOI_ENABLED = True
     DATACITE_TEST_URL = "https://api.test.datacite.org/dois"
     DATACITE_URL = "https://api.datacite.org/dois"
-    DATACITE_USERNAME = "admin"
-    DATACITE_PASSWORD = "<PASSWORD>"
 
 
 settings = Settings()
