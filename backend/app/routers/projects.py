@@ -64,6 +64,7 @@ async def get_projects(
     enable_admin: bool = False,
 ):
 
+    # TODO check if the current user is a member OR creator
     query = (ProjectDB.creator.email == user_id)
 
     projects_and_count = await ProjectDB.find(*query).to_list()
