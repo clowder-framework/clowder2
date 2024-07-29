@@ -125,7 +125,7 @@ async def add_member(
                 project.users.append(new_member)
                 await project.replace()
             return project.dict()
-        raise HTTPException(status_code=404, detail=f"Group {project_id} not found")
+        raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 @router.post("/{project_id}/remove/{username}", response_model=ProjectOut)
@@ -148,5 +148,5 @@ async def remove_member(
         project.users.remove(found_user)
         await project.replace()
         return project.dict()
-    raise HTTPException(status_code=404, detail=f"Group {project_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
