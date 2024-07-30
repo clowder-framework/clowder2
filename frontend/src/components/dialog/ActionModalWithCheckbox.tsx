@@ -16,6 +16,7 @@ type ActionModalProps = {
 	actionOpen: boolean;
 	actionTitle: string;
 	actionText: string;
+	displayCheckbox: boolean;
 	checkboxLabel: string;
 	checkboxSelected: boolean;
 	publishDOI: boolean;
@@ -33,6 +34,7 @@ export const ActionModalWithCheckbox: React.FC<ActionModalProps> = (
 		actionOpen,
 		actionTitle,
 		actionText,
+		displayCheckbox,
 		checkboxLabel,
 		checkboxSelected,
 		setCheckboxSelected,
@@ -47,7 +49,7 @@ export const ActionModalWithCheckbox: React.FC<ActionModalProps> = (
 			<DialogTitle id="confirmation-dialog-title">{actionTitle}</DialogTitle>
 			<DialogContent>
 				<DialogContentText>{actionText}</DialogContentText>
-				<br />
+				<br hidden={!displayCheckbox} />
 				<FormControlLabel
 					value={"end"}
 					control={
@@ -58,6 +60,7 @@ export const ActionModalWithCheckbox: React.FC<ActionModalProps> = (
 							}}
 						/>
 					}
+					sx={{ display: displayCheckbox ? "block" : "none" }}
 					label={checkboxLabel}
 				/>
 			</DialogContent>

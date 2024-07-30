@@ -101,6 +101,8 @@ config["defaultFeeds"] = 5;
 config["defaultExtractionJobs"] = 5;
 config["defaultMetadataDefintionPerPage"] = 5;
 config["defaultVersionPerPage"] = 3;
+
+// Use this boolean to enable/disable DOI minting feature
 config["enableDOI"] = true;
 
 export default config;
