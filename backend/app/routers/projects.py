@@ -243,11 +243,12 @@ async def get_project(
     project_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
+            )
+    ) is not None:
         return project.dict()
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
