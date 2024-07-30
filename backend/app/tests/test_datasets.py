@@ -23,15 +23,6 @@ def test_get_one(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
 
-def test_create_doi(client: TestClient, headers: dict):
-    dataset_id = create_dataset(client, headers).get("id")
-    response = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-
 def test_delete(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
     response = client.delete(
