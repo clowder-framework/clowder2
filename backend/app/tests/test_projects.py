@@ -18,7 +18,9 @@ def test_create_project(client: TestClient, headers: dict):
 
 def test_get_project(client: TestClient, headers: dict):
     project_id = create_project(client, headers).get("id")
-    response = client.get(f"{settings.API_V2_STR}/projects/{project_id}", headers=headers)
+    response = client.get(
+        f"{settings.API_V2_STR}/projects/{project_id}", headers=headers
+    )
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
@@ -29,7 +31,6 @@ def test_delete_project(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/projects/{project_id}", headers=headers
     )
     assert response.status_code == 200
-
 
 
 def test_add_member(client: TestClient, headers: dict):
@@ -49,6 +50,7 @@ def test_add_member(client: TestClient, headers: dict):
     for user in response.json().get("users"):
         assert user.get("user").get("email") == member_alt["user"]["email"]
 
+
 def test_add_dataset(client: TestClient, headers: dict):
     new_project = create_project(client, headers)
     project_id = new_project.get("id")
@@ -63,4 +65,3 @@ def test_add_dataset(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
     assert dataset_id in response.json().get("dataset_ids")
-
