@@ -190,7 +190,7 @@ async def add_file(
                 )
         ) is not None:
             if file_id not in project.file_ids:
-                project.file_ids.append(file_id)
+                project.file_ids.append(PydanticObjectId(file_id))
                 await project.replace()
             return project.dict()
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -217,7 +217,7 @@ async def remove_file(
                 )
         ) is not None:
             if file_id in project.file_ids:
-                project.file_ids.remove(file_id)
+                project.file_ids.remove(PydanticObjectId(file_id))
                 await project.replace()
                 return project.dict()
             else:
