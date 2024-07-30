@@ -21,9 +21,9 @@ class ProjectBase(BaseModel):
     description: Optional[str] = None
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-    dataset_ids: Optional[List[PydanticObjectId]] = None
-    folder_ids: Optional[List[PydanticObjectId]] = None
-    file_ids: Optional[List[PydanticObjectId]] = None
+    dataset_ids: Optional[List[PydanticObjectId]] = []
+    folder_ids: Optional[List[PydanticObjectId]] = []
+    file_ids: Optional[List[PydanticObjectId]] = []
     creator: UserOut
     users: List[Member] = []
 
