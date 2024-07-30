@@ -50,8 +50,7 @@ async def save_project(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     project = ProjectDB(
-        **project_in.dict(),
-        creator=user,
+        **project_in.dict()
     )
     await project.insert()
 
@@ -220,9 +219,9 @@ async def get_projects(
     enable_admin: bool = False,
 ):
     # TODO check if the current user is a member OR creator
-    query = ProjectDB.creator.email == user_id
-
-    projects_and_count = await ProjectDB.find(*query).to_list()
+    projects_and_count = await ProjectDB.aggregate(
+        [_get_page_query(skip, limit, sort_field="email", ascending=True)],
+    ).to_list()
 
     page_metadata = _construct_page_metadata(projects_and_count, skip, limit)
     # TODO have to change _id this way otherwise it won't work

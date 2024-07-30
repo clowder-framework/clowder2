@@ -39,6 +39,7 @@ from app.models.visualization_data import (
     VisualizationDataDBViewList,
     VisualizationDataFreezeDB,
 )
+from app.models.project import ProjectDB
 from app.routers import (
     authentication,
     authorization,
@@ -66,6 +67,7 @@ from app.routers import (
     thumbnails,
     users,
     visualization,
+    projects,
 )
 
 # setup loggers
@@ -251,6 +253,11 @@ api_router.include_router(
     tags=["public_thumbnails"],
 )
 api_router.include_router(
+    projects.router,
+    prefix="/projects",
+    tags=["projects"],
+)
+api_router.include_router(
     licenses.router,
     prefix="/licenses",
     tags=["licenses"],
@@ -315,6 +322,7 @@ async def startup_beanie():
             ThumbnailFreezeDB,
             ThumbnailDBViewList,
             LicenseDB,
+            ProjectDB,
         ],
         recreate_views=True,
     )
