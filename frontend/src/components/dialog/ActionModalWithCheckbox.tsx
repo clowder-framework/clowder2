@@ -19,7 +19,7 @@ type ActionModalProps = {
 	checkboxLabel: string;
 	checkboxSelected: boolean;
 	publishDOI: boolean;
-	setPublishDOI: (value: boolean) => void;
+	setCheckboxSelected: (value: boolean) => void;
 	actionBtnName: string;
 	handleActionBtnClick: () => void;
 	handleActionCancel: () => void;
@@ -35,8 +35,7 @@ export const ActionModalWithCheckbox: React.FC<ActionModalProps> = (
 		actionText,
 		checkboxLabel,
 		checkboxSelected,
-		publishDOI,
-		setPublishDOI,
+		setCheckboxSelected,
 		actionBtnName,
 		handleActionBtnClick,
 		handleActionCancel,
@@ -48,13 +47,14 @@ export const ActionModalWithCheckbox: React.FC<ActionModalProps> = (
 			<DialogTitle id="confirmation-dialog-title">{actionTitle}</DialogTitle>
 			<DialogContent>
 				<DialogContentText>{actionText}</DialogContentText>
+				<br />
 				<FormControlLabel
+					value={"end"}
 					control={
 						<Checkbox
-							size={"small"}
 							defaultChecked={checkboxSelected}
 							onChange={() => {
-								setPublishDOI(!publishDOI);
+								setCheckboxSelected(!checkboxSelected);
 							}}
 						/>
 					}
@@ -63,18 +63,18 @@ export const ActionModalWithCheckbox: React.FC<ActionModalProps> = (
 			</DialogContent>
 			<DialogActions>
 				<Button
-					variant="contained"
-					onClick={handleActionBtnClick}
-					color={actionLevel ?? "primary"}
-				>
-					{actionBtnName}
-				</Button>
-				<Button
 					variant="outlined"
 					onClick={handleActionCancel}
 					color={actionLevel ?? "primary"}
 				>
 					Cancel
+				</Button>
+				<Button
+					variant="contained"
+					onClick={handleActionBtnClick}
+					color={actionLevel ?? "primary"}
+				>
+					{actionBtnName}
 				</Button>
 			</DialogActions>
 		</Dialog>

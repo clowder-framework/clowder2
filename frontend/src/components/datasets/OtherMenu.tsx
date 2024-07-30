@@ -131,12 +131,11 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			<ActionModalWithCheckbox
 				actionOpen={freezeDatasetConfirmOpen}
 				actionTitle="Are you ready to release this version of the dataset?"
-				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
-				checkboxLabel="Select this checkbox to publish this version of the dataset and get a DOI."
-				checkboxSelected={false}
+				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset. Optionally, you can also generate a Digital Object Identifier (DOI) by selecting the checkbox below. It will be displayed in the dataset page in the Details section."
+				checkboxLabel="Generate a DOI for this version of the dataset."
+				checkboxSelected={publishDOI}
+				setCheckboxSelected={setPublishDOI}
 				actionBtnName="Release"
-				publishDOI={publishDOI}
-				setPublishDOI={setPublishDOI}
 				handleActionBtnClick={() => {
 					freezeDataset(datasetId, publishDOI);
 					setFreezeDatasetConfirmOpen(false);
