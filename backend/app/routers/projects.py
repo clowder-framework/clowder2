@@ -13,6 +13,7 @@ from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app import dependencies
 from app.config import settings
 from app.models.users import UserDB, UserOut, UserIn
+from app.models.datasets import DatasetDB
 from app.models.project import (
     ProjectBase,
     ProjectDB,
@@ -55,6 +56,41 @@ async def save_project(
 
     # TODO Add new entry to elasticsearch
     return project.dict()
+
+@router.post("/{project_id}/add_dataset/{dataset_id}", response_model=ProjectOut)
+async def add_dataset(
+        project_id: str,
+        dataset_id: str,
+):
+    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
+                                           ) is not None:
+        if dataset := await DatasetDB.find_one(DatasetDB.id == PydanticObjectId(dataset_id)
+                                               ) is not None:
+            project.dataset_ids.append(dataset_id)
+            await project.replace()
+            return project.dict()
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+@router.post("/{project_id}/remove_dataset/{dataset_id}", response_model=ProjectOut)
+async def add_dataset(
+        project_id: str,
+        dataset_id: str,
+):
+    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
+                                           ) is not None:
+        if dataset := await DatasetDB.find_one(DatasetDB.id == PydanticObjectId(dataset_id)
+                                               ) is not None:
+            if dataset_id in project.dataset_ids:
+                project.dataset_ids.remove(dataset_id)
+                await project.replace()
+                return project.dict()
+            else:
+                return project.dict()
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+
 
 @router.get("", response_model=Paged)
 async def get_projects(
