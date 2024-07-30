@@ -20,8 +20,31 @@ export default function Geospatial(props: GeospatialProps) {
 	const { visConfigEntry } = props;
 
 	const [layerWMS, setLayerWMS] = useState<string | undefined>(undefined);
+	const [layerAttributes, setLayerAttributes] = useState<string[] | undefined>(
+		undefined
+	);
+	const [filterAttribute, setFilterAttribute] = useState<string | undefined>(
+		undefined
+	);
+	const [attributeValues, setAttributeValues] = useState<string[] | undefined>(
+		undefined
+	);
+	const [attributeValue, setAttributeValue] = useState<string | undefined>(
+		undefined
+	);
+	const [vectorRef, setVectorRef] = useState<VectorLayer<any> | undefined>(
+		undefined
+	);
 	const [map, setMap] = useState<Map | undefined>(undefined);
 	const mapElement = useRef();
+
+	function updateFilterAttribute(event) {
+		setFilterAttribute(event.target.value);
+	}
+
+	function setAttributeValueFn(event) {
+		setAttributeValue(event.target.value);
+	}
 
 	useEffect(() => {
 		if (visConfigEntry !== undefined) {
@@ -38,7 +61,11 @@ export default function Geospatial(props: GeospatialProps) {
 				fetch(attribute_url).then((response) => {
 					if (response.status === 200) {
 						response.json().then((json) => {
-							console.log(json);
+							const attrs: string[] = [];
+							json["featureTypes"][0]["properties"].forEach((a) => {
+								attrs.push(a["name"]);
+							});
+							setLayerAttributes(attrs);
 						});
 					}
 				});
@@ -60,8 +87,17 @@ export default function Geospatial(props: GeospatialProps) {
 			bbox = transformExtent(bbox, "EPSG:4326", "EPSG:3857");
 			const center = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2];
 
+			let wms_url = layerWMS;
+			if (attributeValue != undefined) {
+				wms_url;
+				const params = new URLSearchParams(wms_url.split("?")[1]);
+				params.delete("bbox");
+				wms_url = `${wms_url.split("?")[0]}?${params.toString()}`;
+				wms_url += `&CQL_FILTER=STATE_NAME='${attributeValue}'`;
+			}
+
 			const source = new VectorSource({
-				url: layerWMS,
+				url: wms_url,
 				format: new GeoJSON(),
 				strategy: bboxStrategy,
 			});
@@ -127,9 +163,64 @@ export default function Geospatial(props: GeospatialProps) {
 				if (info) info.style.visibility = "hidden";
 			});
 
+			setVectorRef(vecLayer);
 			setMap(wms_map);
 		}
 	}, [layerWMS]);
+
+	useEffect(() => {
+		if (layerWMS !== undefined) {
+			// Determine bounding box extent & center point from URL
+			let bbox = [0, 0, 0, 0];
+			const entries = layerWMS.split("&");
+			entries.forEach((entry) => {
+				if (entry.startsWith("bbox=")) {
+					const vals = entry.replace("bbox=", "").split(",");
+					bbox = vals.map((v) => parseFloat(v));
+				}
+			});
+			bbox = transformExtent(bbox, "EPSG:4326", "EPSG:3857");
+			const center = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2];
+
+			let wms_url = layerWMS;
+			if (attributeValue != undefined) {
+				wms_url;
+				const params = new URLSearchParams(wms_url.split("?")[1]);
+				params.delete("bbox");
+				wms_url = `${wms_url.split("?")[0]}?${params.toString()}`;
+				wms_url += `&CQL_FILTER=STATE_NAME='${attributeValue}'`;
+			}
+
+			const source = new VectorSource({
+				url: wms_url,
+				format: new GeoJSON(),
+				strategy: bboxStrategy,
+			});
+
+			const vecLayer = new VectorLayer({
+				source: source,
+			});
+
+			if (map) {
+				if (vectorRef) map.removeLayer(vectorRef);
+				map.addLayer(vecLayer);
+				setVectorRef(vecLayer);
+			}
+		}
+	}, [layerWMS, attributeValue]);
+
+	useEffect(() => {
+		const values: string[] = [];
+		if (vectorRef && filterAttribute) {
+			vectorRef
+				.getSource()
+				.getFeatures()
+				.forEach((feat: any) => {
+					values.push(feat["values_"][filterAttribute]);
+				});
+			setAttributeValues(values);
+		}
+	}, [filterAttribute]);
 
 	return (() => {
 		return (
@@ -152,6 +243,28 @@ export default function Geospatial(props: GeospatialProps) {
 						}}
 					/>
 				</div>
+				{layerAttributes ? (
+					<>
+						<select onChange={updateFilterAttribute}>
+							{layerAttributes.map((att) => {
+								return <option value={att}>{att}</option>;
+							})}
+						</select>
+					</>
+				) : (
+					<></>
+				)}
+				{attributeValues ? (
+					<>
+						<select onChange={setAttributeValueFn}>
+							{attributeValues.map((att) => {
+								return <option value={att}>{att}</option>;
+							})}
+						</select>
+					</>
+				) : (
+					<></>
+				)}
 			</>
 		);
 	})();
