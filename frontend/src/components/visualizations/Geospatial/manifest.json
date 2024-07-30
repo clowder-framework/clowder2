@@ -13,10 +13,6 @@
 		"name": "Geospatial",
 		"mainType": "image",
 		"mimeTypes": [
-			"application/zip",
-			"application/x-zip",
-			"application/x-7z-compressed",
-			"multi/files-zipped",
 			"image/tif",
 			"image/tiff"
 		],
