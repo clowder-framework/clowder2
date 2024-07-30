@@ -100,7 +100,7 @@ export default function GeospatialVector(props: GeospatialProps) {
 				const params = new URLSearchParams(wms_url.split("?")[1]);
 				params.delete("bbox");
 				wms_url = `${wms_url.split("?")[0]}?${params.toString()}`;
-				wms_url += `&CQL_FILTER=STATE_NAME='${attributeValue}'`;
+				wms_url += `&CQL_FILTER=${filterAttribute}='${attributeValue}'`;
 			}
 
 			const source = new VectorSource({
@@ -143,7 +143,15 @@ export default function GeospatialVector(props: GeospatialProps) {
 					info.style.top = `${pixel[1]}px`;
 					if (feature !== currentFeature) {
 						info.style.visibility = "visible";
-						info.innerText = feature.get("STATE_NAME");
+						let label =
+							"<table><th>" + "<td>Field</td>" + "<td>Value</td></th>";
+						const allProps = feature.getProperties();
+						for (const key in allProps) {
+							if (key == "geometry") continue;
+							label += `<tr><td>${key}</td><td>${allProps[key]}</td></tr>`;
+						}
+						label += "</table>";
+						info.innerHTML = label;
 					}
 				} else {
 					if (info) info.style.visibility = "hidden";
@@ -255,17 +263,7 @@ export default function GeospatialVector(props: GeospatialProps) {
 						height: "300px",
 					}}
 					className="map-container"
-				>
-					<div
-						id="info"
-						style={{
-							position: "absolute",
-							display: "inline-block",
-							height: "auto",
-							width: "auto",
-						}}
-					/>
-				</div>
+				/>
 				{layerAttributes ? (
 					<>
 						<b>Field Name</b>
@@ -300,6 +298,16 @@ export default function GeospatialVector(props: GeospatialProps) {
 				) : (
 					<></>
 				)}
+				<br />
+				<div
+					id="info"
+					style={{
+						//position: "absolute",
+						//display: "inline-block",
+						height: "auto",
+						width: "auto",
+					}}
+				/>
 			</>
 		);
 	})();
