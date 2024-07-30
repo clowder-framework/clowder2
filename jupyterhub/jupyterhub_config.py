@@ -94,6 +94,8 @@ if os.getenv("PROD_DEPLOYMENT") == "true":
     c.CustomTokenAuthenticator.landing_page_logout_url = (
         f"""https://{os.getenv("CLOWDER_URL")}/auth/logout"""
     )
+    # Environment variable for the single-user server
+    c.Spawner.environment = {"CLOWDER_URL": f"https://{os.getenv('CLOWDER_URL')}"}
 
 else:
     c.CustomTokenAuthenticator.keycloak_url = "http://%s/realms/%s/" % (
@@ -106,11 +108,11 @@ else:
     c.CustomTokenAuthenticator.landing_page_logout_url = (
         f"""http://{os.getenv("CLOWDER_URL")}/auth/logout"""
     )
+    c.Spawner.environment = {"CLOWDER_URL": f"http://{os.getenv('CLOWDER_URL')}"}
 
 c.JupyterHub.cookie_secret = os.getenv("JUPYTERHUB_CRYPT_KEY")
 
 # Set environment variables for the single-user server
-c.Spawner.environment = {"CLOWDER_URL": os.getenv("CLOWDER_URL")}
 
 # Allowed admins
 admin = os.environ.get("JUPYTERHUB_ADMIN")
