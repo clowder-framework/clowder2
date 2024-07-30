@@ -56,9 +56,7 @@ export const Projects = (): JSX.Element => {
 											author={`${project.creator.first_name} ${project.creator.last_name}`}
 											created={project.created}
 											description={project.description}
-											numFiles={
-												project.files_ids ? project.files_ids.length : 0
-											}
+											numFiles={project.file_ids ? project.file_ids.length : 0}
 											numFolders={
 												project.folder_ids ? project.folder_ids.length : 0
 											}

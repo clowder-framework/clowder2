@@ -18,6 +18,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
 import { V2 } from "../../openapi";
 import { DatsetTableEntry } from "../datasets/DatasetTableEntry";
+import { FolderTableEntry } from "../folders/FolderTableEntry";
 
 const iconStyle = {
 	verticalAlign: "middle",
@@ -35,8 +36,11 @@ export default function ProjectTable(props) {
 	const selectFile = (selectedFileId) => {
 		navigate(`/files/${selectedFileId}`);
 	};
-	const selectFolder = (selectedFolderId) => {
-		navigate(`/folders/${selectedFolderId}`);
+	const selectFolder = (selectedFolder) => {
+		if (selectedFolder)
+			navigate(
+				`/datasets/${selectedFolder.dataset_id}?folder=${selectedFolder.id}`
+			);
 	};
 
 	const dispatch = useDispatch();
@@ -44,6 +48,30 @@ export default function ProjectTable(props) {
 	const [datasets, setDatasets] = useState([]);
 	const [folders, setFolders] = useState([]);
 	const [files, setFiles] = useState([]);
+
+	useEffect(() => {
+		// hack the folders for now
+		setFolders([
+			{
+				id: "66a085640c20e43f5c50b059",
+				name: "20240723233900",
+				dataset_id: "669fcf3978f3222201e18a0d",
+				parent_folder: null,
+				creator: {
+					email: "cwang138@illinois.edu",
+					first_name: "Chen",
+					last_name: "Wang",
+					id: "669ea726d559628438e57841",
+					admin: true,
+					admin_mode: true,
+					read_only_user: false,
+				},
+				created: "2024-07-24T04:39:00.710+0000",
+				modified: "2024-07-24T04:39:00.710+0000",
+				object_type: "folder",
+			},
+		]);
+	}, []);
 
 	useEffect(() => {
 		if (project) {
@@ -100,6 +128,14 @@ export default function ProjectTable(props) {
 							iconStyle={iconStyle}
 							selectDataset={selectDataset}
 							dataset={item}
+							key={item.id}
+						/>
+					))}
+					{folders.map((item) => (
+						<FolderTableEntry
+							iconStyle={iconStyle}
+							selectFolder={selectFolder}
+							folder={item}
 							key={item.id}
 						/>
 					))}
