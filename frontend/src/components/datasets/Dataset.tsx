@@ -49,6 +49,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
+import ChatIcon from "@mui/icons-material/Chat";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import { TabStyle } from "../../styles/Styles";
@@ -63,6 +64,7 @@ import { authCheck, frozenCheck } from "../../utils/common";
 import { DatasetVersions } from "./versions/DatasetVersions";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
+import Chat from "../chat/Chat";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -410,6 +412,14 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 						<Tab
+							icon={<ChatIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Chat"
+							{...a11yProps(5)}
+							disabled={false}
+						/>
+						<Tab
 							icon={<ShareIcon />}
 							iconPosition="start"
 							sx={
@@ -534,9 +544,12 @@ export const Dataset = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={5}>
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={6}>
+						<Chat />
+					</TabPanel>
 					<TabPanel
 						value={selectedTabIndex}
-						index={6}
+						index={7}
 						sx={
 							!authCheck(adminMode, datasetRole.role, [
 								"owner",
