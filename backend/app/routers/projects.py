@@ -91,19 +91,21 @@ async def remove_dataset(
     dataset_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
-        if (
-            dataset := await DatasetDB.find_one(
-                DatasetDB.id == PydanticObjectId(dataset_id)
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
             )
-            is not None
-        ):
+    ) is not None:
+        if (
+                dataset := await DatasetDB.find_one(
+                    Or(
+                        DatasetDB.id == PydanticObjectId(dataset_id),
+                    )
+                )
+        ) is not None:
             if dataset_id in project.dataset_ids:
-                project.dataset_ids.remove(dataset_id)
+                project.dataset_ids.remove(PydanticObjectId(dataset_id))
                 await project.replace()
                 return project.dict()
             else:
@@ -118,19 +120,21 @@ async def add_folder(
     folder_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
-        if (
-            folder := await FolderDB.find_one(
-                FolderDB.id == PydanticObjectId(folder_id)
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
             )
-            is not None
-        ):
+    ) is not None:
+        if (
+                folder := await FolderDB.find_one(
+                    Or(
+                        FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
+                    )
+                )
+        ) is not None:
             if folder_id not in project.folder_ids:
-                project.folder_ids.append(folder_id)
+                project.folder_ids.append(PydanticObjectId(folder_id))
                 await project.replace()
             return project.dict()
         raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
@@ -143,19 +147,21 @@ async def remove_folder(
     folder_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
-        if (
-            folder := await FolderDB.find_one(
-                FolderDB.id == PydanticObjectId(folder_id)
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
             )
-            is not None
-        ):
+    ) is not None:
+        if (
+                folder := await FolderDB.find_one(
+                    Or(
+                        FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
+                    )
+                )
+        ) is not None:
             if folder_id in project.folder_ids:
-                project.folder_ids.remove(folder_id)
+                project.folder_ids.remove(PydanticObjectId(folder_id))
                 await project.replace()
                 return project.dict()
             else:
