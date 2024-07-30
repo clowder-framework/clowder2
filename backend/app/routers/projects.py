@@ -43,7 +43,6 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 @router.post("", response_model=ProjectOut)
 async def save_project(
     project_in: ProjectIn,
-    license_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
@@ -73,7 +72,7 @@ async def add_dataset(
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
 @router.post("/{project_id}/remove_dataset/{dataset_id}", response_model=ProjectOut)
-async def add_dataset(
+async def remove_dataset(
         project_id: str,
         dataset_id: str,
 ):
