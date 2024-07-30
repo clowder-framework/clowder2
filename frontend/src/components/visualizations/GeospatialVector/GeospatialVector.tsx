@@ -20,6 +20,8 @@ export default function GeospatialVector(props: GeospatialProps) {
 	const { visConfigEntry } = props;
 
 	const [layerWMS, setLayerWMS] = useState<string | undefined>(undefined);
+	const [layerDL, setLayerDL] = useState<string | undefined>(undefined);
+
 	const [layerAttributes, setLayerAttributes] = useState<string[] | undefined>(
 		undefined
 	);
@@ -46,6 +48,11 @@ export default function GeospatialVector(props: GeospatialProps) {
 		setAttributeValue(event.target.value);
 	}
 
+	function clearFilter() {
+		setFilterAttribute(undefined);
+		setAttributeValue("Show All");
+	}
+
 	useEffect(() => {
 		if (visConfigEntry !== undefined) {
 			if (
@@ -54,6 +61,7 @@ export default function GeospatialVector(props: GeospatialProps) {
 			) {
 				const wms_url = String(visConfigEntry.parameters["WMS Layer URL"]);
 				setLayerWMS(wms_url);
+
 				const attribute_url = wms_url.replace(
 					"GetFeature",
 					"describeFeatureType"
@@ -89,7 +97,6 @@ export default function GeospatialVector(props: GeospatialProps) {
 
 			let wms_url = layerWMS;
 			if (attributeValue != undefined) {
-				wms_url;
 				const params = new URLSearchParams(wms_url.split("?")[1]);
 				params.delete("bbox");
 				wms_url = `${wms_url.split("?")[0]}?${params.toString()}`;
@@ -183,12 +190,15 @@ export default function GeospatialVector(props: GeospatialProps) {
 			const center = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2];
 
 			let wms_url = layerWMS;
-			if (attributeValue != undefined) {
-				wms_url;
+			if (
+				filterAttribute &&
+				attributeValue != undefined &&
+				attributeValue != "Show All"
+			) {
 				const params = new URLSearchParams(wms_url.split("?")[1]);
 				params.delete("bbox");
 				wms_url = `${wms_url.split("?")[0]}?${params.toString()}`;
-				wms_url += `&CQL_FILTER=STATE_NAME='${attributeValue}'`;
+				wms_url += `&CQL_FILTER=${filterAttribute}='${attributeValue}'`;
 			}
 
 			const source = new VectorSource({
@@ -210,7 +220,20 @@ export default function GeospatialVector(props: GeospatialProps) {
 	}, [layerWMS, attributeValue]);
 
 	useEffect(() => {
-		const values: string[] = [];
+		if (layerWMS) {
+			const params = new URLSearchParams(layerWMS.split("?")[1]);
+			params.delete("bbox");
+			params.delete("outputFormat");
+			let dl_url = `${layerWMS.split("?")[0]}?${params.toString()}`;
+			if (attributeValue && filterAttribute)
+				dl_url += `&CQL_FILTER=${filterAttribute}='${attributeValue}'`;
+			dl_url += "&outputFormat=shape-zip";
+			setLayerDL(dl_url);
+		}
+	}, [attributeValue]);
+
+	useEffect(() => {
+		const values: string[] = ["Show All"];
 		if (vectorRef && filterAttribute) {
 			vectorRef
 				.getSource()
@@ -245,6 +268,7 @@ export default function GeospatialVector(props: GeospatialProps) {
 				</div>
 				{layerAttributes ? (
 					<>
+						<b>Field Name</b>
 						<select onChange={updateFilterAttribute}>
 							{layerAttributes.map((att) => {
 								return <option value={att}>{att}</option>;
@@ -256,11 +280,22 @@ export default function GeospatialVector(props: GeospatialProps) {
 				)}
 				{attributeValues ? (
 					<>
-						<select onChange={setAttributeValueFn}>
+						<br />
+						<b>Value</b>
+						<select onChange={setAttributeValueFn} value={attributeValue}>
 							{attributeValues.map((att) => {
 								return <option value={att}>{att}</option>;
 							})}
 						</select>
+						<button onClick={clearFilter}>Clear Filter</button>
+					</>
+				) : (
+					<></>
+				)}
+				{layerDL ? (
+					<>
+						<br />
+						<a href={layerDL}>Download Data</a>
 					</>
 				) : (
 					<></>
