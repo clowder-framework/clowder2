@@ -10,6 +10,7 @@ import TileLayer from "ol/layer/Tile";
 import { OSM } from "ol/source";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
+import { FeatureLike } from "ol/Feature";
 
 type GeospatialProps = {
 	visConfigEntry?: VisualizationConfigOut;
@@ -30,6 +31,17 @@ export default function Geospatial(props: GeospatialProps) {
 			) {
 				const wms_url = String(visConfigEntry.parameters["WMS Layer URL"]);
 				setLayerWMS(wms_url);
+				const attribute_url = wms_url.replace(
+					"GetFeature",
+					"describeFeatureType"
+				);
+				fetch(attribute_url).then((response) => {
+					if (response.status === 200) {
+						response.json().then((json) => {
+							console.log(json);
+						});
+					}
+				});
 			}
 		}
 	}, [visConfigEntry]);
@@ -54,15 +66,17 @@ export default function Geospatial(props: GeospatialProps) {
 				strategy: bboxStrategy,
 			});
 
+			const vecLayer = new VectorLayer({
+				source: source,
+			});
+
 			const wms_map = new Map({
 				target: mapElement.current,
 				layers: [
 					new TileLayer({
 						source: new OSM(),
 					}),
-					new VectorLayer({
-						source: source,
-					}),
+					vecLayer,
 				],
 				view: new View({
 					projection: "EPSG:3857",
@@ -71,20 +85,74 @@ export default function Geospatial(props: GeospatialProps) {
 				controls: [],
 			});
 			wms_map.getView().fit(bbox);
+
+			const info = document.getElementById("info");
+
+			let currentFeature: FeatureLike | undefined;
+			const displayFeatureInfo = function (pixel, target) {
+				const feature = target.closest(".ol-control")
+					? undefined
+					: wms_map.forEachFeatureAtPixel(pixel, function (feature) {
+							return feature;
+					  });
+				if (feature && info) {
+					info.style.left = `${pixel[0]}px`;
+					info.style.top = `${pixel[1]}px`;
+					if (feature !== currentFeature) {
+						info.style.visibility = "visible";
+						info.innerText = feature.get("STATE_NAME");
+					}
+				} else {
+					if (info) info.style.visibility = "hidden";
+				}
+				currentFeature = feature;
+			};
+
+			// Interactive behavior
+			wms_map.on("pointermove", function (evt) {
+				if (evt.dragging && info) {
+					info.style.visibility = "hidden";
+					currentFeature = undefined;
+					return;
+				}
+				const pixel = wms_map.getEventPixel(evt.originalEvent);
+				displayFeatureInfo(pixel, evt.originalEvent.target);
+			});
+
+			wms_map.on("click", function (evt) {
+				displayFeatureInfo(evt.pixel, evt.originalEvent.target);
+			});
+			wms_map.getTargetElement().addEventListener("pointerleave", function () {
+				currentFeature = undefined;
+				if (info) info.style.visibility = "hidden";
+			});
+
 			setMap(wms_map);
 		}
 	}, [layerWMS]);
 
 	return (() => {
 		return (
-			<div
-				ref={mapElement}
-				style={{
-					width: "400px",
-					height: "300px",
-				}}
-				className="map-container"
-			/>
+			<>
+				<div
+					ref={mapElement}
+					style={{
+						width: "400px",
+						height: "300px",
+					}}
+					className="map-container"
+				>
+					<div
+						id="info"
+						style={{
+							position: "absolute",
+							display: "inline-block",
+							height: "auto",
+							width: "auto",
+						}}
+					/>
+				</div>
+			</>
 		);
 	})();
 }
