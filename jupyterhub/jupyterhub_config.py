@@ -78,7 +78,7 @@ c.KubeSpawner.args = ["--allow-root"]
 c.JupyterHub.authenticator_class = CustomTokenAuthenticator
 c.CustomTokenAuthenticator.auth_cookie_header = "Authorization"
 c.CustomTokenAuthenticator.auth_username_key = "preferred_username"
-c.CustomTokenAuthenticator.enable_auth_state = True
+c.CustomTokenAuthenticator.enable_auth_state = False
 c.CustomTokenAuthenticator.auto_login = True
 # Ensure auth_state is up to date
 c.CustomTokenAuthenticator.refresh_pre_spawn = True
