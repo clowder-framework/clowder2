@@ -48,3 +48,19 @@ def test_add_member(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
     for user in response.json().get("users"):
         assert user.get("user").get("email") == member_alt["user"]["email"]
+
+def test_add_dataset(client: TestClient, headers: dict):
+    new_project = create_project(client, headers)
+    project_id = new_project.get("id")
+
+    dataset_id = create_dataset(client, headers).get("id")
+
+    response = client.post(
+        f"{settings.API_V2_STR}/projects/{project_id}/add_dataset/{dataset_id}",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    assert dataset_id in response.json().get("dataset_ids")
+
