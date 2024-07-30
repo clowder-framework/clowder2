@@ -42,13 +42,13 @@ security = HTTPBearer()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+
 @router.post("", response_model=ProjectOut)
 async def save_project(
     project_in: ProjectIn,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-
     project = ProjectDB(
         **project_in.dict(),
         creator=user,
@@ -58,15 +58,24 @@ async def save_project(
     # TODO Add new entry to elasticsearch
     return project.dict()
 
+
 @router.post("/{project_id}/add_dataset/{dataset_id}", response_model=ProjectOut)
 async def add_dataset(
-        project_id: str,
-        dataset_id: str,
+    project_id: str,
+    dataset_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-                                           ) is not None:
-        if dataset := await DatasetDB.find_one(DatasetDB.id == PydanticObjectId(dataset_id)
-                                               ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
+        if (
+            dataset := await DatasetDB.find_one(
+                DatasetDB.id == PydanticObjectId(dataset_id)
+            )
+            is not None
+        ):
             if dataset_id not in project.dataset_ids:
                 project.dataset_ids.append(dataset_id)
                 await project.replace()
@@ -74,15 +83,24 @@ async def add_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
+
 @router.post("/{project_id}/remove_dataset/{dataset_id}", response_model=ProjectOut)
 async def remove_dataset(
-        project_id: str,
-        dataset_id: str,
+    project_id: str,
+    dataset_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-                                           ) is not None:
-        if dataset := await DatasetDB.find_one(DatasetDB.id == PydanticObjectId(dataset_id)
-                                               ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
+        if (
+            dataset := await DatasetDB.find_one(
+                DatasetDB.id == PydanticObjectId(dataset_id)
+            )
+            is not None
+        ):
             if dataset_id in project.dataset_ids:
                 project.dataset_ids.remove(dataset_id)
                 await project.replace()
@@ -95,13 +113,21 @@ async def remove_dataset(
 
 @router.post("/{project_id}/add_folder/{folder_id}", response_model=ProjectOut)
 async def add_folder(
-        project_id: str,
-        folder_id: str,
+    project_id: str,
+    folder_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-                                           ) is not None:
-        if folder := await FolderDB.find_one(FolderDB.id == PydanticObjectId(folder_id)
-                                               ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
+        if (
+            folder := await FolderDB.find_one(
+                FolderDB.id == PydanticObjectId(folder_id)
+            )
+            is not None
+        ):
             if folder_id not in project.folder_ids:
                 project.folder_ids.append(folder_id)
                 await project.replace()
@@ -109,15 +135,24 @@ async def add_folder(
         raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
+
 @router.post("/{project_id}/remove_folder/{folder_id}", response_model=ProjectOut)
 async def remove_folder(
-        project_id: str,
-        folder_id: str,
+    project_id: str,
+    folder_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-                                           ) is not None:
-        if folder := await FolderDB.find_one(FolderDB.id == PydanticObjectId(folder_id)
-                                               ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
+        if (
+            folder := await FolderDB.find_one(
+                FolderDB.id == PydanticObjectId(folder_id)
+            )
+            is not None
+        ):
             if folder_id in project.folder_ids:
                 project.folder_ids.remove(folder_id)
                 await project.replace()
@@ -127,15 +162,22 @@ async def remove_folder(
         raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
+
 @router.post("/{project_id}/add_file/{file_id}", response_model=ProjectOut)
 async def add_file(
-        project_id: str,
-        file_id: str,
+    project_id: str,
+    file_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-                                           ) is not None:
-        if file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id)
-                                               ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
+        if (
+            file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id))
+            is not None
+        ):
             if file_id not in project.file_ids:
                 project.file_ids.append(file_id)
                 await project.replace()
@@ -143,15 +185,22 @@ async def add_file(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
+
 @router.post("/{project_id}/remove_file/{file_id}", response_model=ProjectOut)
 async def remove_file(
-        project_id: str,
-        file_id: str,
+    project_id: str,
+    file_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-                                           ) is not None:
-        if file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id)
-                                               ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
+        if (
+            file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id))
+            is not None
+        ):
             if file_id in project.file_ids:
                 project.file_ids.remove(file_id)
                 await project.replace()
@@ -170,9 +219,8 @@ async def get_projects(
     mine: bool = False,
     enable_admin: bool = False,
 ):
-
     # TODO check if the current user is a member OR creator
-    query = (ProjectDB.creator.email == user_id)
+    query = ProjectDB.creator.email == user_id
 
     projects_and_count = await ProjectDB.find(*query).to_list()
 
@@ -190,14 +238,20 @@ async def get_projects(
 
     return page.dict()
 
+
 @router.get("/{project_id}", response_model=ProjectOut)
 async def get_project(
     project_id: str,
 ):
-    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
-            ) is not None:
+    if (
+        project := await ProjectDB.find_one(
+            ProjectDB.id == PydanticObjectId(project_id)
+        )
+        is not None
+    ):
         return project.dict()
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
 
 @router.delete("/{project_id}", response_model=ProjectOut)
 async def delete_project(
@@ -210,7 +264,7 @@ async def delete_project(
         raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
 
-@router.post("/{project_id}/add/{username}", response_model=ProjectOut)
+@router.post("/{project_id}/add_member/{username}", response_model=ProjectOut)
 async def add_member(
     project_id: str,
     username: str,
@@ -234,7 +288,8 @@ async def add_member(
         raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
-@router.post("/{project_id}/remove/{username}", response_model=ProjectOut)
+
+@router.post("/{project_id}/remove_member/{username}", response_model=ProjectOut)
 async def remove_member(
     project_id: str,
     username: str,
@@ -255,4 +310,3 @@ async def remove_member(
         await project.replace()
         return project.dict()
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
-

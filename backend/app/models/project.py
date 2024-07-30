@@ -14,6 +14,7 @@ class Member(BaseModel):
     user: UserOut
     editor: bool = False
 
+
 class ProjectBase(BaseModel):
     id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
     name: str
@@ -26,12 +27,15 @@ class ProjectBase(BaseModel):
     creator: UserOut
     users: List[Member] = []
 
+
 class ProjectDB(Document, ProjectBase):
     class Settings:
         name = "projects"
 
+
 class ProjectIn(ProjectBase):
     pass
+
 
 class ProjectOut(ProjectDB):
     class Config:
