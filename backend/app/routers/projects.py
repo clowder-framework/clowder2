@@ -78,7 +78,7 @@ async def add_dataset(
                 )
         ) is not None:
             if dataset_id not in project.dataset_ids:
-                project.dataset_ids.append(dataset_id)
+                project.dataset_ids.append(PydanticObjectId(dataset_id))
                 await project.replace()
             return project.dict()
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
