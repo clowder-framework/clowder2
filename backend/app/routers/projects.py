@@ -64,17 +64,19 @@ async def add_dataset(
     dataset_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
-        if (
-            dataset := await DatasetDB.find_one(
-                DatasetDB.id == PydanticObjectId(dataset_id)
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
             )
-            is not None
-        ):
+    ) is not None:
+        if (
+                dataset := await DatasetDB.find_one(
+                    Or(
+                        DatasetDB.id == PydanticObjectId(dataset_id),
+                    )
+                )
+        ) is not None:
             if dataset_id not in project.dataset_ids:
                 project.dataset_ids.append(dataset_id)
                 await project.replace()
