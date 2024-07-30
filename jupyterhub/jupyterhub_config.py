@@ -43,6 +43,14 @@ c.DockerSpawner.notebook_dir = notebook_dir
 # notebook directory in the container
 c.DockerSpawner.volumes = {"jupyterhub-user-{username}": notebook_dir}
 
+# Set environment variables
+# c.DockerSpawner.environment = {
+#     "CLOWDER_API_KEY": os.getenv("CLOWDER_API_KEY"),
+# }
+
+# Stop containers after user logout
+c.JupyterHub.shutdown_on_logout = True
+
 # Remove containers once they are stopped
 c.DockerSpawner.remove = True
 
@@ -67,8 +75,6 @@ c.JupyterHub.db_url = "sqlite:////data/jupyterhub.sqlite"
 c.Spawner.cmd = ["start.sh", "jupyterhub-singleuser", "--allow-root"]
 c.KubeSpawner.args = ["--allow-root"]
 c.JupyterHub.authenticator_class = CustomTokenAuthenticator
-# TODO:Change this keycloak_url as required
-
 c.CustomTokenAuthenticator.auth_cookie_header = "Authorization"
 c.CustomTokenAuthenticator.auth_username_key = "preferred_username"
 c.CustomTokenAuthenticator.auth_uid_number_key = "uid_number"
@@ -80,11 +86,11 @@ if os.getenv("PROD_DEPLOYMENT") == "true":
         os.getenv("KEYCLOAK_HOSTNAME"),
         os.getenv("KEYCLOAK_REALM"),
     )
-    c.CustomTokenAuthenticator.landing_page_login_url = "https://" + os.getenv(
-        "KEYCLOAK_HOSTNAME"
+    c.CustomTokenAuthenticator.landing_page_login_url = (
+        f"""https://{os.getenv("CLOWDER_URL")}/auth/login"""
     )
     c.CustomTokenAuthenticator.landing_page_logout_url = (
-        "https://" + os.getenv("CLOWDER_URL") + "/auth/logout"
+        f"""https://{os.getenv("CLOWDER_URL")}/auth/logout"""
     )
 
 else:
@@ -92,11 +98,11 @@ else:
         os.getenv("KEYCLOAK_HOSTNAME"),
         os.getenv("KEYCLOAK_REALM"),
     )
-    c.CustomTokenAuthenticator.landing_page_login_url = "http://" + os.getenv(
-        "KEYCLOAK_HOSTNAME"
+    c.CustomTokenAuthenticator.landing_page_login_url = (
+        f"""http://{os.getenv("CLOWDER_URL")}/auth/login"""
     )
     c.CustomTokenAuthenticator.landing_page_logout_url = (
-        "http://" + os.getenv("CLOWDER_URL") + "/auth/logout"
+        f"""http://{os.getenv("CLOWDER_URL")}/auth/logout"""
     )
 
 c.JupyterHub.cookie_secret = os.getenv("JUPYTERHUB_CRYPT_KEY")

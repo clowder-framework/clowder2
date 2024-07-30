@@ -34,6 +34,9 @@ c.DockerSpawner.notebook_dir = notebook_dir
 # notebook directory in the container
 c.DockerSpawner.volumes = {"jupyterhub-user-{username}": notebook_dir}
 
+# Stop containers after user logout
+c.JupyterHub.shutdown_on_logout = True
+
 # Remove containers once they are stopped
 c.DockerSpawner.remove = True
 
@@ -71,8 +74,8 @@ if os.getenv("PROD_DEPLOYMENT") == "true":
         os.getenv("KEYCLOAK_HOSTNAME"),
         os.getenv("KEYCLOAK_REALM"),
     )
-    c.CustomTokenAuthenticator.landing_page_login_url = "https://" + os.getenv(
-        "KEYCLOAK_HOSTNAME"
+    c.CustomTokenAuthenticator.landing_page_login_url = (
+        f"""https://{os.getenv("CLOWDER_URL")}/auth/login"""
     )
     c.CustomTokenAuthenticator.landing_page_logout_url = (
         "https://" + os.getenv("CLOWDER_URL") + "/auth/logout"
@@ -83,8 +86,8 @@ else:
         os.getenv("KEYCLOAK_HOSTNAME"),
         os.getenv("KEYCLOAK_REALM"),
     )
-    c.CustomTokenAuthenticator.landing_page_login_url = "http://" + os.getenv(
-        "KEYCLOAK_HOSTNAME"
+    c.CustomTokenAuthenticator.landing_page_login_url = (
+        f"""http://{os.getenv("CLOWDER_URL")}/auth/login"""
     )
     c.CustomTokenAuthenticator.landing_page_logout_url = (
         "http://" + os.getenv("CLOWDER_URL") + "/auth/logout"
