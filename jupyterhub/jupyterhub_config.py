@@ -109,6 +109,9 @@ else:
 
 c.JupyterHub.cookie_secret = os.getenv("JUPYTERHUB_CRYPT_KEY")
 
+# Set environment variables for the single-user server
+c.Spawner.environment = {"CLOWDER_URL": os.getenv("CLOWDER_URL")}
+
 # Allowed admins
 admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
