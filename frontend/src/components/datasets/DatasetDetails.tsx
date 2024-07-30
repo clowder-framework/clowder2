@@ -11,15 +11,13 @@ type DatasetAboutProps = {
 
 export function DatasetDetails(props: DatasetAboutProps) {
 	const { myRole } = props;
-	const { id, created, modified, creator, status, downloads, doi } =
-		props.details;
+	const { id, created, modified, creator, status, downloads } = props.details;
 
 	const details = new Map<
 		string,
 		{ value: string | undefined; info?: string }
 	>();
 	details.set("Owner", { value: `${creator.first_name} ${creator.last_name}` });
-	if (doi != null) details.set("DOI", { value: doi });
 	details.set("Created", {
 		value: parseDate(created),
 		info: "Date and time of dataset creation",
