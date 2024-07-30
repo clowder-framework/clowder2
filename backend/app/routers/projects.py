@@ -14,6 +14,8 @@ from app import dependencies
 from app.config import settings
 from app.models.users import UserDB, UserOut, UserIn
 from app.models.datasets import DatasetDB
+from app.models.files import FileDB
+from app.models.folders import FolderDB
 from app.models.project import (
     ProjectBase,
     ProjectDB,
@@ -89,6 +91,72 @@ async def remove_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
+
+@router.post("/{project_id}/add_folder/{folder_id}", response_model=ProjectOut)
+async def add_folder(
+        project_id: str,
+        folder_id: str,
+):
+    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
+                                           ) is not None:
+        if folder := await FolderDB.find_one(FolderDB.id == PydanticObjectId(dataset_id)
+                                               ) is not None:
+            project.folder_ids.append(folder_id)
+            await project.replace()
+            return project.dict()
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+@router.post("/{project_id}/remove_folder/{folder_id}", response_model=ProjectOut)
+async def remove_folder(
+        project_id: str,
+        folder_id: str,
+):
+    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
+                                           ) is not None:
+        if folder := await FolderDB.find_one(FolderDB.id == PydanticObjectId(folder_id)
+                                               ) is not None:
+            if folder_id in project.folder_ids:
+                project.folder_ids.remove(folder_id)
+                await project.replace()
+                return project.dict()
+            else:
+                return project.dict()
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+@router.post("/{project_id}/add_file/{file_id}", response_model=ProjectOut)
+async def add_file(
+        project_id: str,
+        file_id: str,
+):
+    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
+                                           ) is not None:
+        if file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id)
+                                               ) is not None:
+            project.file_ids.append(file_id)
+            await project.replace()
+            return project.dict()
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+@router.post("/{project_id}/remove_file/{file_id}", response_model=ProjectOut)
+async def remove_file(
+        project_id: str,
+        file_id: str,
+):
+    if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
+                                           ) is not None:
+        if file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id)
+                                               ) is not None:
+            if file_id in project.file_ids:
+                project.file_ids.remove(file_id)
+                await project.replace()
+                return project.dict()
+            else:
+                return project.dict()
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
 
 @router.get("", response_model=Paged)
