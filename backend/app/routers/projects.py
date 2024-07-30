@@ -67,8 +67,9 @@ async def add_dataset(
                                            ) is not None:
         if dataset := await DatasetDB.find_one(DatasetDB.id == PydanticObjectId(dataset_id)
                                                ) is not None:
-            project.dataset_ids.append(dataset_id)
-            await project.replace()
+            if dataset_id not in project.dataset_ids:
+                project.dataset_ids.append(dataset_id)
+                await project.replace()
             return project.dict()
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
@@ -99,10 +100,11 @@ async def add_folder(
 ):
     if project := await ProjectDB.find_one(ProjectDB.id == PydanticObjectId(project_id)
                                            ) is not None:
-        if folder := await FolderDB.find_one(FolderDB.id == PydanticObjectId(dataset_id)
+        if folder := await FolderDB.find_one(FolderDB.id == PydanticObjectId(folder_id)
                                                ) is not None:
-            project.folder_ids.append(folder_id)
-            await project.replace()
+            if folder_id not in project.folder_ids:
+                project.folder_ids.append(folder_id)
+                await project.replace()
             return project.dict()
         raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
@@ -134,8 +136,9 @@ async def add_file(
                                            ) is not None:
         if file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id)
                                                ) is not None:
-            project.file_ids.append(file_id)
-            await project.replace()
+            if file_id not in project.file_ids:
+                project.file_ids.append(file_id)
+                await project.replace()
             return project.dict()
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
