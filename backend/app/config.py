@@ -89,6 +89,7 @@ class Settings(BaseSettings):
     listener_heartbeat_interval = 5 * 60
 
     # DOI datacite details
+    # TODO: Update the below configuration details once access to DataCite production instance is ready
     DOI_ENABLED = True
     DATACITE_TEST_URL = "https://api.test.datacite.org/dois"
     DATACITE_URL = "https://api.datacite.org/dois"
