@@ -183,7 +183,7 @@ async def add_file(
             )
     ) is not None:
         if (
-                folder := await FolderDB.find_one(
+                file := await FolderDB.find_one(
                     Or(
                         FileDB.id == FileDB(PydanticObjectId(file_id)),
                     )
@@ -210,7 +210,7 @@ async def remove_file(
             )
     ) is not None:
         if (
-                folder := await FolderDB.find_one(
+                file := await FolderDB.find_one(
                     Or(
                         FileDB.id == FileDB(PydanticObjectId(file_id)),
                     )
