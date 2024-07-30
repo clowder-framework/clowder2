@@ -176,15 +176,19 @@ async def add_file(
     file_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
+            )
+    ) is not None:
         if (
-            file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id))
-            is not None
-        ):
+                folder := await FolderDB.find_one(
+                    Or(
+                        FileDB.id == FileDB(PydanticObjectId(file_id)),
+                    )
+                )
+        ) is not None:
             if file_id not in project.file_ids:
                 project.file_ids.append(file_id)
                 await project.replace()
@@ -199,15 +203,19 @@ async def remove_file(
     file_id: str,
 ):
     if (
-        project := await ProjectDB.find_one(
-            ProjectDB.id == PydanticObjectId(project_id)
-        )
-        is not None
-    ):
+            project := await ProjectDB.find_one(
+                Or(
+                    ProjectDB.id == PydanticObjectId(project_id),
+                )
+            )
+    ) is not None:
         if (
-            file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id))
-            is not None
-        ):
+                folder := await FolderDB.find_one(
+                    Or(
+                        FileDB.id == FileDB(PydanticObjectId(file_id)),
+                    )
+                )
+        ) is not None:
             if file_id in project.file_ids:
                 project.file_ids.remove(file_id)
                 await project.replace()
