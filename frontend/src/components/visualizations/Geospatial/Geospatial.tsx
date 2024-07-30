@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 
 import Map from "ol/Map";
 import View from "ol/View";
-import { OSM } from "ol/source";
-import TileLayer from "ol/layer/Tile";
-import Static from "ol/source/ImageStatic";
-import ImageLayer from "ol/layer/Image";
 import { VisualizationConfigOut } from "../../../openapi/v2";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import GeoJSON from "ol/format/GeoJSON";
+import TileLayer from "ol/layer/Tile";
+import { OSM } from "ol/source";
+import { bbox as bboxStrategy } from "ol/loadingstrategy";
+import { transformExtent } from "ol/proj";
 
 type GeospatialProps = {
 	visConfigEntry?: VisualizationConfigOut;
@@ -42,7 +45,14 @@ export default function Geospatial(props: GeospatialProps) {
 					bbox = vals.map((v) => parseFloat(v));
 				}
 			});
+			bbox = transformExtent(bbox, "EPSG:4326", "EPSG:3857");
 			const center = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2];
+
+			const source = new VectorSource({
+				url: layerWMS,
+				format: new GeoJSON(),
+				strategy: bboxStrategy,
+			});
 
 			const wms_map = new Map({
 				target: mapElement.current,
@@ -50,12 +60,8 @@ export default function Geospatial(props: GeospatialProps) {
 					new TileLayer({
 						source: new OSM(),
 					}),
-					new ImageLayer({
-						source: new Static({
-							url: layerWMS,
-							projection: "EPSG:3857",
-							imageExtent: bbox,
-						}),
+					new VectorLayer({
+						source: source,
 					}),
 				],
 				view: new View({
