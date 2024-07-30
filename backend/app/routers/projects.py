@@ -49,9 +49,7 @@ async def save_project(
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    project = ProjectDB(
-        **project_in.dict()
-    )
+    project = ProjectDB(**project_in.dict())
     await project.insert()
 
     # TODO Add new entry to elasticsearch
@@ -64,18 +62,18 @@ async def add_dataset(
     dataset_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         if (
-                dataset := await DatasetDB.find_one(
-                    Or(
-                        DatasetDB.id == PydanticObjectId(dataset_id),
-                    )
+            dataset := await DatasetDB.find_one(
+                Or(
+                    DatasetDB.id == PydanticObjectId(dataset_id),
                 )
+            )
         ) is not None:
             if dataset_id not in project.dataset_ids:
                 project.dataset_ids.append(PydanticObjectId(dataset_id))
@@ -91,18 +89,18 @@ async def remove_dataset(
     dataset_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         if (
-                dataset := await DatasetDB.find_one(
-                    Or(
-                        DatasetDB.id == PydanticObjectId(dataset_id),
-                    )
+            dataset := await DatasetDB.find_one(
+                Or(
+                    DatasetDB.id == PydanticObjectId(dataset_id),
                 )
+            )
         ) is not None:
             if dataset_id in project.dataset_ids:
                 project.dataset_ids.remove(PydanticObjectId(dataset_id))
@@ -120,18 +118,18 @@ async def add_folder(
     folder_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         if (
-                folder := await FolderDB.find_one(
-                    Or(
-                        FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
-                    )
+            folder := await FolderDB.find_one(
+                Or(
+                    FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
                 )
+            )
         ) is not None:
             if folder_id not in project.folder_ids:
                 project.folder_ids.append(PydanticObjectId(folder_id))
@@ -147,18 +145,18 @@ async def remove_folder(
     folder_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         if (
-                folder := await FolderDB.find_one(
-                    Or(
-                        FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
-                    )
+            folder := await FolderDB.find_one(
+                Or(
+                    FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
                 )
+            )
         ) is not None:
             if folder_id in project.folder_ids:
                 project.folder_ids.remove(PydanticObjectId(folder_id))
@@ -176,18 +174,18 @@ async def add_file(
     file_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         if (
-                file := await FolderDB.find_one(
-                    Or(
-                        FileDB.id == FileDB(PydanticObjectId(file_id)),
-                    )
+            file := await FolderDB.find_one(
+                Or(
+                    FileDB.id == FileDB(PydanticObjectId(file_id)),
                 )
+            )
         ) is not None:
             if file_id not in project.file_ids:
                 project.file_ids.append(PydanticObjectId(file_id))
@@ -203,18 +201,18 @@ async def remove_file(
     file_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         if (
-                file := await FolderDB.find_one(
-                    Or(
-                        FileDB.id == FileDB(PydanticObjectId(file_id)),
-                    )
+            file := await FolderDB.find_one(
+                Or(
+                    FileDB.id == FileDB(PydanticObjectId(file_id)),
                 )
+            )
         ) is not None:
             if file_id in project.file_ids:
                 project.file_ids.remove(PydanticObjectId(file_id))
@@ -259,11 +257,11 @@ async def get_project(
     project_id: str,
 ):
     if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
+        project := await ProjectDB.find_one(
+            Or(
+                ProjectDB.id == PydanticObjectId(project_id),
             )
+        )
     ) is not None:
         return project.dict()
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
