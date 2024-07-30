@@ -66,6 +66,7 @@ from app.routers import (
     thumbnails,
     users,
     visualization,
+    llm,
 )
 
 # setup loggers
@@ -261,7 +262,13 @@ api_router.include_router(
 )
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
+
+api_router.include_router(
+    llm.router, prefix="/llm", tags=["llm"]
+)
+
 app.include_router(api_router, prefix=settings.API_V2_STR)
+
 
 
 def gather_documents():
