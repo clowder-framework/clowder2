@@ -508,6 +508,7 @@ async def mint_doi(
                     ],
                     "publisher": "DataCite e.V.",
                     "publicationYear": datetime.datetime.now().year,
+                    "types": {"resourceTypeGeneral": "Dataset"},
                 },
             }
         }
