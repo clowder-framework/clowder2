@@ -30,12 +30,6 @@ def test_create_doi(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/doi", headers=headers
-    )
-    assert response.status_code == 200
-    print(response.json())
-    assert response.json().get("doi") is not None
 
 
 def test_delete(client: TestClient, headers: dict):

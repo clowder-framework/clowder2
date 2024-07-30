@@ -46,8 +46,10 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	const freezeDataset = (datasetId: string | undefined) =>
-		dispatch(freezeDatasetAction(datasetId));
+	const freezeDataset = (
+		datasetId: string | undefined,
+		publishDOI: boolean | undefined
+	) => dispatch(freezeDatasetAction(datasetId, publishDOI));
 
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 
@@ -130,7 +132,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
 				actionBtnName="Release"
 				handleActionBtnClick={() => {
-					freezeDataset(datasetId);
+					freezeDataset(datasetId, true);
 					setFreezeDatasetConfirmOpen(false);
 				}}
 				handleActionCancel={() => {

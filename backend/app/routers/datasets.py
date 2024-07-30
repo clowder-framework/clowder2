@@ -491,20 +491,16 @@ async def mint_doi(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization(RoleType.OWNER)) and settings.DOI_ENABLED,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        dataset_db = dataset.dict()
+    if (dataset := await DatasetFreezeDB.get(PydanticObjectId(dataset_id))) is not None:
         metadata = {
             "data": {
                 "type": "dois",
                 "attributes": {
                     "prefix": os.getenv("DATACITE_PREFIX"),
                     "url": f"{settings.API_HOST}{settings.API_V2_STR}/datasets/{dataset_id}",
-                    "titles": [{"title": dataset_db["name"]}],
+                    "titles": [{"title": dataset.name}],
                     "creators": [
-                        {
-                            "name": dataset_db["creator"]["first_name"]
-                            + dataset_db["creator"]["last_name"]
-                        }
+                        {"name": dataset.creator.first_name + dataset.creator.last_name}
                     ],
                     "publisher": "DataCite e.V.",
                     "publicationYear": datetime.datetime.now().year,
@@ -513,14 +509,14 @@ async def mint_doi(
         }
         dataCiteClient = DataCiteClient()
         response = dataCiteClient.create_doi(metadata)
-        dataset_db["doi"] = response.get("data").get("id")
-        dataset_db["modified"] = datetime.datetime.utcnow()
-        dataset.update(dataset_db)
+        print("doi created:", response.get("data").get("id"))
+        dataset.doi = response.get("data").get("id")
+        dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
 
-        # Update entry to the dataset index
-        await index_dataset(es, DatasetOut(**dataset_db), update=True)
-        return dataset_db
+        # TODO: if we ever index freeze datasets
+        # await index_dataset(es, DatasetOut(**dataset_db), update=True)
+        return dataset.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -589,7 +585,8 @@ async def freeze_dataset(
 
         # TODO thumbnails, visualizations
 
-        await mint_doi(frozen_dataset.dict()["id"])
+        if publish_doi:
+            return await mint_doi(frozen_dataset.id)
 
         return frozen_dataset.dict()
 
