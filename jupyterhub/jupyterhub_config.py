@@ -71,15 +71,17 @@ c.JupyterHub.db_url = "sqlite:////data/jupyterhub.sqlite"
 # # Allow anyone to sign-up without approval
 # c.NativeAuthenticator.open_signup = True
 
+
 # Authenticate with Custom Token Authenticator
 c.Spawner.cmd = ["start.sh", "jupyterhub-singleuser", "--allow-root"]
 c.KubeSpawner.args = ["--allow-root"]
 c.JupyterHub.authenticator_class = CustomTokenAuthenticator
 c.CustomTokenAuthenticator.auth_cookie_header = "Authorization"
 c.CustomTokenAuthenticator.auth_username_key = "preferred_username"
-c.CustomTokenAuthenticator.auth_uid_number_key = "uid_number"
 c.CustomTokenAuthenticator.enable_auth_state = True
 c.CustomTokenAuthenticator.auto_login = True
+# Ensure auth_state is up to date
+c.CustomTokenAuthenticator.refresh_pre_spawn = True
 
 if os.getenv("PROD_DEPLOYMENT") == "true":
     c.CustomTokenAuthenticator.keycloak_url = "https://%s/realms/%s/" % (
