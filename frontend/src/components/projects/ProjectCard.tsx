@@ -16,7 +16,7 @@ import {
 	Download,
 	Folder,
 	InsertDriveFile,
-	Storage,
+	Dataset,
 } from "@mui/icons-material";
 import config from "../../app.config";
 
@@ -99,7 +99,7 @@ export default function ProjectCard(props: ProjectCardProps) {
 						<Box
 							style={{ display: "flex", alignItems: "center", marginRight: 8 }}
 						>
-							<Storage fontSize="small" />
+							<Dataset fontSize="small" />
 							<Typography variant="body2" sx={{ ml: 0.5 }}>
 								{numDatasets ?? 0}
 							</Typography>

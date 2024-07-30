@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProject } from "../../actions/project";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-// import FilesTable from "../files/FilesTable";
+import ProjectTable from "../projects/ProjectTable";
 import Layout from "../Layout";
 // import { ActionsMenuGroup } from "../datasets/ActionsMenuGroup";
 import { ProjectDetails } from "./ProjectDetails";
@@ -29,46 +29,41 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 
 export const Project = (): JSX.Element => {
-	// path parameter
-	const { projectId } = useParams<{ projectId?: string }>();
+	// Path parameter
+	const { projectId } = useParams<{ projectId: string }>();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const getProject = (projectId: string | null) =>
-		dispatch(fetchProject(projectId));
+	const getProject = (projectId: string) => dispatch(fetchProject(projectId));
 	const project = useSelector((state: RootState) => state.project.project);
 
-	// state
+	// State
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-
-	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
-
-	// Snackbar
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState("");
-
 	const [paths, setPaths] = useState([]);
-
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	useEffect(() => {
-		getProject(projectId);
+		if (projectId) {
+			getProject(projectId);
+		}
 	}, [projectId]);
 
-	// for breadcrumb
+	// Breadcrumb
 	useEffect(() => {
-		// for breadcrumb
-		const tmpPaths = [
-			{
-				name: project["name"],
-				url: `/projects/${projectId}`,
-			},
-		];
-
-		setPaths(tmpPaths);
-	}, [project]);
+		if (project) {
+			const tmpPaths = [
+				{
+					name: project.name,
+					url: `/projects/${projectId}`,
+				},
+			];
+			setPaths(tmpPaths);
+		}
+	}, [project, projectId]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -78,14 +73,12 @@ export const Project = (): JSX.Element => {
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
-		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
 	};
 
-	// @ts-ignore
 	return (
 		<Layout>
-			{/*Error Message dialogue*/}
+			{/* Error Message dialog */}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Snackbar
 				open={snackBarOpen}
@@ -97,26 +90,25 @@ export const Project = (): JSX.Element => {
 				message={snackBarMessage}
 			/>
 			<Grid container>
-				{/*title*/}
+				{/* Title */}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<Grid container spacing={2} alignItems="flex-start">
 						<Grid item xs>
 							<Box>
 								<Typography variant="h5" paragraph sx={{ marginBottom: 0 }}>
-									{project["name"]}
+									{project?.name ?? "Loading..."}
 								</Typography>
 								<Typography variant="body1" paragraph>
-									{project["description"]}
+									{project?.description ?? "Loading project details..."}
 								</Typography>
 							</Box>
 						</Grid>
 					</Grid>
 				</Grid>
-				{/*actions*/}
+				{/* Actions */}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
 					{/*<ActionsMenuGroup />*/}
 				</Grid>
-				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
@@ -184,12 +176,7 @@ export const Project = (): JSX.Element => {
 						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
-						{/*<FilesTable*/}
-						{/*	folderId={project.folder_ids}*/}
-						{/*	foldersFilesInDataset={project}*/}
-						{/*	setCurrPageNum={setCurrPageNum}*/}
-						{/*	publicView={false}*/}
-						{/*/>*/}
+						<ProjectTable project={project} />
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination
 								count={Math.ceil(20 / limit)}
@@ -201,35 +188,22 @@ export const Project = (): JSX.Element => {
 						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
-						{/*<DisplayMetadata*/}
-						{/*			updateMetadata={updateDatasetMetadata}*/}
-						{/*			deleteMetadata={deleteDatasetMetadata}*/}
-						{/*			resourceType="dataset"*/}
-						{/*			resourceId={datasetId}*/}
-						{/*			publicView={false}*/}
-						{/*		/>*/}
-						{/*)}*/}
+						{/* Content for User Metadata */}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						{/*<DisplayListenerMetadata*/}
-						{/*	updateMetadata={updateDatasetMetadata}*/}
-						{/*	deleteMetadata={deleteDatasetMetadata}*/}
-						{/*	resourceType="dataset"*/}
-						{/*	resourceId={datasetId}*/}
-						{/*/>*/}
+						{/* Content for Machine Metadata */}
 					</TabPanel>
-					{/* Viewer is not allowed to submit to extractor*/}
 					<TabPanel value={selectedTabIndex} index={3} sx={TabStyle}>
-						{/*<Listeners datasetId={datasetId} />*/}
+						{/* Content for Analysis */}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
-						{/*<ExtractionHistoryTab datasetId={datasetId} />*/}
+						{/* Content for Extraction History */}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={5}>
-						{/*<Visualization datasetId={datasetId} />*/}
+						{/* Content for Visualizations */}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={6}>
-						{/*<SharingTab datasetId={datasetId} />*/}
+						{/* Content for Access Control */}
 					</TabPanel>
 				</Grid>
 				<Grid item>

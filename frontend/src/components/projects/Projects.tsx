@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { Box, Button, Grid, Pagination, Tab, Tabs } from "@mui/material";
+import { Box, Button, Grid, Pagination } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "../../actions/project";

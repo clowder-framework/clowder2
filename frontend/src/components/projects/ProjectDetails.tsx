@@ -10,7 +10,11 @@ export function ProjectDetails(props) {
 		string,
 		{ value: string | undefined; info?: string }
 	>();
-	details.set("Owner", { value: `${creator.first_name} ${creator.last_name}` });
+	if (creator && creator.first_name && creator.last_name) {
+		details.set("Owner", {
+			value: `${creator.first_name} ${creator.last_name}`,
+		});
+	}
 	details.set("Created", {
 		value: parseDate(created),
 		info: "Date and time of project creation",
