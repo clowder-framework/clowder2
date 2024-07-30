@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ActionModal } from "../dialog/ActionModal";
+import { ActionModalWithCheckbox } from "../dialog/ActionModalWithCheckbox";
 import {
 	datasetDeleted,
 	freezeDataset as freezeDatasetAction,
@@ -89,6 +90,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	};
 
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
+	const [publishDOI, setPublishDOI] = React.useState<boolean>(false);
 
 	const handleOptionClick = (event: React.MouseEvent<any>) => {
 		setAnchorEl(event.currentTarget);
@@ -126,13 +128,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 				}}
 				actionLevel={"error"}
 			/>
-			<ActionModal
+			<ActionModalWithCheckbox
 				actionOpen={freezeDatasetConfirmOpen}
 				actionTitle="Are you ready to release this version of the dataset?"
 				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
+				checkboxLabel="Select this checkbox to publish this version of the dataset and get a DOI."
+				checkboxSelected={false}
 				actionBtnName="Release"
+				publishDOI={publishDOI}
+				setPublishDOI={setPublishDOI}
 				handleActionBtnClick={() => {
-					freezeDataset(datasetId, true);
+					freezeDataset(datasetId, publishDOI);
 					setFreezeDatasetConfirmOpen(false);
 				}}
 				handleActionCancel={() => {

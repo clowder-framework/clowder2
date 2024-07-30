@@ -497,10 +497,14 @@ async def mint_doi(
                 "type": "dois",
                 "attributes": {
                     "prefix": os.getenv("DATACITE_PREFIX"),
-                    "url": f"{settings.API_HOST}{settings.API_V2_STR}/datasets/{dataset_id}",
+                    "url": f"{settings.frontend_url}/datasets/{dataset_id}",
                     "titles": [{"title": dataset.name}],
                     "creators": [
-                        {"name": dataset.creator.first_name + dataset.creator.last_name}
+                        {
+                            "name": dataset.creator.first_name
+                            + " "
+                            + dataset.creator.last_name
+                        }
                     ],
                     "publisher": "DataCite e.V.",
                     "publicationYear": datetime.datetime.now().year,
