@@ -147,8 +147,13 @@ export default function GeospatialVector(props: GeospatialProps) {
 							"<table><th>" + "<td>Field</td>" + "<td>Value</td></th>";
 						const allProps = feature.getProperties();
 						for (const key in allProps) {
-							if (key == "geometry") continue;
-							label += `<tr><td>${key}</td><td>${allProps[key]}</td></tr>`;
+							if (
+								!["operation_", "sp_region", "price", "prosperty_"].includes(
+									key
+								)
+							)
+								continue;
+							label += `<tr><td><b>${key}</b></td><td>${allProps[key]}</td></tr>`;
 						}
 						label += "</table>";
 						info.innerHTML = label;
@@ -247,9 +252,10 @@ export default function GeospatialVector(props: GeospatialProps) {
 				.getSource()
 				.getFeatures()
 				.forEach((feat: any) => {
-					values.push(feat["values_"][filterAttribute]);
+					const val = feat["values_"][filterAttribute];
+					if (!values.includes(val)) values.push(val);
 				});
-			setAttributeValues(values);
+			setAttributeValues(values.sort());
 		}
 	}, [filterAttribute]);
 
