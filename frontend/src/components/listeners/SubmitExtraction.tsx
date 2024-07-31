@@ -85,7 +85,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		}
 	};
 
-	// The for loop is used to pass the datasetId to a widget if it is a clowderFile Widget
+	// The for loop is used to pass the datasetId to a widget if it is a ClowderFile Widget
 	if (
 		selectedExtractor &&
 		selectedExtractor["properties"] &&
@@ -96,9 +96,9 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		for (const key in parameters) {
 			if (parameters[key].format) {
 				switch (parameters[key].format) {
-					case "clowderFile":
+					case "ClowderFile":
 						uiSchema[key] = {
-							"ui:widget": "clowderFile",
+							"ui:widget": "ClowderFile",
 							"ui:options": {
 								datasetId: datasetId,
 							},
