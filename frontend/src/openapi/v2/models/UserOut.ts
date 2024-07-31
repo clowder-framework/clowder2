@@ -9,14 +9,16 @@
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type UserOut = {
     email: string;
     first_name: string;
     last_name: string;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
     admin?: boolean;
     admin_mode?: boolean;
