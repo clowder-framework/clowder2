@@ -47,6 +47,8 @@ section below).
 - Running `docker-compose logs -f` displays the live logs for all containers. To view the logs of individual containers,
   provide the container name. For example, for viewing the backend module logs, run `docker-compose logs -f backend`.
 - Running `./docker-dev.sh down` brings down the required services.
+- If you want to run the jupyterhub, you can run `./docker-dev.sh jupyter up`. The jupyterhub will be available at
+  `http://localhost:8765`. You can bring it down using `./docker-dev.sh jupyter down`.
 
 **Note:** `./docker-dev.sh` sets the project name flag to `-p clowder2-dev`. This is so that the dev containers
 don't get mixed with the production containers if the user is running both on the same machine using `docker-compose.yml`.

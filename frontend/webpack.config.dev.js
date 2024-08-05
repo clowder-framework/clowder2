@@ -8,6 +8,9 @@ import ESLintPlugin from "eslint-webpack-plugin";
 console.log(
 	`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${process.env.CLOWDER_REMOTE_HOSTNAME}`
 );
+console.log(
+	`the JupyterHub URL is set to ${process.env.JUPYTERHUB_URL}`
+)
 
 export default {
 	mode: "development",
@@ -40,6 +43,7 @@ export default {
 				CLOWDER_REMOTE_HOSTNAME: JSON.stringify(
 					process.env.CLOWDER_REMOTE_HOSTNAME
 				),
+				JUPYTERHUB_URL: JSON.stringify(process.env.JUPYTERHUB_URL),
 				APIKEY: JSON.stringify(process.env.APIKEY),
 				KeycloakBaseURL: JSON.stringify(process.env.KeycloakBaseURL),
 			},

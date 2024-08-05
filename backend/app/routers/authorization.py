@@ -21,7 +21,6 @@ from app.models.datasets import (
     GroupAndRole,
     UserAndRole,
 )
-from app.models.files import FileDB, FileOut
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode
@@ -71,6 +70,7 @@ async def save_authorization(
 async def get_dataset_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -206,9 +206,9 @@ async def set_dataset_group_role(
                             auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
                     await index_dataset(
-                        es, DatasetOut(**dataset.dict()), auth_db.user_ids
+                        es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
                     )
-                    await index_dataset_files(es, str(dataset_id))
+                    await index_dataset_files(es, str(dataset_id), update=True)
                     if len(readonly_user_ids) > 0:
                         readonly_auth_db = AuthorizationDB(
                             creator=user_id,
@@ -219,7 +219,10 @@ async def set_dataset_group_role(
                         )
                         await readonly_auth_db.insert()
                         await index_dataset(
-                            es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
+                            es,
+                            DatasetOut(**dataset.dict()),
+                            readonly_auth_db.user_ids,
+                            update=True,
                         )
                         await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
@@ -243,9 +246,12 @@ async def set_dataset_group_role(
                     )
                     await readonly_auth_db.insert()
                     await index_dataset(
-                        es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
+                        es,
+                        DatasetOut(**dataset.dict()),
+                        readonly_auth_db.user_ids,
+                        update=True,
                     )
-                    await index_dataset_files(es, str(dataset_id))
+                    await index_dataset_files(es, str(dataset_id), update=True)
                 if len(user_ids) > 0:
                     auth_db = AuthorizationDB(
                         creator=user_id,
@@ -257,9 +263,9 @@ async def set_dataset_group_role(
                     # if there are read only users add them with the role of viewer
                     await auth_db.insert()
                     await index_dataset(
-                        es, DatasetOut(**dataset.dict()), auth_db.user_ids
+                        es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
                     )
-                    await index_dataset_files(es, str(dataset_id))
+                    await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -313,7 +319,9 @@ async def set_dataset_user_role(
                 else:
                     auth_db.user_ids.append(username)
                     await auth_db.save()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                )
                 await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
             else:
@@ -325,8 +333,10 @@ async def set_dataset_user_role(
                     user_ids=[username],
                 )
                 await auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), [username])
-                await index_dataset_files(es, dataset_id)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), [username], update=True
+                )
+                await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -363,7 +373,9 @@ async def remove_dataset_group_role(
                         auth_db.user_ids.remove(u.user.email)
                 await auth_db.save()
                 # Update elasticsearch index with new users
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                )
                 await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
         else:
@@ -400,7 +412,9 @@ async def remove_dataset_user_role(
                 auth_db.user_ids.remove(username)
                 await auth_db.save()
                 # Update elasticsearch index with updated users
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                )
                 await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
         else:

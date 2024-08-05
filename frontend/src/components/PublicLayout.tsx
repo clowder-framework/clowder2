@@ -226,7 +226,6 @@ export default function PersistentDrawerLeft(props) {
 						)}
 					</IconButton>
 				</DrawerHeader>
-				<Divider />
 				<List>
 					<ListItem key={"public"} disablePadding>
 						<ListItemButton component={RouterLink} to="/public">
@@ -237,7 +236,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					<ListItem key={"public_search"} disablePadding>
 						<ListItemButton component={RouterLink} to="/public_search">
@@ -249,7 +247,6 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				{/*<Divider />*/}
-				<Divider />
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />

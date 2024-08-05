@@ -120,13 +120,20 @@ async def get_admin(
 
 
 @router.get("/users/me/admin_mode")
-async def get_admin_mode(current_username=Depends(get_current_user)) -> bool:
+async def get_admin_mode(
+    enable_admin: bool = False, current_username=Depends(get_current_user)
+) -> bool:
     """Get Admin mode from User Object."""
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
-        if current_user.admin_mode is not None:
-            return current_user.admin_mode
+        if current_user.admin:
+            if enable_admin:
+                return True
+            elif current_user.admin_mode is not None:
+                return current_user.admin_mode
+            else:
+                return False
         else:
             return False
     else:
@@ -197,6 +204,7 @@ async def revoke_admin(
         else:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
                 user.admin = False
+                user.admin_mode = False  # make sure to disable admin mode as well
                 await user.replace()
                 return user.dict()
             else:

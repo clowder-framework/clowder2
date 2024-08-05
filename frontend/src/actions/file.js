@@ -344,12 +344,18 @@ export function generateFilePresignedUrl(
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
-export function submitFileExtractionAction(fileId, extractorName, requestBody) {
+export function submitFileExtractionAction(
+	fileId,
+	extractorName,
+	datasetId,
+	requestBody
+) {
 	return (dispatch) => {
 		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
 			null,
+			datasetId,
 			requestBody
 		)
 			.then((json) => {
@@ -363,7 +369,13 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 				dispatch(
 					handleErrors(
 						reason,
-						submitFileExtractionAction(fileId, extractorName, requestBody)
+						submitFileExtractionAction(
+							fileId,
+							extractorName,
+							null,
+							datasetId,
+							requestBody
+						)
 					)
 				);
 			});
