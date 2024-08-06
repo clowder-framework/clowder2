@@ -46,7 +46,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "clowder2.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "clowder2.name" . }}
+app.kubernetes.io/name: {{ include "clowder2.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
