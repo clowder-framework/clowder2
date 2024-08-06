@@ -1,20 +1,17 @@
 import os
 
 import requests
+from app.config import settings
 from requests.auth import HTTPBasicAuth
 
 
 class DataCiteClient:
-    def __init__(self, test_mode=False):
+    def __init__(self):
         self.auth = HTTPBasicAuth(
             os.getenv("DATACITE_USERNAME"), os.getenv("DATACITE_PASSWORD")
         )
         self.headers = {"Content-Type": "application/vnd.api+json"}
-        self.base_url = (
-            "https://api.test.datacite.org/"
-            if test_mode
-            else "https://api.datacite.org/"
-        )
+        self.base_url = settings.DATACITE_API_URL
 
     def create_doi(self, metadata):
         url = f"{self.base_url}dois"

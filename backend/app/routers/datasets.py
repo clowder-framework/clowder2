@@ -495,6 +495,7 @@ async def mint_doi(
         metadata = {
             "data": {
                 "type": "dois",
+                "event": "publish",
                 "attributes": {
                     "prefix": os.getenv("DATACITE_PREFIX"),
                     "url": f"{settings.frontend_url}/datasets/{dataset_id}",

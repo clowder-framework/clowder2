@@ -91,8 +91,7 @@ class Settings(BaseSettings):
     # DOI datacite details
     # TODO: Update the below configuration details once access to DataCite production instance is ready
     DOI_ENABLED = True
-    DATACITE_TEST_URL = "https://api.test.datacite.org/dois"
-    DATACITE_URL = "https://api.datacite.org/dois"
+    DATACITE_API_URL = "https://api.test.datacite.org/"
 
 
 settings = Settings()
