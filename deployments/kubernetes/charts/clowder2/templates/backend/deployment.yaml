@@ -115,7 +115,7 @@ spec:
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
             - name: API_HOST
-              value: http://{{ include "clowder2.releaseName" . }}-backend:{{ .Values.backend.service.port }}
+              value: http://{{ include "clowder2.fullname" . }}-backend:{{ .Values.backend.service.port }}
           ports:
             - name: http
               containerPort: 80
