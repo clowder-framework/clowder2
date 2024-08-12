@@ -64,6 +64,8 @@ spec:
               value: "10485760"
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.releaseName" . }}-mongodb:27017
+            - name: MONGO_DATABASE
+              value: {{ .Values.mongodb.database }}
             - name: CLOWDER2_URL
               value: http://{{ .Values.hostname }}
             - name: auth_base
