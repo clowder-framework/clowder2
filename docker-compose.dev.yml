@@ -67,6 +67,8 @@ services:
 
   postgres:
       image: postgres
+      networks:
+        - clowder2
       volumes:
         - postgres_data:/var/lib/postgresql/data
       environment:
@@ -79,6 +81,8 @@ services:
       volumes:
         - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
         - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+      networks:
+        - clowder2
       command:
         - start-dev
         - --http-relative-path /keycloak
@@ -137,7 +141,7 @@ services:
       - logger.level=debug
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
-    
+
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat:latest"
     build:
@@ -172,6 +176,7 @@ services:
 
 networks:
   clowder2:
+    name: clowder2
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.

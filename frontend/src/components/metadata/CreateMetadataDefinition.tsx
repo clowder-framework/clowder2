@@ -36,18 +36,12 @@ interface SupportedInputs {
 
 type CreateMetadataDefinitionProps = {
 	setCreateMetadataDefinitionOpen: any;
-	setSnackBarOpen: any;
-	setSnackBarMessage: any;
 };
 
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const {
-		setCreateMetadataDefinitionOpen,
-		setSnackBarOpen,
-		setSnackBarMessage,
-	} = props;
+	const { setCreateMetadataDefinitionOpen } = props;
 
 	const dispatch = useDispatch();
 	const history = useNavigate();
@@ -98,7 +92,7 @@ export const CreateMetadataDefinition = (
 	}, [newMetadataDefintion]);
 
 	const handleInputChange = (idx: number, key: string, value: string) => {
-		let data = { ...formInput };
+		const data = { ...formInput };
 
 		// Handle input change of name, description, context high level fields
 		if (idx == -1) {
@@ -122,7 +116,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const handleMetadataRequiredInputChange = (key: string) => {
-		let data = { ...formInput };
+		const data = { ...formInput };
 
 		if (key == "datasets")
 			data.required_for_items.datasets = !data.required_for_items.datasets;
@@ -132,7 +126,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const addNewContext = (idx: number) => {
-		let newContextMap = [...contextMap];
+		const newContextMap = [...contextMap];
 		newContextMap.splice(idx + 1, 0, { term: "", iri: "" });
 
 		setContextMap(newContextMap);
@@ -140,7 +134,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const removeContext = (idx: number) => {
-		let newContextMap = [...contextMap];
+		const newContextMap = [...contextMap];
 		newContextMap.splice(idx, 1);
 
 		setContextMap(newContextMap);
@@ -148,8 +142,8 @@ export const CreateMetadataDefinition = (
 	};
 
 	const updateContext = (idx: number, key: string, value: string | null) => {
-		let currItem = contextMap[idx];
-		let newContextMap = [...contextMap];
+		const currItem = contextMap[idx];
+		const newContextMap = [...contextMap];
 
 		if (key == "term") {
 			newContextMap.splice(idx, 1, { term: value, iri: currItem.iri }); // Replaces item with new value inserted
@@ -162,7 +156,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const constructContextJson = (newContextMap: any) => {
-		let contextJson = {};
+		const contextJson = {};
 
 		newContextMap.forEach((item, idx) => {
 			contextJson[item["term"]] = item["iri"];
@@ -178,7 +172,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const addNewField = (idx: number) => {
-		let newitem = {
+		const newitem = {
 			name: "",
 			list: false,
 			widgetType: "",
@@ -189,7 +183,7 @@ export const CreateMetadataDefinition = (
 			required: false,
 		};
 
-		let newfield = formInput["fields"];
+		const newfield = formInput["fields"];
 
 		// Add newfield to ith idx of list
 		newfield.splice(idx + 1, 0, newitem);
@@ -207,7 +201,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const removeField = (idx: number) => {
-		let data = formInput["fields"];
+		const data = formInput["fields"];
 		data.splice(idx, 1);
 
 		setFormInput({
@@ -227,7 +221,7 @@ export const CreateMetadataDefinition = (
 
 	const postMetadata = () => {
 		// Parse the context
-		let context = [JSON.parse(formInput.context)];
+		const context = [JSON.parse(formInput.context)];
 		formInput.context = context;
 
 		// Remove the options field if widgetType != enum
@@ -248,7 +242,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const parseInput = () => {
-		let data = { ...formInput };
+		const data = { ...formInput };
 
 		// Parse the context JSON
 		data.context = [JSON.parse(data.context)];
@@ -258,7 +252,7 @@ export const CreateMetadataDefinition = (
 			if (data.fields[i].config.type != "enum") {
 				delete data.fields[i].config.options;
 			} else {
-				let listOfOptions = data.fields[i].config.options.split(",");
+				const listOfOptions = data.fields[i].config.options.split(",");
 				// Remove any trailing whitespace from each list entry
 				listOfOptions.forEach(
 					(value, index, arr) => (arr[index] = value.trim())
@@ -286,7 +280,7 @@ export const CreateMetadataDefinition = (
 				});
 			}
 		} else {
-			let idx = stepNumber - 1;
+			const idx = stepNumber - 1;
 
 			if (
 				formInput.fields[idx].name !== "" &&
@@ -334,9 +328,6 @@ export const CreateMetadataDefinition = (
 		});
 
 		setContextMap([{ term: "", iri: "" }]);
-		// TODO add snackbar here
-		setSnackBarMessage("Successfully added metadata definition");
-		setSnackBarOpen(true);
 	};
 
 	const handleNext = () => {

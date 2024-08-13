@@ -1,12 +1,11 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional, List
-
-from beanie import Document, View, PydanticObjectId
-from pydantic import Field, BaseModel
+from typing import List, Optional
 
 from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
+from beanie import Document, PydanticObjectId, View
+from pydantic import BaseModel, Field
 
 
 class AutoName(Enum):
@@ -72,7 +71,7 @@ class LocalFileIn(BaseModel):
     path: str
 
 
-class FileDB(Document, FileBase):
+class FileBaseCommon(FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str = "N/A"
@@ -87,7 +86,10 @@ class FileDB(Document, FileBase):
     storage_type: StorageType = StorageType.MINIO
     storage_path: Optional[str]  # store URL or file path depending on storage_type
     object_type: str = "file"
+    origin_id: Optional[PydanticObjectId] = None
 
+
+class FileDB(Document, FileBaseCommon):
     class Settings:
         name = "files"
 
@@ -96,24 +98,37 @@ class FileDB(Document, FileBase):
         use_enum_values = True
 
 
-class FileDBViewList(View, FileBase):
+class FileFreezeDB(Document, FileBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "files_freeze"
+
+
+class FileDBViewList(View, FileBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    version_id: str = "N/A"
-    version_num: int = 0
-    dataset_id: PydanticObjectId
-    folder_id: Optional[PydanticObjectId]
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
-    bytes: int = 0
-    content_type: ContentType = ContentType()
-    thumbnail_id: Optional[PydanticObjectId] = None
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
 
     class Settings:
         source = FileDB
         name = "files_view"
         pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "files_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
             {
                 "$lookup": {
                     "from": "authorization",
@@ -129,6 +144,6 @@ class FileDBViewList(View, FileBase):
         # cache_capacity = 5
 
 
-class FileOut(FileDB):
+class FileOut(FileDB, FileFreezeDB):
     class Config:
         fields = {"id": "id"}

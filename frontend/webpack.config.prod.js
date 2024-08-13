@@ -12,7 +12,8 @@ console.log(
 	`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${process.env.CLOWDER_REMOTE_HOSTNAME}`
 );
 console.log(
-	`the current BASE_URL_ROUTE  environment variable is ${process.env.BASE_URL_ROUTE}`
+	`The current BASE_URL_ROUTE environment variable is ${process.env.BASE_URL_ROUTE}.
+	 The JupyterHub URL is set to ${process.env.JUPYTERHUB_URL}.`
 );
 
 export default {
@@ -51,6 +52,7 @@ export default {
 					process.env.CLOWDER_REMOTE_HOSTNAME
 				),
 				BASE_URL_ROUTE: JSON.stringify(process.env.BASE_URL_ROUTE),
+				JUPYTERHUB_URL: JSON.stringify(process.env.JUPYTERHUB_URL),
 				APIKEY: JSON.stringify(process.env.APIKEY),
 				KeycloakBaseURL: JSON.stringify(process.env.KeycloakBaseURL),
 			},

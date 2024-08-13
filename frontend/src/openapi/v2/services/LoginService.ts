@@ -73,13 +73,22 @@ export class LoginService {
     /**
      * Get Admin Mode
      * Get Admin mode from User Object.
+     * @param enableAdmin
      * @returns boolean Successful Response
      * @throws ApiError
      */
-    public static getAdminModeApiV2UsersMeAdminModeGet(): CancelablePromise<boolean> {
+    public static getAdminModeApiV2UsersMeAdminModeGet(
+        enableAdmin: boolean = false,
+    ): CancelablePromise<boolean> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/me/admin_mode`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
@@ -145,6 +154,98 @@ export class LoginService {
         return __request({
             method: 'POST',
             path: `/api/v2/users/revoke_admin/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Enable Readonly User
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/enable_readonly/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Disable Readonly User
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static disableReadonlyUserApiV2UsersDisableReadonlyUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/disable_readonly/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * User Enable
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static userEnableApiV2UsersEnableUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/enable/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * User Disable
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static userDisableApiV2UsersDisableUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/disable/${useremail}`,
             query: {
                 'dataset_id': datasetId,
             },

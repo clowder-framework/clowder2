@@ -1,7 +1,6 @@
-from fastapi.testclient import TestClient
-
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file, register_v1_extractor
+from app.tests.utils import create_dataset, register_v1_extractor, upload_file
+from fastapi.testclient import TestClient
 
 
 def test_register(client: TestClient, headers: dict):
@@ -39,7 +38,7 @@ def test_delete(client: TestClient, headers: dict):
 def test_v1_mime_trigger(client: TestClient, headers: dict):
     # Need a new listener otherwise this will collide with test_register above
     ext_name = "test.test_v1_mime_trigger"
-    extractor_id = register_v1_extractor(client, headers, ext_name).get("id")
+    register_v1_extractor(client, headers, ext_name).get("id")
 
     # Verify feeds were created for the process rules
     response = client.get(
@@ -61,3 +60,23 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert len(response.json()) > 0
+
+
+def test_enable_disable_extractor(client: TestClient, headers: dict):
+    # create a new extractor
+    ext_name = "test.v1_extractor"
+    extractor_id = register_v1_extractor(client, headers, ext_name).get("id")
+
+    # enable the extractor
+    response = client.put(
+        f"{settings.API_V2_STR}/listeners/{extractor_id}/enable", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json()["active"] is True
+
+    # disable the extractor
+    response = client.put(
+        f"{settings.API_V2_STR}/listeners/{extractor_id}/disable", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json()["active"] is False

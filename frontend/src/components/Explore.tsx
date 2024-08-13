@@ -31,6 +31,9 @@ export const Explore = (): JSX.Element => {
 	const datasets = useSelector(
 		(state: RootState) => state.dataset.datasets.data
 	);
+	const deletedDataset = useSelector(
+		(state: RootState) => state.dataset.deletedDataset
+	);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
 	);
@@ -40,25 +43,33 @@ export const Explore = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	// TODO add switch to turn on and off "mine" dataset
-	const [mine] = useState<boolean>(false);
+	const [mine, setMine] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
-	// component did mount
-	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, []);
-
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, [adminMode]);
+		if (adminMode) {
+			if (selectedTabIndex === 1) {
+				listDatasets((currPageNum - 1) * limit, limit, true);
+			} else {
+				listDatasets((currPageNum - 1) * limit, limit, false);
+			}
+		} else listDatasets((currPageNum - 1) * limit, limit, mine);
+	}, [adminMode, deletedDataset, mine, currPageNum, selectedTabIndex, limit]);
 
 	// switch tabs
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
 		newTabIndex: number
 	) => {
+		if (newTabIndex === 1) {
+			setMine(true);
+			setCurrPageNum(1);
+		} else {
+			setMine(false);
+			setCurrPageNum(1);
+		}
 		setSelectedTabIndex(newTabIndex);
 	};
 
@@ -82,9 +93,67 @@ export const Explore = (): JSX.Element => {
 							aria-label="dashboard tabs"
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+							<Tab sx={tab} label="My Datasets" {...a11yProps(1)} />
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
+						<Grid container spacing={2}>
+							{datasets !== undefined ? (
+								datasets.map((dataset: DatasetOut) => {
+									return (
+										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
+											<DatasetCard
+												id={dataset.id}
+												name={dataset.name}
+												author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
+												created={dataset.created}
+												description={dataset.description}
+												thumbnailId={dataset.thumbnail_id}
+												frozen={dataset.frozen}
+												frozenVersionNum={dataset.frozen_version_num}
+											/>
+										</Grid>
+									);
+								})
+							) : (
+								<></>
+							)}
+							{datasets.length === 0 ? (
+								<Grid container justifyContent="center">
+									<Box textAlign="center">
+										<p>
+											Nobody has created any datasets on this instance. Click
+											below to create a dataset!
+										</p>
+										<Button
+											component={RouterLink}
+											to="/create-dataset"
+											variant="contained"
+											sx={{ m: 2 }}
+										>
+											Create Dataset
+										</Button>
+									</Box>
+								</Grid>
+							) : (
+								<></>
+							)}
+						</Grid>
+						{datasets.length !== 0 ? (
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<Pagination
+									count={Math.ceil(pageMetadata.total_count / limit)}
+									page={currPageNum}
+									onChange={handlePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
+							</Box>
+						) : (
+							<></>
+						)}
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={1}>
 						<Grid container spacing={2}>
 							{datasets !== undefined ? (
 								datasets.map((dataset: DatasetOut) => {

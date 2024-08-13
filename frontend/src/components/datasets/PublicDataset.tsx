@@ -3,8 +3,9 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Grid,
+	Link,
 	Pagination,
-	Stack,
+	Snackbar,
 	Tab,
 	Tabs,
 	Typography,
@@ -38,6 +39,9 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import { FreezeVersionChip } from "../versions/FeezeVersionChip";
+import { PublicDatasetVersions } from "./versions/PublicDatasetVersions";
+import { fetchPublicStandardLicenseUrl } from "../../utils/licenses";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -76,13 +80,22 @@ export const PublicDataset = (): JSX.Element => {
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
-	const about = useSelector(
+	const dataset = useSelector(
 		(state: RootState) => state.publicDataset.publicAbout
 	);
-
 	const publicFolderPath = useSelector(
 		(state: RootState) => state.folder.publicFolderPath
 	);
+	const license = useSelector((state: RootState) => state.dataset.license);
+	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+	const fetchStandardLicenseUrlData = async (license_id: string) => {
+		try {
+			const data = await fetchPublicStandardLicenseUrl(license_id); // Call your function to fetch licenses
+			setStandardLicenseUrl(data); // Update state with the fetched data
+		} catch (error) {
+			console.error("Error fetching license url", error);
+		}
+	};
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -90,6 +103,10 @@ export const PublicDataset = (): JSX.Element => {
 	const [paths, setPaths] = useState([]);
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
+
+	// Snackbar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
 
 	const pageMetadata = useSelector(
 		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata
@@ -109,14 +126,26 @@ export const PublicDataset = (): JSX.Element => {
 		listPublicDatasetAbout(datasetId);
 		getPublicFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams]);
+	}, [datasetId, searchParams]);
+
+	useEffect(() => {
+		if (dataset && dataset.license_id !== undefined)
+			fetchStandardLicenseUrlData(dataset.license_id);
+
+		if (dataset.frozen && dataset.id !== dataset.origin_id) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Viewing dataset version ${dataset.frozen_version_num}.`
+			);
+		}
+	}, [dataset]);
 
 	// for breadcrumb
 	useEffect(() => {
 		// for breadcrumb
 		const tmpPaths = [
 			{
-				name: about["name"],
+				name: dataset["name"],
 				url: `/public_datasets/${datasetId}`,
 			},
 		];
@@ -124,8 +153,15 @@ export const PublicDataset = (): JSX.Element => {
 		if (publicFolderPath != null) {
 			for (const folderBread of publicFolderPath) {
 				tmpPaths.push({
-					name: folderBread["folder_name"],
-					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					name:
+						folderBread && folderBread["folder_name"]
+							? folderBread["folder_name"]
+							: "",
+					url: `/public_datasets/${datasetId}?folder=${
+						folderBread && folderBread["folder_id"]
+							? folderBread["folder_id"]
+							: ""
+					}`,
 				});
 			}
 		} else {
@@ -133,7 +169,7 @@ export const PublicDataset = (): JSX.Element => {
 		}
 
 		setPaths(tmpPaths);
-	}, [about, publicFolderPath]);
+	}, [dataset, publicFolderPath]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -152,23 +188,36 @@ export const PublicDataset = (): JSX.Element => {
 		<PublicLayout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<Stack>
-						<Box
-							sx={{
-								display: "inline-flex",
-								justifyContent: "space-between",
-								alignItems: "baseline",
-							}}
-						>
-							<Typography variant="h3" paragraph>
-								{about["name"]}
-							</Typography>
-						</Box>
-						<Box>{/*<RoleChip role={datasetRole.role} />*/}</Box>
-					</Stack>
+					<Grid container spacing={2} alignItems="flex-start">
+						<Grid item>
+							<FreezeVersionChip
+								frozenVersionNum={dataset.frozen_version_num}
+								frozen={dataset.frozen}
+							/>
+						</Grid>
+						<Grid item xs>
+							<Box>
+								<Typography variant="h5" paragraph sx={{ marginBottom: 0 }}>
+									{dataset["name"]}
+								</Typography>
+								<Typography variant="body1" paragraph>
+									{dataset["description"]}
+								</Typography>
+							</Box>
+						</Grid>
+					</Grid>
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -177,10 +226,7 @@ export const PublicDataset = (): JSX.Element => {
 				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
-				<Grid item xs={10}>
-					<Typography variant="body1" paragraph>
-						{about["description"]}
-					</Typography>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -268,8 +314,38 @@ export const PublicDataset = (): JSX.Element => {
 						<Listeners datasetId={datasetId} />
 					</TabPanel>
 				</Grid>
-				<Grid item>
-					<DatasetDetails details={about} />
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
+					<PublicDatasetVersions currDataset={dataset} />
+					<Typography variant="h5" gutterBottom>
+						License
+					</Typography>
+					{dataset.standard_license && dataset.license_id !== undefined ? (
+						<Typography>
+							<Link href={standardLicenseUrl} target="_blank">
+								<img
+									className="logo"
+									src={`public/${dataset.license_id}.png`}
+									alt={dataset.license_id}
+								/>
+							</Link>
+						</Typography>
+					) : (
+						<></>
+					)}
+					{!dataset.standard_license &&
+					license !== undefined &&
+					license.name !== undefined ? (
+						<div>
+							<Typography>
+								<Link href={license.url} target="_blank">
+									{license.name}
+								</Link>
+							</Typography>
+						</div>
+					) : (
+						<></>
+					)}
+					<DatasetDetails details={dataset} />
 				</Grid>
 			</Grid>
 		</PublicLayout>

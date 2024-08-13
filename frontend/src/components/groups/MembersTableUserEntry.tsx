@@ -4,7 +4,6 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import PersonIcon from "@mui/icons-material/Person";
 import {
-	Button,
 	ButtonGroup,
 	FormControl,
 	IconButton,
@@ -94,14 +93,18 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 							height: "32px",
 							borderRadius: "50%",
 							verticalAlign: "middle",
+							marginRight: "1em",
 						}}
 					/>
 				) : (
-					<PersonIcon sx={iconStyle} />
+					<PersonIcon
+						sx={{
+							verticalAlign: "middle",
+							marginRight: "1em",
+						}}
+					/>
 				)}
-				<Button>
-					{member.user.first_name} {member.user.last_name}
-				</Button>
+				{member.user.first_name} {member.user.last_name}
 			</TableCell>
 			<TableCell align="right">{member.user.email}</TableCell>
 			{member.user.email == creatorEmail && (
@@ -162,9 +165,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 					</AuthWrapper>
 				</TableCell>
 			)}
-			{member.user.email == creatorEmail && (
-				<TableCell align="right"></TableCell>
-			)}
+			{member.user.email == creatorEmail && <TableCell align="right" />}
 			{member.user.email != creatorEmail && (
 				<TableCell align="right">
 					{/*only owner or editor are allowed to delete*/}

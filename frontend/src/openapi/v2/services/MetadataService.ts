@@ -81,6 +81,28 @@ export class MetadataService {
     }
 
     /**
+     * Update Metadata Definition
+     * @param metadataDefinitionId
+     * @param requestBody
+     * @returns MetadataDefinitionOut Successful Response
+     * @throws ApiError
+     */
+    public static updateMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdPut(
+        metadataDefinitionId: string,
+        requestBody: MetadataDefinitionIn,
+    ): CancelablePromise<MetadataDefinitionOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/metadata/definition/${metadataDefinitionId}`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Metadata Definition
      * Delete metadata definition by specific ID.
      * @param metadataDefinitionId
@@ -135,18 +157,21 @@ export class MetadataService {
      * Delete Metadata
      * Delete metadata by specific ID.
      * @param metadataId
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteMetadataApiV2MetadataMetadataIdDelete(
         metadataId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/metadata/${metadataId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -164,6 +189,7 @@ export class MetadataService {
      * Metadata document that was updated
      * @param metadataId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -171,12 +197,14 @@ export class MetadataService {
     public static updateMetadataApiV2MetadataMetadataIdPatch(
         metadataId: string,
         requestBody: MetadataPatch,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/metadata/${metadataId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -193,6 +221,7 @@ export class MetadataService {
      * @param fileId
      * @param version
      * @param allVersions
+     * @param enableAdmin
      * @param datasetId
      * @param formData
      * @returns MetadataOut Successful Response
@@ -202,6 +231,7 @@ export class MetadataService {
         fileId: string,
         version?: number,
         allVersions: boolean = false,
+        enableAdmin: boolean = false,
         datasetId?: string,
         formData?: Body_get_file_metadata_api_v2_files__file_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
@@ -211,6 +241,7 @@ export class MetadataService {
             query: {
                 'version': version,
                 'all_versions': allVersions,
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             formData: formData,
@@ -229,6 +260,7 @@ export class MetadataService {
      * Metadata document that was updated
      * @param fileId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -236,12 +268,14 @@ export class MetadataService {
     public static replaceFileMetadataApiV2FilesFileIdMetadataPut(
         fileId: string,
         requestBody: MetadataPatch,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}/metadata`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -261,6 +295,7 @@ export class MetadataService {
      * Metadata document that was added to database
      * @param fileId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -268,12 +303,14 @@ export class MetadataService {
     public static addFileMetadataApiV2FilesFileIdMetadataPost(
         fileId: string,
         requestBody: MetadataIn,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/metadata`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -288,6 +325,7 @@ export class MetadataService {
      * Delete File Metadata
      * @param fileId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -295,12 +333,14 @@ export class MetadataService {
     public static deleteFileMetadataApiV2FilesFileIdMetadataDelete(
         fileId: string,
         requestBody: MetadataDelete,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}/metadata`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -320,6 +360,7 @@ export class MetadataService {
      * Metadata document that was updated
      * @param fileId
      * @param requestBody
+     * @param enableAdmin
      * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -327,12 +368,14 @@ export class MetadataService {
     public static updateFileMetadataApiV2FilesFileIdMetadataPatch(
         fileId: string,
         requestBody: MetadataPatch,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/metadata`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -346,17 +389,22 @@ export class MetadataService {
     /**
      * Get Dataset Metadata
      * @param datasetId
+     * @param enableAdmin
      * @param formData
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static getDatasetMetadataApiV2DatasetsDatasetIdMetadataGet(
         datasetId: string,
+        enableAdmin: boolean = false,
         formData?: Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/metadata`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             formData: formData,
             mediaType: 'application/x-www-form-urlencoded',
             errors: {
@@ -374,16 +422,21 @@ export class MetadataService {
      * Metadata document that was updated
      * @param datasetId
      * @param requestBody
+     * @param enableAdmin
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static replaceDatasetMetadataApiV2DatasetsDatasetIdMetadataPut(
         datasetId: string,
         requestBody: MetadataIn,
+        enableAdmin: boolean = false,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/datasets/${datasetId}/metadata`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -401,16 +454,21 @@ export class MetadataService {
      * Metadata document that was added to database
      * @param datasetId
      * @param requestBody
+     * @param enableAdmin
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static addDatasetMetadataApiV2DatasetsDatasetIdMetadataPost(
         datasetId: string,
         requestBody: MetadataIn,
+        enableAdmin: boolean = false,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/metadata`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -423,16 +481,21 @@ export class MetadataService {
      * Delete Dataset Metadata
      * @param datasetId
      * @param requestBody
+     * @param enableAdmin
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(
         datasetId: string,
         requestBody: MetadataDelete,
+        enableAdmin: boolean = false,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/metadata`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -450,16 +513,21 @@ export class MetadataService {
      * Metadata document that was updated
      * @param datasetId
      * @param requestBody
+     * @param enableAdmin
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static updateDatasetMetadataApiV2DatasetsDatasetIdMetadataPatch(
         datasetId: string,
         requestBody: MetadataPatch,
+        enableAdmin: boolean = false,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}/metadata`,
+            query: {
+                'enable_admin': enableAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {

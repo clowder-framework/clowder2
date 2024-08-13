@@ -19,7 +19,9 @@ export function fetchPublicFileMetadata(fileId, version) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicFileMetadata(fileId, version)));
+				dispatch(
+					handleErrors(reason, fetchPublicFileMetadata(fileId, version))
+				);
 			});
 	};
 }
@@ -28,7 +30,9 @@ export const RECEIVE_PUBLIC_FILE_SUMMARY = "RECEIVE_PUBLIC_FILE_SUMMARY";
 
 export function fetchPublicFileSummary(id) {
 	return (dispatch) => {
-		return V2.PublicFilesService.getFileSummaryApiV2PublicFilesFileIdSummaryGet(id)
+		return V2.PublicFilesService.getFileSummaryApiV2PublicFilesFileIdSummaryGet(
+			id
+		)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_FILE_SUMMARY,
@@ -42,13 +46,12 @@ export function fetchPublicFileSummary(id) {
 	};
 }
 
-
 export const RECEIVE_PUBLIC_PREVIEWS = "RECEIVE_PUBLIC_PREVIEWS";
 
 export function fetchPublicFilePreviews(id) {
 	const url = `${config.hostname}/public_files/${id}/getPreviews`;
 	return (dispatch) => {
-		return fetch(url, { mode: "cors"})
+		return fetch(url, { mode: "cors" })
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then((json) => {
@@ -68,11 +71,6 @@ export function fetchPublicFilePreviews(id) {
 	};
 }
 
-
-
-
-
-
 // TODO this method will change the selected file version, should get that version first to make sure it exists
 export const CHANGE_PUBLIC_SELECTED_VERSION = "CHANGE_PUBLIC_SELECTED_VERSION";
 
@@ -90,7 +88,11 @@ export const RECEIVE_PUBLIC_VERSIONS = "RECEIVE_PUBLIC_VERSIONS";
 
 export function fetchPublicFileVersions(fileId, skip, limit) {
 	return (dispatch) => {
-		return V2.PublicFilesService.getFileVersionsApiV2PublicFilesFileIdVersionsGet(fileId, skip, limit)
+		return V2.PublicFilesService.getFileVersionsApiV2PublicFilesFileIdVersionsGet(
+			fileId,
+			skip,
+			limit
+		)
 			.then((json) => {
 				// sort by decending order
 				const version = json.sort(
@@ -120,7 +122,7 @@ export function filePublicDownloaded(
 		if (filename === "") {
 			filename = `${fileId}.zip`;
 		}
-		let endpoint = `${config.hostname}/api/v2/public/files/${fileId}`;
+		let endpoint = `${config.hostname}/api/v2/public_files/${fileId}`;
 		if (fileVersionNum != 0) endpoint = `${endpoint}?version=${fileVersionNum}`;
 		const response = await fetch(endpoint, {
 			method: "GET",
@@ -157,3 +159,6 @@ export function filePublicDownloaded(
 		}
 	};
 }
+
+export const INCREMENT_PUBLIC_FILE_DOWNLOADS =
+	"INCREMENT_PUBLIC_FILE_DOWNLOADS";

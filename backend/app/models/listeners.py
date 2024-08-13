@@ -1,15 +1,14 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
-from pydantic import Field, BaseModel, AnyUrl
-
 from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
+from beanie import Document, PydanticObjectId, View
+from pydantic import AnyUrl, BaseModel, Field
 
 
 class Repository(BaseModel):
@@ -70,6 +69,7 @@ class EventListenerDB(Document, EventListenerBase):
     modified: datetime = Field(default_factory=datetime.now)
     lastAlive: datetime = None
     alive: Optional[bool] = None  # made up field to indicate if extractor is alive
+    active: bool = False
     properties: Optional[ExtractorInfo] = None
 
     class Settings:
@@ -176,6 +176,7 @@ class EventListenerDatasetJobMessage(BaseModel):
     id: str
     datasetId: str
     job_id: str
+    parameters: Optional[dict] = None
 
 
 class EventListenerJobUpdateBase(BaseModel):

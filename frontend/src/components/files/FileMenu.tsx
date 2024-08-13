@@ -8,14 +8,15 @@ import { fileDeleted } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { ActionModal } from "../dialog/ActionModal";
 import DownloadIcon from "@mui/icons-material/Download";
-import DeleteIcon from "@mui/icons-material/Delete";
 import UploadIcon from "@mui/icons-material/Upload";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Dialog, DialogTitle, ListItemIcon, ListItemText } from "@mui/material";
 import { UpdateFile } from "./UpdateFile";
 import { MoreHoriz } from "@material-ui/icons";
 import { RootState } from "../../types/data";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type FileMenuProps = {
 	file: File;
@@ -24,7 +25,7 @@ type FileMenuProps = {
 };
 
 export default function FileMenu(props: FileMenuProps) {
-	const { file, setSelectedVersion , publicView} = props;
+	const { file, setSelectedVersion, publicView } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,9 +39,11 @@ export default function FileMenu(props: FileMenuProps) {
 	const dispatch = useDispatch();
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
+	// need to update file role
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const dataset = useSelector((state: RootState) => state.dataset.about);
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
@@ -62,6 +65,7 @@ export default function FileMenu(props: FileMenuProps) {
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<Dialog
 				open={updateFileOpen}
@@ -98,73 +102,68 @@ export default function FileMenu(props: FileMenuProps) {
 					"aria-labelledby": "basic-button",
 				}}
 			>
-				{/*owner, editor can update file*/}
-				<AuthWrapper
-					currRole={datasetRole.role}
-					allowedRoles={["owner", "editor"]}
-				>
+				{publicView ? (
 					<MenuItem
 						onClick={() => {
 							handleClose();
-							setUpdateFileOpen(true);
+							window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
 						}}
 					>
 						<ListItemIcon>
-							<UploadIcon fontSize="small" />
+							<DownloadIcon fontSize="small" />
 						</ListItemIcon>
-						<ListItemText>Update File</ListItemText>
+						<ListItemText>Download</ListItemText>
 					</MenuItem>
-				</AuthWrapper>
-
-
-				{/*owner, editor, uploader and viewer can download file*/}
-
-				{publicView?
-					(
-						<MenuItem
-							onClick={() => {
-								handleClose();
-								window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
-							}}
-						>
-							<ListItemIcon>
-								<DownloadIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Download</ListItemText>
-						</MenuItem>
-					):
+				) : (
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
+						}}
+					>
+						<ListItemIcon>
+							<DownloadIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Download</ListItemText>
+					</MenuItem>
+				)}
+				<FrozenWrapper
+					frozen={dataset.frozen}
+					frozenVersionNum={dataset.frozen_version_num}
+				>
+					{/*owner, editor can update file*/}
 					<AuthWrapper
 						currRole={datasetRole.role}
-						allowedRoles={["owner", "editor", "uploader", "viewer"]}
+						allowedRoles={["owner", "editor"]}
 					>
 						<MenuItem
 							onClick={() => {
 								handleClose();
-								window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
+								setUpdateFileOpen(true);
 							}}
 						>
 							<ListItemIcon>
-								<DownloadIcon fontSize="small" />
+								<UploadIcon fontSize="small" />
 							</ListItemIcon>
-							<ListItemText>Download</ListItemText>
+							<ListItemText>Update File</ListItemText>
 						</MenuItem>
 					</AuthWrapper>
-				}
 
-				{/*owner can delete file*/}
-				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-					<MenuItem
-						onClick={() => {
-							handleClose();
-							setConfirmationOpen(true);
-						}}
-					>
-						<ListItemIcon>
-							<DeleteIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Delete</ListItemText>
-					</MenuItem>
-				</AuthWrapper>
+					{/*owner can delete file*/}
+					<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setConfirmationOpen(true);
+							}}
+						>
+							<ListItemIcon>
+								<DeleteIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Delete</ListItemText>
+						</MenuItem>
+					</AuthWrapper>
+				</FrozenWrapper>
 			</Menu>
 		</div>
 	);

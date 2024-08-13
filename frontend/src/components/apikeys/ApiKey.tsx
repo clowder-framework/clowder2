@@ -34,6 +34,10 @@ export function ApiKeys() {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.user.apiKeys.metadata
 	);
+	const deletedApiKey = useSelector(
+		(state: RootState) => state.user.deletedApiKey
+	);
+	const hashedKey = useSelector((state: RootState) => state.user.hashedKey);
 
 	// TODO add option to determine limit number; default show 5 tokens each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
@@ -44,8 +48,8 @@ export function ApiKeys() {
 
 	// component did mount
 	useEffect(() => {
-		listApiKeys(0, limit);
-	}, []);
+		listApiKeys((currPageNum - 1) * limit, limit);
+	}, [deletedApiKey, hashedKey]);
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
@@ -57,7 +61,7 @@ export function ApiKeys() {
 		<Layout>
 			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}></Grid>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }} />
 				<Grid item xs={4}>
 					<Button
 						variant="contained"
@@ -86,6 +90,7 @@ export function ApiKeys() {
 					handleActionCancel={() => {
 						setDeleteApikeyConfirmOpen(false);
 					}}
+					actionLevel={"error"}
 				/>
 				{/*create api key modal*/}
 				<CreateApiKeyModal
@@ -102,7 +107,7 @@ export function ApiKeys() {
 								<TableCell>API Key Name</TableCell>
 								<TableCell align="right">Created at</TableCell>
 								<TableCell align="right">Expired at</TableCell>
-								<TableCell align="right"></TableCell>
+								<TableCell align="right" />
 							</TableRow>
 						</TableHead>
 						<TableBody>

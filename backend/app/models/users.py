@@ -3,7 +3,7 @@ from typing import Optional
 
 from beanie import Document
 from passlib.context import CryptContext
-from pydantic import Field, EmailStr, BaseModel
+from pydantic import BaseModel, EmailStr, Field
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,8 +24,9 @@ class UserLogin(BaseModel):
 
 
 class UserDoc(Document, UserBase):
-    admin: bool
+    admin: bool = False
     admin_mode: bool = False
+    read_only_user: bool = False
 
     class Settings:
         name = "users"

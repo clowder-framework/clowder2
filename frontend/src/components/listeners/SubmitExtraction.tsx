@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 
 import { ListenerInfo } from "./ListenerInfo";
-import Form from "@rjsf/material-ui";
+import Form from "@rjsf/mui";
 import { FormProps } from "@rjsf/core";
 import { submitFileExtractionAction } from "../../actions/file";
 import { submitDatasetExtractionAction } from "../../actions/dataset";
@@ -25,8 +25,10 @@ import { RootState } from "../../types/data";
 import { EventListenerOut as Extractor } from "../../openapi/v2";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
+import { ClowderFileSelector } from "../styledComponents/ClowderFileSelector";
 import ExtractorStatus from "./ExtractorStatus";
 import CloseIcon from "@mui/icons-material/Close";
+import validator from "@rjsf/validator-ajv8";
 
 type SubmitExtractionProps = {
 	fileId: string;
@@ -40,6 +42,7 @@ type SubmitExtractionProps = {
 const widgets = {
 	TextWidget: ClowderRjsfTextWidget,
 	SelectWidget: ClowderRjsfSelectWidget,
+	clowderFile: ClowderFileSelector,
 };
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
@@ -47,11 +50,17 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		props;
 	const dispatch = useDispatch();
 
+	const uiSchema: any = {};
+
 	const submitFileExtraction = (
 		fileId: string | undefined,
 		extractorName: string | undefined,
+		datasetId: string | undefined,
 		requestBody: FormData
-	) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
+	) =>
+		dispatch(
+			submitFileExtractionAction(fileId, extractorName, datasetId, requestBody)
+		);
 	const submitDatasetExtraction = (
 		datasetId: string | undefined,
 		extractorName: string | undefined,
@@ -69,10 +78,31 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 			submitDatasetExtraction(datasetId, extractorName, formData);
 			handleNext();
 		} else if (fileId !== undefined) {
-			submitFileExtraction(fileId, extractorName, formData);
+			submitFileExtraction(fileId, extractorName, datasetId, formData);
 			handleNext();
 		}
 	};
+
+	// The for loop is used to pass the datasetId to a widget if it is a clowderFile Widget
+	if (
+		selectedExtractor &&
+		selectedExtractor["properties"] &&
+		selectedExtractor["properties"]["parameters"] &&
+		selectedExtractor["properties"]["parameters"]["schema"]
+	) {
+		const parameters = selectedExtractor["properties"]["parameters"]["schema"];
+		for (const key in parameters) {
+			// Check if field "format" present and equals "clowderFile"
+			if (parameters[key].format && parameters[key].format === "clowderFile") {
+				uiSchema[key] = {
+					"ui:widget": "clowderFile",
+					"ui:options": {
+						datasetId: datasetId,
+					},
+				};
+			}
+		}
+	}
 
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
@@ -132,6 +162,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 											<Container>
 												<Form
 													widgets={widgets}
+													validator={validator}
+													uiSchema={uiSchema}
 													schema={{
 														properties: selectedExtractor["properties"][
 															"parameters"
@@ -155,7 +187,10 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 										) : (
 											<Container>
 												<Form
+													widgets={widgets}
+													validator={validator}
 													schema={{ properties: {} }}
+													uiSchema={uiSchema}
 													onSubmit={({ formData }) => {
 														onSubmit(formData);
 													}}
@@ -193,7 +228,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 								</Step>
 								{/*step 2 results*/}
 								<Step key="results">
-									<StepLabel>Extracted Results</StepLabel>
+									{/*<StepLabel>Extracted Results</StepLabel>*/}
 									<StepContent>
 										{/*buttons*/}
 										<Box sx={{ mb: 2 }}>

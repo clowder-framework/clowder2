@@ -11,6 +11,7 @@ import {
 import React, { useState } from "react";
 import {
 	fetchPublicFileSummary,
+	INCREMENT_PUBLIC_FILE_DOWNLOADS,
 } from "../../actions/public_file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
@@ -23,7 +24,9 @@ type PublicFileActionsMenuProps = {
 	setSelectedVersion: any;
 };
 
-export const PublicFileActionsMenu = (props: PublicFileActionsMenuProps): JSX.Element => {
+export const PublicFileActionsMenu = (
+	props: PublicFileActionsMenuProps
+): JSX.Element => {
 	const { fileId, datasetId, setSelectedVersion } = props;
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -56,7 +59,10 @@ export const PublicFileActionsMenu = (props: PublicFileActionsMenuProps): JSX.El
 				sx={{ minWidth: "auto" }}
 				variant="contained"
 				onClick={() => {
-					listFileSummary(fileId);
+					dispatch({
+						type: INCREMENT_PUBLIC_FILE_DOWNLOADS,
+						receivedAt: Date.now(),
+					});
 					window.location.href = `${config.hostname}/api/v2/public_files/${fileId}`;
 				}}
 				endIcon={<Download />}

@@ -1,28 +1,24 @@
+import datetime
 from typing import Optional
-
-from beanie import PydanticObjectId
-from beanie.odm.operators.find.evaluation import RegEx
-from beanie.odm.operators.find.logical import Or
-from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-)
 
 from app import dependencies
 from app.deps.authorization_deps import MetadataAuthorization
 from app.keycloak_auth import get_current_user
 from app.models.metadata import (
-    MetadataDefinitionIn,
+    MetadataDB,
     MetadataDefinitionDB,
+    MetadataDefinitionIn,
     MetadataDefinitionOut,
     MetadataOut,
     MetadataPatch,
     patch_metadata,
-    MetadataDB,
 )
-from app.models.pages import Paged, _get_page_query, _construct_page_metadata
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from beanie import PydanticObjectId
+from beanie.odm.operators.find.evaluation import RegEx
+from beanie.odm.operators.find.logical import Or
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -73,6 +69,62 @@ async def get_metadata_definition_list(
         ],
     )
     return page.dict()
+
+
+@router.put(
+    "/definition/{metadata_definition_id}", response_model=MetadataDefinitionOut
+)
+async def update_metadata_definition(
+    metadata_definition: MetadataDefinitionIn,
+    metadata_definition_id: str,
+    user=Depends(get_current_user),
+):
+    existing_count = await MetadataDefinitionDB.find(
+        {
+            "$and": [
+                {"_id": {"$ne": PydanticObjectId(metadata_definition_id)}},
+                {"name": {"$eq": metadata_definition.name}},
+            ]
+        }
+    ).count()
+    if existing_count > 0:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Metadata definition named {metadata_definition.name} already exists.",
+        )
+    else:
+        if (
+            mdd := await MetadataDefinitionDB.get(
+                PydanticObjectId(metadata_definition_id)
+            )
+        ) is not None:
+            # Check if metadata using this definition exists
+            metadata_using_definition = await MetadataDB.find(
+                MetadataDB.definition == mdd.name
+            ).to_list()
+
+            if len(metadata_using_definition) > 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Metadata definition: {mdd.name} ({metadata_definition_id}) in use. "
+                    f"You cannot edit it if there are existing metadata using this definition.",
+                )
+            try:
+                metadata_update = metadata_definition.dict()
+                metadata_update["modified"] = datetime.datetime.utcnow()
+
+                # Update mdd's attributes using the updated dictionary
+                for key, value in metadata_update.items():
+                    setattr(mdd, key, value)
+                await mdd.save()
+                return mdd.dict()
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=e.args[0])
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Metadata definition id {metadata_definition_id} not found",
+            )
 
 
 @router.get(
@@ -143,9 +195,17 @@ async def search_metadata_definition(
     mdds_and_count = (
         await MetadataDefinitionDB.find(
             Or(
-                RegEx(field=MetadataDefinitionDB.name, pattern=search_term),
-                RegEx(field=MetadataDefinitionDB.description, pattern=search_term),
-                RegEx(field=MetadataDefinitionDB.context, pattern=search_term),
+                RegEx(
+                    field=MetadataDefinitionDB.name, pattern=search_term, options="i"
+                ),
+                RegEx(
+                    field=MetadataDefinitionDB.description,
+                    pattern=search_term,
+                    options="i",
+                ),
+                RegEx(
+                    field=MetadataDefinitionDB.context, pattern=search_term, options="i"
+                ),
             ),
         )
         .aggregate(

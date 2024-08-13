@@ -1,21 +1,20 @@
 from datetime import timedelta
 from secrets import token_urlsafe
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from fastapi import APIRouter, HTTPException, Depends
-from itsdangerous.url_safe import URLSafeSerializer
-
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.pages import Paged, _get_page_query, _construct_page_metadata
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import (
-    UserDB,
-    UserOut,
+    ListenerAPIKeyDB,
     UserAPIKeyDB,
     UserAPIKeyOut,
-    ListenerAPIKeyDB,
+    UserDB,
+    UserOut,
 )
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
+from itsdangerous.url_safe import URLSafeSerializer
 
 router = APIRouter()
 
@@ -119,9 +118,9 @@ async def search_users(
     users_and_count = (
         await UserDB.find(
             Or(
-                RegEx(field=UserDB.email, pattern=text),
-                RegEx(field=UserDB.first_name, pattern=text),
-                RegEx(field=UserDB.last_name, pattern=text),
+                RegEx(field=UserDB.email, pattern=text, options="i"),
+                RegEx(field=UserDB.first_name, pattern=text, options="i"),
+                RegEx(field=UserDB.last_name, pattern=text, options="i"),
             )
         )
         .aggregate(
@@ -140,7 +139,7 @@ async def search_users(
 
 
 @router.get("/prefixSearch", response_model=Paged)
-async def search_users(
+async def search_users_prefix(
     prefix: str,
     skip: int = 0,
     limit: int = 2,
@@ -148,7 +147,7 @@ async def search_users(
     query_regx = f"^{prefix}.*"
     users_and_count = (
         await UserDB.find(
-            Or(RegEx(field=UserDB.email, pattern=query_regx)),
+            Or(RegEx(field=UserDB.email, pattern=query_regx, options="i")),
         )
         .aggregate(
             [_get_page_query(skip, limit, sort_field="email", ascending=True)],

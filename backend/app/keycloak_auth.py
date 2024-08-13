@@ -3,8 +3,8 @@ import json
 import logging
 from datetime import datetime
 
-from fastapi import Security, HTTPException, Depends
-from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader, APIKeyCookie
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import APIKeyCookie, APIKeyHeader, OAuth2AuthorizationCodeBearer
 from itsdangerous.exc import BadSignature
 from itsdangerous.url_safe import URLSafeSerializer
 from jose import ExpiredSignatureError
@@ -15,7 +15,7 @@ from pydantic import Json
 
 from .config import settings
 from .models.tokens import TokenDB
-from .models.users import UserOut, UserAPIKeyDB, UserDB, ListenerAPIKeyDB
+from .models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB, UserOut
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +120,7 @@ async def get_token(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -154,6 +154,9 @@ async def get_current_user(
             user = await UserDB.find_one(UserDB.email == userinfo["email"])
             return UserOut(**user.dict())
         except KeycloakAuthenticationError as e:
+            if not e.error_message:
+                if e.response_code == 401:
+                    e.error_message = '{"error": "Unauthenticated"}'
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),
@@ -210,7 +213,7 @@ async def get_current_user(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -236,6 +239,9 @@ async def get_current_username(
             return userinfo["email"]
         # expired token
         except KeycloakAuthenticationError as e:
+            if not e.error_message:
+                if e.response_code == 401:
+                    e.error_message = '{"error": "Unauthenticated"}'
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),
@@ -292,7 +298,92 @@ async def get_current_username(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
+            raise HTTPException(
+                status_code=401,
+                detail={"error": "Key is invalid."},
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    raise HTTPException(
+        status_code=401,
+        detail="Not authenticated.",  # "token expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+async def get_read_only_user(
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
+    token_cookie: str = Security(jwt_header),
+) -> bool:
+    """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
+    Potentially expensive. Use `get_current_username` if all you need is user name.
+    """
+
+    if token:
+        try:
+            userinfo = keycloak_openid.userinfo(token)
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
+            return user.read_only_user
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    if token_cookie:
+        try:
+            userinfo = keycloak_openid.userinfo(token_cookie.removeprefix("Bearer%20"))
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
+            return user.read_only_user
+        # expired token
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    if api_key:
+        serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
+        try:
+            payload = serializer.loads(api_key)
+            # Key is valid, check expiration date in database
+            if (
+                key := await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                user = await UserDB.find_one(UserDB.email == key.user)
+                return user.read_only_user
+            elif (
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                current_time = datetime.utcnow()
+
+                if key.expires is not None and current_time >= key.expires:
+                    # Expired key, delete it first
+                    await key.delete()
+                    raise HTTPException(
+                        status_code=401,
+                        detail={"error": "Key is expired."},
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                else:
+                    user = await UserDB.find_one(UserDB.email == key.user)
+                    return user.read_only_user
+            else:
+                raise HTTPException(
+                    status_code=401,
+                    detail={"error": "Key is invalid."},
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -329,7 +420,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
         {
             "email": email,
             "username": email,
-            "enabled": True,
+            "enabled": settings.keycloak_default_enabled,
             "firstName": firstName,
             "lastName": lastName,
             "credentials": [
@@ -388,3 +479,24 @@ async def retreive_refresh_token(email: str):
             },  # "Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def enable_disable_user(email: str, set_enable: bool):
+    keycloak_admin = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name=settings.keycloak_realm_name,
+        user_realm_name=settings.keycloak_user_realm_name,
+        # client_secret_key=settings.auth_client_secret,
+        # client_id=settings.keycloak_client_id,
+        verify=True,
+    )
+    user_id = keycloak_admin.get_user_id(username=email)
+    if user_id:
+        if set_enable:
+            keycloak_admin.enable_user(user_id)
+        else:
+            keycloak_admin.disable_user(user_id)
+    else:
+        raise Exception("keycloak doesnot have user: " + str)

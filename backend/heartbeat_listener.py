@@ -2,17 +2,16 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime
 import time
+from datetime import datetime
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
-from packaging import version
-
 from app.config import settings
 from app.main import startup_beanie
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
+from packaging import version
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,6 +42,7 @@ async def callback(message: AbstractIncomingMessage):
         if existing_extractor is not None:
             extractor_db.id = existing_extractor.id
             extractor_db.created = existing_extractor.created
+            extractor_db.active = existing_extractor.active
 
             # Update existing listener version
             existing_version = existing_extractor.version
@@ -107,13 +107,13 @@ async def listen_for_heartbeats():
         queue = await channel.declare_queue(exclusive=True)
         await queue.bind(exchange)
 
-        logger.info(f" [*] Listening to {exchange}")
+        logger.info(f"[*] Listening to {exchange}")
         await queue.consume(
             callback=callback,
             no_ack=False,
         )
 
-        logger.info(" [*] Waiting for heartbeats. To exit press CTRL+C")
+        logger.info("[*] Waiting for heartbeats. To exit press CTRL+C")
         try:
             # Wait until terminate
             await asyncio.Future()
@@ -126,10 +126,10 @@ if __name__ == "__main__":
     while time_ran < timeout:
         try:
             asyncio.run(listen_for_heartbeats())
-        except Exception as e:
-            logger.info(f" Heartbeat listner failed, retry in 10 seconds...")
+        except:  # noqa: E722
+            logger.info("Heartbeat listener failed, retry in 10 seconds...")
             time.sleep(10)
             current_time = datetime.now()
             current_seconds = (current_time - start).total_seconds()
             time_ran += current_seconds
-    logger.info(f" Heartbeat listener could not connect to rabbitmq.")
+    logger.info("Heartbeat listener could not connect to rabbitmq.")

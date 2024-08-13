@@ -142,6 +142,7 @@ export function submitDatasetExtractionAction(
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
 			datasetId,
 			extractorName,
+			null,
 			requestBody
 		)
 			.then((json) => {
@@ -183,6 +184,114 @@ export function updateDataset(datasetId, formData) {
 	};
 }
 
+export const FREEZE_DATASET = "FREEZE_DATASET";
+
+export function freezeDataset(datasetId) {
+	return (dispatch) => {
+		return V2.DatasetsService.freezeDatasetApiV2DatasetsDatasetIdFreezePost(
+			datasetId
+		)
+			.then((json) => {
+				dispatch({
+					type: FREEZE_DATASET,
+					newFrozenDataset: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(handleErrorsAuthorization(reason, freezeDataset(datasetId)));
+			});
+	};
+}
+
+export const GET_FREEZE_DATASET_LATEST_VERSION_NUM =
+	"GET_FREEZE_DATASET_LATEST_VERSION_NUM";
+
+export function getFreezeDatasetLatest(datasetId) {
+	return (dispatch) => {
+		return V2.DatasetsService.getFreezeDatasetLastestVersionNumApiV2DatasetsDatasetIdFreezeLatestVersionNumGet(
+			datasetId
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_FREEZE_DATASET_LATEST_VERSION_NUM,
+					latestFrozenVersionNum: json ?? -999,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(reason, getFreezeDatasetLatest(datasetId))
+				);
+			});
+	};
+}
+
+export const GET_FREEZE_DATASET = "GET_FREEZE_DATASET";
+
+export function getFreezeDataset(datasetId, frozenVersionNum) {
+	return (dispatch) => {
+		return V2.DatasetsService.getFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumGet(
+			datasetId,
+			frozenVersionNum
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_FREEZE_DATASET,
+					frozenDataset: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(
+						reason,
+						getFreezeDataset(datasetId, frozenVersionNum)
+					)
+				);
+			});
+	};
+}
+
+export const GET_FREEZE_DATASETS = "GET_FREEZE_DATASETS";
+
+export function getFreezeDatasets(datasetId, skip = 0, limit = 21) {
+	return (dispatch) => {
+		return V2.DatasetsService.getFreezeDatasetsApiV2DatasetsDatasetIdFreezeGet(
+			datasetId,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_FREEZE_DATASETS,
+					frozenDatasets: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(
+						reason,
+						getFreezeDatasets(datasetId, skip, limit)
+					)
+				);
+			});
+	};
+}
+
 export const RECEIVE_DATASET_ABOUT = "RECEIVE_DATASET_ABOUT";
 
 export function fetchDatasetAbout(id) {
@@ -197,6 +306,76 @@ export function fetchDatasetAbout(id) {
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, fetchDatasetAbout(id)));
+			});
+	};
+}
+
+export const DELETE_FREEZE_DATASET = "DELETE_FREEZE_DATASET";
+
+export function deleteFreezeDataset(datasetId, frozenVersionNum) {
+	return (dispatch) => {
+		return V2.DatasetsService.deleteFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumDelete(
+			datasetId,
+			frozenVersionNum
+		)
+			.then((json) => {
+				dispatch({
+					type: DELETE_FREEZE_DATASET,
+					frozenDataset: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(
+						reason,
+						deleteFreezeDataset(datasetId, frozenVersionNum)
+					)
+				);
+			});
+	};
+}
+
+export const RECEIVE_DATASET_LICENSE = "RECEIVE_DATASET_LICENSE";
+
+export function fetchDatasetLicense(license_id) {
+	return (dispatch) => {
+		return V2.LicensesService.getLicenseApiV2LicensesLicenseIdGet(license_id)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_DATASET_LICENSE,
+					license: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchDatasetLicense(license_id)));
+			});
+	};
+}
+
+export const UPDATE_DATASET_LICENSE = "UPDATE_DATASET_LICENSE";
+
+export function updateDatasetLicense(licenseId, formData) {
+	return (dispatch) => {
+		return V2.LicensesService.editLicenseApiV2LicensesLicenseIdPut(
+			licenseId,
+			formData
+		)
+			.then((json) => {
+				dispatch({
+					type: UPDATE_DATASET_LICENSE,
+					license: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, updateDatasetLicense(licenseId, formData))
+				);
 			});
 	};
 }
@@ -220,22 +399,86 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 	};
 }
 
-export const CREATE_DATASET = "CREATE_DATASET";
+export const RECEIVE_MY_DATASETS = "RECEIVE_MY_DATASETS";
 
-export function datasetCreated(formData) {
+export function fetchMyDatasets(skip = 0, limit = 21, mine = true) {
 	return (dispatch) => {
-		return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData)
-			.then((dataset) => {
+		// TODO: Parameters for dates? paging?
+		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
+			.then((json) => {
 				dispatch({
-					type: CREATE_DATASET,
-					dataset: dataset,
+					type: RECEIVE_MY_DATASETS,
+					datasets: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, datasetCreated(formData)));
+				dispatch(handleErrors(reason, fetchMyDatasets(skip, limit, mine)));
 			});
 	};
+}
+
+export const CREATE_DATASET = "CREATE_DATASET";
+
+export function datasetCreated(formData, licenseId, licenseFormData) {
+	return (dispatch) => {
+		if (licenseFormData) {
+			// If licenseFormData is present, save the license first
+			return V2.LicensesService.saveLicenseApiV2LicensesPost(licenseFormData)
+				.then((license) => {
+					licenseId = license.id;
+					// After saving the license, save the dataset
+					return V2.DatasetsService.saveDatasetApiV2DatasetsPost(
+						licenseId,
+						formData
+					);
+				})
+				.then((dataset) => {
+					dispatch({
+						type: CREATE_DATASET,
+						dataset: dataset,
+						receivedAt: Date.now(),
+					});
+				})
+				.catch((reason) => {
+					dispatch(
+						handleErrors(
+							reason,
+							datasetCreated(formData, licenseId, licenseFormData)
+						)
+					);
+				});
+		} else {
+			// If licenseFormData is not present, directly save the dataset
+			return V2.DatasetsService.saveDatasetApiV2DatasetsPost(
+				licenseId,
+				formData
+			)
+				.then((dataset) => {
+					dispatch({
+						type: CREATE_DATASET,
+						dataset: dataset,
+						receivedAt: Date.now(),
+					});
+				})
+				.catch((reason) => {
+					dispatch(
+						handleErrors(
+							reason,
+							datasetCreated(formData, licenseId, licenseFormData)
+						)
+					);
+				});
+		}
+	};
+}
+
+export function licenseCreated(formData) {
+	try {
+		return V2.LicensesService.saveLicenseApiV2LicensesPost(formData);
+	} catch (reason) {
+		handleErrors(reason, licenseCreated(formData));
+	}
 }
 
 export const RESET_CREATE_DATASET = "RESET_CREATE_DATASET";
@@ -390,3 +633,5 @@ export function fetchDatasetRoles(datasetId) {
 			});
 	};
 }
+
+export const INCREMENT_DATASET_DOWNLOADS = "INCREMENT_DATASET_DOWNLOADS";

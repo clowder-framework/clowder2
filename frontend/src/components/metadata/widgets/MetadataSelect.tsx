@@ -4,6 +4,8 @@ import { FormControl, Grid, InputLabel, MenuItem } from "@mui/material";
 import { ClowderSelect } from "../../styledComponents/ClowderSelect";
 import { ClowderMetadataFormHelperText } from "../../styledComponents/ClowderMetadataFormHelperText";
 import { MetadataEditButton } from "./MetadataEditButton";
+import { AuthWrapper } from "../../auth/AuthWrapper";
+import { FrozenWrapper } from "../../auth/FrozenWrapper";
 
 export const MetadataSelect = (props) => {
 	const {
@@ -18,6 +20,8 @@ export const MetadataSelect = (props) => {
 		updateMetadata,
 		isRequired,
 		datasetRole,
+		frozen,
+		frozenVersionNum,
 	} = props;
 	const [localContent, setLocalContent] = useState(
 		content && content[fieldName] ? content : {}
@@ -75,20 +79,24 @@ export const MetadataSelect = (props) => {
 					</FormControl>
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
-						<MetadataEditButton
-							readOnly={readOnly}
-							setReadOnly={setReadOnly}
-							updateMetadata={updateMetadata}
-							content={localContent}
-							metadataId={metadataId}
-							resourceId={resourceId}
-							widgetName={widgetName}
-							setInputChanged={setInputChanged}
-							setMetadata={setMetadata}
-						/> :
-						<></>
-					}
+					<FrozenWrapper frozen={frozen} frozenVersionNum={frozenVersionNum}>
+						<AuthWrapper
+							currRole={datasetRole.role}
+							allowedRoles={["owner", "editor", "uploader"]}
+						>
+							<MetadataEditButton
+								readOnly={readOnly}
+								setReadOnly={setReadOnly}
+								updateMetadata={updateMetadata}
+								content={localContent}
+								metadataId={metadataId}
+								resourceId={resourceId}
+								widgetName={widgetName}
+								setInputChanged={setInputChanged}
+								setMetadata={setMetadata}
+							/>
+						</AuthWrapper>
+					</FrozenWrapper>
 				</Grid>
 			</Grid>
 		</div>

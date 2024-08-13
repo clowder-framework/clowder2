@@ -1,38 +1,35 @@
-import datetime
-
-from beanie import PydanticObjectId
-from beanie.operators import Or, In
-from bson import ObjectId
-from fastapi import APIRouter, Depends
-from fastapi.exceptions import HTTPException
-
 from app.dependencies import get_elasticsearchclient
 from app.deps.authorization_deps import (
     Authorization,
     get_role_by_file,
-    get_role_by_metadata,
     get_role_by_group,
+    get_role_by_metadata,
 )
 from app.keycloak_auth import get_current_username, get_user
 from app.models.authorization import (
     AuthorizationBase,
-    AuthorizationMetadata,
     AuthorizationDB,
+    AuthorizationMetadata,
     AuthorizationOut,
     RoleType,
 )
 from app.models.datasets import (
-    UserAndRole,
-    GroupAndRole,
-    DatasetRoles,
-    DatasetDB,
+    DatasetDBViewList,
     DatasetOut,
+    DatasetRoles,
     DatasetStatus,
+    GroupAndRole,
+    UserAndRole,
 )
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode
-from app.search.index import index_dataset
+from app.search.index import index_dataset, index_dataset_files
+from beanie import PydanticObjectId
+from beanie.operators import In, Or
+from bson import ObjectId
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 
 router = APIRouter()
 
@@ -42,6 +39,7 @@ async def save_authorization(
     dataset_id: str,
     authorization_in: AuthorizationBase,
     user=Depends(get_current_username),
+    es=Depends(get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id."""
@@ -64,6 +62,7 @@ async def save_authorization(
         **authorization_in.dict(), creator=user, user_ids=user_ids
     )
     await authorization.insert()
+    await index_dataset_files(es, dataset_id, update=True)
     return authorization.dict()
 
 
@@ -71,6 +70,7 @@ async def save_authorization(
 async def get_dataset_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -91,7 +91,9 @@ async def get_dataset_role(
     )
     if auth_db is None:
         if (
-            current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+            current_dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
         ) is not None:
             if (
                 current_dataset.status == DatasetStatus.AUTHENTICATED.name
@@ -161,7 +163,12 @@ async def get_group_role(
     role: RoleType = Depends(get_role_by_group),
 ):
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
-    return role
+    if (user := await UserDB.find_one(UserDB.email == current_user)) is not None:
+        # return viewer if read only user
+        if user.read_only_user:
+            return RoleType.VIEWER
+        else:
+            return role
 
 
 @router.post(
@@ -177,7 +184,9 @@ async def set_dataset_group_role(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
-    if (dataset := await DatasetDB.get(dataset_id)) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == dataset_id)
+    ) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, es, user_id, allow)
@@ -189,25 +198,74 @@ async def set_dataset_group_role(
             ) is not None:
                 if group_id not in auth_db.group_ids:
                     auth_db.group_ids.append(group_id)
+                    readonly_user_ids = []
                     for u in group.users:
-                        auth_db.user_ids.append(u.user.email)
+                        if u.user.read_only_user:
+                            readonly_user_ids.append(u.user.email)
+                        else:
+                            auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                    await index_dataset(
+                        es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                    )
+                    await index_dataset_files(es, str(dataset_id), update=True)
+                    if len(readonly_user_ids) > 0:
+                        readonly_auth_db = AuthorizationDB(
+                            creator=user_id,
+                            dataset_id=PydanticObjectId(dataset_id),
+                            role=RoleType.VIEWER,
+                            group_ids=[PydanticObjectId(group_id)],
+                            user_ids=readonly_user_ids,
+                        )
+                        await readonly_auth_db.insert()
+                        await index_dataset(
+                            es,
+                            DatasetOut(**dataset.dict()),
+                            readonly_auth_db.user_ids,
+                            update=True,
+                        )
+                        await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
                 user_ids = []
+                readonly_user_ids = []
                 for u in group.users:
-                    user_ids.append(u.user.email)
-                auth_db = AuthorizationDB(
-                    creator=user_id,
-                    dataset_id=PydanticObjectId(dataset_id),
-                    role=role,
-                    group_ids=[PydanticObjectId(group_id)],
-                    user_ids=user_ids,
-                )
-                await auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                    if u.user.read_only_user:
+                        readonly_user_ids.append(u.user.email)
+                    else:
+                        user_ids.append(u.user.email)
+                # add the users who get the role
+                if len(readonly_user_ids) > 0:
+                    readonly_auth_db = AuthorizationDB(
+                        creator=user_id,
+                        dataset_id=PydanticObjectId(dataset_id),
+                        role=RoleType.VIEWER,
+                        group_ids=[PydanticObjectId(group_id)],
+                        user_ids=readonly_user_ids,
+                    )
+                    await readonly_auth_db.insert()
+                    await index_dataset(
+                        es,
+                        DatasetOut(**dataset.dict()),
+                        readonly_auth_db.user_ids,
+                        update=True,
+                    )
+                    await index_dataset_files(es, str(dataset_id), update=True)
+                if len(user_ids) > 0:
+                    auth_db = AuthorizationDB(
+                        creator=user_id,
+                        dataset_id=PydanticObjectId(dataset_id),
+                        role=role,
+                        group_ids=[PydanticObjectId(group_id)],
+                        user_ids=user_ids,
+                    )
+                    # if there are read only users add them with the role of viewer
+                    await auth_db.insert()
+                    await index_dataset(
+                        es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                    )
+                    await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -229,14 +287,22 @@ async def set_dataset_user_role(
 ):
     """Assign a single user a specific role for a dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (await UserDB.find_one(UserDB.email == username)) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
+        if (user := await UserDB.find_one(UserDB.email == username)) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, es, user_id, allow)
             auth_db = await AuthorizationDB.find_one(
                 AuthorizationDB.dataset_id == PydanticObjectId(dataset_id),
                 AuthorizationDB.role == role,
             )
+            if user.read_only_user and role.name is not RoleType.VIEWER.name:
+                raise HTTPException(
+                    status_code=405, detail=f"User {username} is read only"
+                )
             if auth_db is not None and username not in auth_db.user_ids:
                 auth_db.user_ids.append(username)
                 await auth_db.save()
@@ -253,7 +319,10 @@ async def set_dataset_user_role(
                 else:
                     auth_db.user_ids.append(username)
                     await auth_db.save()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                )
+                await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
             else:
                 # Create a new entry
@@ -264,7 +333,10 @@ async def set_dataset_user_role(
                     user_ids=[username],
                 )
                 await auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), [username])
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), [username], update=True
+                )
+                await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -285,7 +357,9 @@ async def remove_dataset_group_role(
 ):
     """Remove any role the group has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(dataset_id)) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == dataset_id)
+    ) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -299,7 +373,10 @@ async def remove_dataset_group_role(
                         auth_db.user_ids.remove(u.user.email)
                 await auth_db.save()
                 # Update elasticsearch index with new users
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                )
+                await index_dataset_files(es, str(dataset_id), update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -320,7 +397,11 @@ async def remove_dataset_user_role(
 ):
     """Remove any role the user has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -331,7 +412,10 @@ async def remove_dataset_user_role(
                 auth_db.user_ids.remove(username)
                 await auth_db.save()
                 # Update elasticsearch index with updated users
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth_db.user_ids, update=True
+                )
+                await index_dataset_files(es, dataset_id, update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -339,13 +423,17 @@ async def remove_dataset_user_role(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/datasets/{dataset_id}/roles}", response_model=DatasetRoles)
+@router.get("/datasets/{dataset_id}/roles", response_model=DatasetRoles)
 async def get_dataset_roles(
     dataset_id: str,
     allow: bool = Depends(Authorization("editor")),
 ):
     """Get a list of all users and groups that have assigned roles on this dataset."""
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         roles = DatasetRoles(dataset_id=str(dataset.id))
 
         async for auth in AuthorizationDB.find(

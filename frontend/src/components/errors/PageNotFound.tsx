@@ -1,7 +1,6 @@
 import React from "react";
 import { Grid, Link, Typography } from "@mui/material";
 import Layout from "../Layout";
-import { Link as RouterLink } from "react-router-dom";
 
 export const PageNotFound = (): JSX.Element => {
 	return (
@@ -23,7 +22,7 @@ export const PageNotFound = (): JSX.Element => {
 					</Typography>
 					<Typography variant="body1" paragraph>
 						Go back{" "}
-						<Link component={RouterLink} to="/" variant="body1">
+						<Link href="/" variant="body1">
 							home
 						</Link>
 					</Typography>

@@ -1,12 +1,11 @@
 import os
 import struct
 
+from app.config import settings
+from app.keycloak_auth import delete_user
 from elasticsearch import Elasticsearch
 from fastapi.testclient import TestClient
 from pymongo import MongoClient
-
-from app.config import settings
-from app.keycloak_auth import delete_user
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {
@@ -31,6 +30,13 @@ group_example = {
 dataset_example = {
     "name": "test dataset",
     "description": "a dataset is a container of files and metadata",
+}
+
+license_example = {
+    "name": "test license",
+    "description": "test description",
+    "url": "test url",
+    "holders": " test holders",
 }
 
 filename_example_1 = "test_upload1.csv"
@@ -140,8 +146,30 @@ def create_group(client: TestClient, headers: dict):
 
 def create_dataset(client: TestClient, headers: dict):
     """Creates a test dataset and returns the JSON."""
+    license_id = "CC BY"
     response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_example
+        f"{settings.API_V2_STR}/datasets/?license_id={license_id}",
+        headers=headers,
+        json=dataset_example,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    return response.json()
+
+
+def create_dataset_with_custom_license(client: TestClient, headers: dict):
+    """Creates a test dataset and returns the JSON."""
+    # create
+    response = client.post(
+        f"{settings.API_V2_STR}/licenses/?user=test@test.org",
+        headers=headers,
+        json=license_example,
+    )
+    license_id = response.json().get("id")
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/?license_id={license_id}",
+        headers=headers,
+        json=dataset_example,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

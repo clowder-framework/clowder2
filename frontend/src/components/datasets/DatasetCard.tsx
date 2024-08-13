@@ -15,7 +15,6 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
-// import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
 	id?: string;
@@ -25,10 +24,23 @@ type DatasetCardProps = {
 	description?: string;
 	thumbnailId?: string;
 	publicView?: boolean | false;
+	frozen?: string;
+	frozenVersionNum?: number;
 };
 
 export default function DatasetCard(props: DatasetCardProps) {
-	const { id, name, author, created, description, thumbnailId, publicView } = props;
+	const {
+		id,
+		name,
+		author,
+		created,
+		description,
+		thumbnailId,
+		publicView,
+		frozen,
+		frozenVersionNum,
+	} = props;
+
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
@@ -48,38 +60,37 @@ export default function DatasetCard(props: DatasetCardProps) {
 			sx={{ display: "flex", flexDirection: "column", height: "100%" }}
 			variant="outlined"
 		>
-			{publicView?
-				(
-					<CardActionArea
-						component={Link}
-						to={`/public/datasets/${id}`}
-						sx={{ height: "100%" }}
-					>
-						<CardHeader title={name} subheader={subheader} />
-						{thumbnailId ? (
-							<CardMedia
-								component="img"
-								image={thumbnailUrl}
-								alt={`${name}_thumbnail`}
-							/>
-						) :
-							null}
-						<CardContent sx={{ py: 0 }}>
-							<Typography
-								variant="body2"
-								sx={{
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									display: "-webkit-box",
-									WebkitLineClamp: "5",
-									WebkitBoxOrient: "vertical",
-								}}
-							>
-								{description}
-							</Typography>
-						</CardContent>
-					</CardActionArea>):
-				(<CardActionArea
+			{publicView ? (
+				<CardActionArea
+					component={Link}
+					to={`/public_datasets/${id}`}
+					sx={{ height: "100%" }}
+				>
+					<CardHeader title={name} subheader={subheader} />
+					{thumbnailId ? (
+						<CardMedia
+							component="img"
+							image={thumbnailUrl}
+							alt={`${name}_thumbnail`}
+						/>
+					) : null}
+					<CardContent sx={{ py: 0 }}>
+						<Typography
+							variant="body2"
+							sx={{
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								display: "-webkit-box",
+								WebkitLineClamp: "5",
+								WebkitBoxOrient: "vertical",
+							}}
+						>
+							{description}
+						</Typography>
+					</CardContent>
+				</CardActionArea>
+			) : (
+				<CardActionArea
 					component={Link}
 					to={`/datasets/${id}`}
 					sx={{ height: "100%" }}
@@ -106,9 +117,9 @@ export default function DatasetCard(props: DatasetCardProps) {
 							{description}
 						</Typography>
 					</CardContent>
-				</CardActionArea>)
-			}
-			<CardActions sx={{ pb: 0 }}>
+				</CardActionArea>
+			)}
+			<CardActions sx={{ pb: 0, justifyContent: "space-between" }}>
 				<Tooltip title="Download">
 					<IconButton
 						href={`${config.hostname}/api/v2/datasets/${id}/download`}

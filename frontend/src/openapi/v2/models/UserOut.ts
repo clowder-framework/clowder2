@@ -20,6 +20,7 @@ export type UserOut = {
     first_name: string;
     last_name: string;
     id?: string;
-    admin: boolean;
+    admin?: boolean;
     admin_mode?: boolean;
+    read_only_user?: boolean;
 }

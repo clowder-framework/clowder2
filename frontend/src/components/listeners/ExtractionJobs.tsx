@@ -38,6 +38,7 @@ import { EventListenerJobOut } from "../../openapi/v2";
 export interface Data {
 	status: string;
 	jobId: string;
+	listenerName: string;
 	created: string;
 	creator: string;
 	duration: number;
@@ -53,6 +54,10 @@ const headCells = [
 	{
 		id: "jobId",
 		label: "Job ID",
+	},
+	{
+		id: "extractorName",
+		label: "Extractor Name",
 	},
 	{
 		id: "created",
@@ -79,6 +84,7 @@ const headCells = [
 const createData = (
 	status: string,
 	jobId: string,
+	listenerName: string,
 	created: string,
 	creator: string,
 	duration: number,
@@ -88,6 +94,7 @@ const createData = (
 	return {
 		status,
 		jobId,
+		listenerName,
 		created,
 		creator,
 		duration,
@@ -227,13 +234,14 @@ export const ExtractionJobs = (props) => {
 	}, [selectedStatus, selectedCreatedTime]);
 
 	useEffect(() => {
-		let rows = [];
+		const rows = [];
 		if (jobs && jobs.length > 0) {
 			jobs.map((job: EventListenerJobOut) => {
 				rows.push(
 					createData(
 						job["status"],
 						job["id"],
+						job["listener_id"],
 						parseDate(job["created"]),
 						job["creator"]["email"],
 						`${job["duration"]} sec`,

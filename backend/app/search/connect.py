@@ -1,14 +1,12 @@
 import json
 import logging
 
-from elasticsearch import BadRequestError
-from elasticsearch import Elasticsearch
-
 from app.config import settings
 from app.database.errors import log_error
 from app.models.errors import ServiceUnreachable
 from app.models.feeds import SearchObject
 from app.models.files import FileOut
+from elasticsearch import BadRequestError, ConflictError, Elasticsearch, NotFoundError
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
@@ -116,8 +114,11 @@ def delete_document_by_id(es_client, index_name, id):
         id -- unique identifier of the document
     """
     try:
-        query = {"match": {"_id": id}}
-        es_client.delete_by_query(index=index_name, query=query)
+        es_client.delete(index=index_name, id=id)
+    except NotFoundError:
+        print(f"Document with ID {id} not found.")
+    except ConflictError as ex:
+        print(f"Version conflict error: {str(ex)}")
     except BadRequestError as ex:
         logger.error(str(ex))
 
@@ -161,9 +162,9 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
         match_list.append({"match": crit})
 
     # TODO: This will need to be more complex to support other operators
-    if search_obj.mode == "and":
+    if search_obj.mode.lower() == "and":
         subquery = {"bool": {"must": match_list}}
-    if search_obj.mode == "or":
+    if search_obj.mode.lower() == "or":
         subquery = {"bool": {"should": match_list}}
 
     # Wrap the normal criteria with restriction of file ID also
@@ -177,5 +178,5 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     try:
         responses = results.body["responses"][0]
         return responses["hits"]["total"]["value"] > 0
-    except Exception as e:
+    except Exception:
         return False

@@ -167,7 +167,7 @@ export const PREFIX_SEARCH_USERS = "PREFIX_SEARCH_USERS";
 
 export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {
 	return (dispatch) => {
-		return V2.UsersService.searchUsersApiV2UsersPrefixSearchGet(
+		return V2.UsersService.searchUsersPrefixApiV2UsersPrefixSearchGet(
 			text,
 			skip,
 			limit
@@ -300,6 +300,46 @@ export function revokeAdmin(email) {
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, revokeAdmin(email)));
+			});
+	};
+}
+
+export const ENABLE_READONLY = "ENABLE_READONLY";
+
+export function enableReadOnly(email) {
+	return (dispatch) => {
+		return V2.LoginService.enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
+			email
+		)
+			.then((json) => {
+				dispatch({
+					type: ENABLE_READONLY,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, enableReadOnly(email)));
+			});
+	};
+}
+
+export const DISABLE_READONLY = "DISABLE_READONLY";
+
+export function disableReadOnly(email) {
+	return (dispatch) => {
+		return V2.LoginService.disableReadonlyUserApiV2UsersDisableReadonlyUseremailPost(
+			email
+		)
+			.then((json) => {
+				dispatch({
+					type: DISABLE_READONLY,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, disableReadOnly(email)));
 			});
 	};
 }

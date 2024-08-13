@@ -1,18 +1,20 @@
 from datetime import datetime
 from typing import Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, Push, RegEx
-from bson.objectid import ObjectId
-from fastapi import HTTPException, Depends, APIRouter
-
+from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
-from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
-from app.models.pages import _get_page_query, Paged, _construct_page_metadata
-from app.models.users import UserOut, UserDB
-from app.routers.authentication import get_admin_mode, get_admin
+from app.models.datasets import DatasetDB, DatasetOut
+from app.models.groups import GroupBase, GroupDB, GroupIn, GroupOut, Member
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from app.models.users import UserDB, UserOut
+from app.routers.authentication import get_admin, get_admin_mode
+from app.search.index import index_dataset, index_dataset_files
+from beanie import PydanticObjectId
+from beanie.operators import Or, Push, RegEx
+from bson.objectid import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -35,6 +37,7 @@ async def get_groups(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -80,6 +83,7 @@ async def search_group(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -93,8 +97,8 @@ async def search_group(
 
     criteria_list = [
         Or(
-            RegEx(field=GroupDB.name, pattern=search_term),
-            RegEx(field=GroupDB.description, pattern=search_term),
+            RegEx(field=GroupDB.name, pattern=search_term, options="i"),
+            RegEx(field=GroupDB.description, pattern=search_term, options="i"),
         ),
     ]
     if not admin or not admin_mode:
@@ -219,6 +223,7 @@ async def add_member(
     group_id: str,
     username: str,
     role: Optional[str] = None,
+    es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
@@ -246,6 +251,20 @@ async def add_member(
                 ).update(
                     Push({AuthorizationDB.user_ids: username}),
                 )
+                # index the datasets in the group
+                group_authorizations = await AuthorizationDB.find(
+                    AuthorizationDB.group_ids == ObjectId(group_id)
+                ).to_list()
+                for auth in group_authorizations:
+                    if (
+                        dataset := await DatasetDB.get(
+                            PydanticObjectId(auth.dataset_id)
+                        )
+                    ) is not None:
+                        await index_dataset(
+                            es, DatasetOut(**dataset.dict()), auth.user_ids, update=True
+                        )
+                        await index_dataset_files(es, str(auth.dataset_id), update=True)
             return group.dict()
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -255,6 +274,7 @@ async def add_member(
 async def remove_member(
     group_id: str,
     username: str,
+    es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Remove a user from a group."""
@@ -272,12 +292,25 @@ async def remove_member(
         # Remove user from all affected Authorization entries
         # TODO not sure if this is right
         async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
-            auth.user_ids.remove(username)
-            await auth.replace()
+            if username in auth.user_ids:
+                auth.user_ids.remove(username)
+                await auth.replace()
 
         # Update group itself
         group.users.remove(found_user)
         await group.replace()
+        # index the datasets in the group
+        group_authorizations = await AuthorizationDB.find(
+            AuthorizationDB.group_ids == ObjectId(group_id)
+        ).to_list()
+        for auth in group_authorizations:
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(auth.dataset_id))
+            ) is not None:
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), auth.user_ids, update=True
+                )
+                await index_dataset_files(es, str(auth.dataset_id), update=True)
 
         return group.dict()
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -291,7 +324,7 @@ async def update_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Update user role."""
-    if (user := await UserDB.find_one({"email": username})) is not None:
+    if (await UserDB.find_one({"email": username})) is not None:
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             found_user = None
             found_user_index = -1

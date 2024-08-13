@@ -17,9 +17,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import FolderMenu from "./FolderMenu";
 import { AuthWrapper } from "../auth/AuthWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type FilesTableProps = {
-	datasetId: string | undefined;
 	folderId: string | null;
 	foldersFilesInDataset: FileOut[] | FolderOut[];
 	publicView: boolean | false;
@@ -32,13 +32,14 @@ const iconStyle = {
 };
 
 export default function FilesTable(props: FilesTableProps) {
-	const {
-		folderId,
-		datasetId,
-		foldersFilesInDataset,
-		publicView,
-		setCurrPageNum,
-	} = props;
+	const { folderId, foldersFilesInDataset, publicView, setCurrPageNum } = props;
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
+	const dataset = useSelector((state: RootState) => state.dataset.about);
+	const publicDataset = useSelector(
+		(state: RootState) => state.publicDataset.publicAbout
+	);
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
@@ -48,7 +49,9 @@ export default function FilesTable(props: FilesTableProps) {
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/files/${selectedFileId}?dataset=${datasetId}&folder=${folderId}&verNum=${selectedFileId}`
+			`/files/${selectedFileId}?dataset=${dataset.id}&folder=${
+				folderId ?? ""
+			}&verNum=${selectedFileId}`
 		);
 	};
 	const selectPublicFile = (selectedFileId: string | undefined) => {
@@ -56,26 +59,24 @@ export default function FilesTable(props: FilesTableProps) {
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/public/files/${selectedFileId}?dataset=${props.datasetId}&folder=${folderId}&verNum=${selectedFileId}`
+			`/public_files/${selectedFileId}?dataset=${publicDataset.id}&folder=${
+				folderId ?? ""
+			}&verNum=${selectedFileId}`
 		);
 	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
 		// reset page number to 1
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
-		history(`/datasets/${datasetId}?folder=${selectedFolderId}`);
+		history(`/datasets/${dataset.id}?folder=${selectedFolderId}`);
 	};
 
 	const selectPublicFolder = (selectedFolderId: string | undefined) => {
 		// reset page number to 1
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
-		history(`/public/datasets/${datasetId}?folder=${selectedFolderId}`);
+		history(`/public_datasets/${publicDataset.id}?folder=${selectedFolderId}`);
 	};
-
-	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
-	);
 
 	return (
 		<TableContainer component={Paper}>
@@ -83,7 +84,6 @@ export default function FilesTable(props: FilesTableProps) {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
-						<TableCell>Version</TableCell>
 						<TableCell align="right">Created</TableCell>
 						<TableCell align="right">Size</TableCell>
 						<TableCell align="right">Type</TableCell>
@@ -109,18 +109,22 @@ export default function FilesTable(props: FilesTableProps) {
 										{item.name}
 									</Button>
 								</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">{parseDate(item.created)}</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">
-									{/*owner, editor can delete and edit folder*/}
-									<AuthWrapper
-										currRole={datasetRole.role}
-										allowedRoles={["owner", "editor"]}
+									<FrozenWrapper
+										frozen={dataset.frozen}
+										frozenVersionNum={dataset.frozen_version_num}
 									>
-										<FolderMenu folder={item} />
-									</AuthWrapper>
+										{/*owner, editor can delete and edit folder*/}
+										<AuthWrapper
+											currRole={datasetRole.role}
+											allowedRoles={["owner", "editor"]}
+										>
+											<FolderMenu folder={item} />
+										</AuthWrapper>
+									</FrozenWrapper>
 								</TableCell>
 							</TableRow>
 						) : (
