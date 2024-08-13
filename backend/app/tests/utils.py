@@ -61,7 +61,11 @@ feed_example = {
     },
 }
 
-project_example = {"name": "test_project", "description": "This project is a test", "creator": user_example}
+project_example = {
+    "name": "test_project",
+    "description": "This project is a test",
+    "creator": user_example,
+}
 
 extractor_info_v1_example = {
     "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",

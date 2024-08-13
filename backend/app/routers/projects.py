@@ -7,23 +7,16 @@ import tempfile
 import zipfile
 from collections.abc import Iterable, Mapping
 from typing import List, Optional
-from app.models.pages import Paged, _construct_page_metadata, _get_page_query
-
 
 from app import dependencies
 from app.config import settings
-from app.models.users import UserDB, UserOut, UserIn
+from app.keycloak_auth import get_current_user, get_token, get_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.folders import FolderDB
-from app.models.project import (
-    ProjectBase,
-    ProjectDB,
-    ProjectIn,
-    ProjectOut,
-    Member,
-)
-from app.keycloak_auth import get_current_user, get_token, get_user
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from app.models.project import Member, ProjectBase, ProjectDB, ProjectIn, ProjectOut
+from app.models.users import UserDB, UserIn, UserOut
 from beanie import PydanticObjectId
 from beanie.operators import And, Or
 from bson import ObjectId, json_util

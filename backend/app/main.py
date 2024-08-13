@@ -26,6 +26,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
     MetadataFreezeDB,
 )
+from app.models.project import ProjectDB
 from app.models.thumbnails import ThumbnailDB, ThumbnailDBViewList, ThumbnailFreezeDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
@@ -39,7 +40,6 @@ from app.models.visualization_data import (
     VisualizationDataDBViewList,
     VisualizationDataFreezeDB,
 )
-from app.models.project import ProjectDB
 from app.routers import (
     authentication,
     authorization,
@@ -56,6 +56,7 @@ from app.routers import (
     metadata,
     metadata_datasets,
     metadata_files,
+    projects,
     public_datasets,
     public_elasticsearch,
     public_files,
@@ -67,7 +68,6 @@ from app.routers import (
     thumbnails,
     users,
     visualization,
-    projects,
 )
 
 # setup loggers

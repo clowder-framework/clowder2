@@ -2,10 +2,10 @@ from app.config import settings
 from app.tests.utils import (
     create_dataset,
     create_group,
+    create_project,
     create_user,
     get_user_token,
     user_alt,
-    create_project,
 )
 from fastapi.testclient import TestClient
 
