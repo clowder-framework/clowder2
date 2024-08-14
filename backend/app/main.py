@@ -26,6 +26,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
     MetadataFreezeDB,
 )
+from app.models.project import ProjectDB
 from app.models.thumbnails import ThumbnailDB, ThumbnailDBViewList, ThumbnailFreezeDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
@@ -55,6 +56,7 @@ from app.routers import (
     metadata,
     metadata_datasets,
     metadata_files,
+    projects,
     public_datasets,
     public_elasticsearch,
     public_files,
@@ -86,7 +88,7 @@ app = FastAPI(
     description="A cloud native data management framework to support any research domain. Clowder was "
     "developed to help researchers and scientists in data intensive domains manage raw data, complex "
     "metadata, and automatic data pipelines. ",
-    version="2.0.0-beta.2",
+    version="2.0.0-beta.3",
     contact={"name": "Clowder", "url": "https://clowderframework.org/"},
     license_info={
         "name": "Apache 2.0",
@@ -251,6 +253,11 @@ api_router.include_router(
     tags=["public_thumbnails"],
 )
 api_router.include_router(
+    projects.router,
+    prefix="/projects",
+    tags=["projects"],
+)
+api_router.include_router(
     licenses.router,
     prefix="/licenses",
     tags=["licenses"],
@@ -315,6 +322,7 @@ async def startup_beanie():
             ThumbnailFreezeDB,
             ThumbnailDBViewList,
             LicenseDB,
+            ProjectDB,
         ],
         recreate_views=True,
     )

@@ -3,9 +3,10 @@
     <module name="clowder2" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
-    <option name="SDK_HOME" value="" />
+    <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/clowder2-Ai7Xc8E9/bin/python" />
+    <option name="SDK_NAME" value="Python 3.7 (clowder2-Ai7Xc8E9)" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/app/tests" />
-    <option name="IS_MODULE_SDK" value="true" />
+    <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
