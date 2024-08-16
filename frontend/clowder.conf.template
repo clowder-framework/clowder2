@@ -10,7 +10,11 @@ server {
   }
 
   location ${BASE_URL_ROUTE}/public/ {
-    root /usr/share/nginx/html;
+    root /usr/share/nginx/html/${BASE_URL_ROUTE};
+  }
+
+  location ${BASE_URL_ROUTE}/public/ {
+    root /usr/share/nginx/html/${BASE_URL_ROUTE};
   }
 
   error_page 500 502 503 504 /50x.html;

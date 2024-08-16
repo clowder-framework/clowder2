@@ -5,9 +5,8 @@
 FROM node:16.15.1 AS clowder-build
 WORKDIR /usr/src/app
 
-# development or production
-#ARG DEPLOY_ENV=""
-#ENV DEPLOY_ENV="${DEPLOY_ENV:-}"
+ARG BASE_URL_ROUTE
+ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
 
 # copy only package for caching purposes
 COPY ["package.json", "package-lock.json*", "./"]
@@ -28,7 +27,9 @@ RUN npm run build
 FROM nginx:alpine as clowder-runtime
 
 # Set the environment variable with a default value if not provided
+ARG BASE_URL_ROUTE
 ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
+RUN echo "BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
 
 # Adjust the paths based on BASE_URL_ROUTE
 RUN rm -rf /usr/share/nginx/html/ && \
