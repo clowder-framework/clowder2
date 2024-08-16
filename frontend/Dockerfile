@@ -3,8 +3,6 @@
 # ----------------------------------------------------------------------
 
 FROM node:16.15.1 AS clowder-build
-# This is Optional
-ENV BASE_URL_ROUTE=${BASE_URL_ROUTE}
 WORKDIR /usr/src/app
 
 # development or production
@@ -28,7 +26,6 @@ RUN npm run build
 # ----------------------------------------------------------------------
 
 FROM nginx:alpine as clowder-runtime
-
 RUN rm -rf /usr/share/nginx/html/ && \
   mkdir /usr/share/nginx/html && \
   mkdir /usr/share/nginx/html/public \

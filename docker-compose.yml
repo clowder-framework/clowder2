@@ -92,7 +92,7 @@ services:
       BASE_URL_ROUTE: ${BASE_URL_ROUTE:-}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`${BASE_URL_ROUTE}/`)"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/${BASE_URL_ROUTE:-}`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
 
