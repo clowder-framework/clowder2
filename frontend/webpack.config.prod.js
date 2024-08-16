@@ -35,7 +35,7 @@ export default {
 		filename: "[name].bundle.js",
 		chunkFilename: "[name].chunk.bundle.js",
 		path: path.resolve(__dirname, "dist"),
-		publicPath: process.env.BASE_URL_ROUTE || "/", // Set the public path for all assets
+		publicPath: process.env.BASE_URL_ROUTE || "", // Set the public path for all assets
 	},
 	plugins: [
 		// NOTE: `npm run preinstall` currently runs eslint
@@ -83,7 +83,7 @@ export default {
 			// Note that you can add custom options here if you need to handle other custom logic in index.html
 			// To track JavaScript errors via TrackJS, sign up for a free trial at TrackJS.com and enter your token below.
 			trackJSToken: "",
-			publicPath: process.env.BASE_URL_ROUTE || "/", // Ensure paths are prefixed correctly
+			publicPath: process.env.BASE_URL_ROUTE || "", // Ensure paths are prefixed correctly
 		}),
 
 		new webpack.LoaderOptionsPlugin({

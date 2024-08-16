@@ -64,6 +64,7 @@ export default {
 				collapseWhitespace: true,
 			},
 			inject: true,
+			publicPath: process.env.BASE_URL_ROUTE || "", // Ensure paths are prefixed correctly
 		}),
 		new webpack.LoaderOptionsPlugin({
 			debug: true,
