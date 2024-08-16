@@ -3,7 +3,8 @@
 # ----------------------------------------------------------------------
 
 FROM node:16.15.1 AS clowder-build
-#ENV NODE_ENV=production
+# This is Optional
+ENV BASE_URL_ROUTE=${BASE_URL_ROUTE}
 WORKDIR /usr/src/app
 
 # development or production
