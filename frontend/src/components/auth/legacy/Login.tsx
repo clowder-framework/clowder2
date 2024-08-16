@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import {
 	Avatar,
 	Button,
@@ -113,8 +113,10 @@ export const Login = (): JSX.Element => {
 						onChange={changePassword}
 						onKeyPress={handleKeyPressed}
 					/>
+
 					<Link
-						href="#"
+						component={RouterLink}
+						to="#"
 						sx={{
 							display: "block",
 							textAlign: "right",
@@ -132,8 +134,10 @@ export const Login = (): JSX.Element => {
 					>
 						Sign In
 					</Button>
+
 					<Link
-						href="/register"
+						component={RouterLink}
+						to="/register"
 						sx={{
 							fontWeight: 500,
 							fontSize: "15px",

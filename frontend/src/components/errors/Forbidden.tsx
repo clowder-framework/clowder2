@@ -1,5 +1,6 @@
 import React from "react";
 import { Grid, Link, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import Layout from "../Layout";
 
 export const Forbidden = (): JSX.Element => {
@@ -22,7 +23,7 @@ export const Forbidden = (): JSX.Element => {
 					</Typography>
 					<Typography variant="body1" paragraph>
 						Go back{" "}
-						<Link href="/" variant="body1">
+						<Link component={RouterLink} to="/" variant="body1">
 							home
 						</Link>
 					</Typography>

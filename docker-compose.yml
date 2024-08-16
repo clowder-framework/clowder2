@@ -77,7 +77,8 @@ services:
       - "traefik.http.routers.backend.priority=5"
 
   frontend:
-    image: "clowder/clowder2-frontend:2.0.0-beta.2"
+#    image: "clowder/clowder2-frontend:2.0.0-beta.2"
+    image: "clowder/clowder2-frontend:basename"
     restart: unless-stopped
     build:
       context: ./frontend
