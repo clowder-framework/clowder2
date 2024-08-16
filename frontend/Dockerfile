@@ -26,12 +26,22 @@ RUN npm run build
 # ----------------------------------------------------------------------
 
 FROM nginx:alpine as clowder-runtime
-RUN rm -rf /usr/share/nginx/html/ && \
-  mkdir /usr/share/nginx/html && \
-  mkdir /usr/share/nginx/html/public \
-  mkdir /usr/share/nginx/html/styles
 
-COPY --from=clowder-build /usr/src/app/dist/ /usr/share/nginx/html/
-COPY src/public /usr/share/nginx/html/public/
-COPY src/styles /usr/share/nginx/html/styles/
-COPY clowder.conf /etc/nginx/conf.d/default.conf
+# Set the environment variable with a default value if not provided
+ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
+
+# Adjust the paths based on BASE_URL_ROUTE
+RUN rm -rf /usr/share/nginx/html/ && \
+  mkdir -p /usr/share/nginx/html${BASE_URL_ROUTE}/public && \
+  mkdir -p /usr/share/nginx/html${BASE_URL_ROUTE}/styles
+
+# Copy the built application from the previous stage
+COPY --from=clowder-build /usr/src/app/dist/ /usr/share/nginx/html${BASE_URL_ROUTE}/
+COPY src/public /usr/share/nginx/html${BASE_URL_ROUTE}/public/
+COPY src/styles /usr/share/nginx/html${BASE_URL_ROUTE}/styles/
+
+# Copy the NGINX configuration template
+COPY clowder.conf.template /etc/nginx/conf.d/default.conf.template
+
+# Use envsubst to substitute environment variables in the NGINX config template
+CMD ["/bin/sh", "-c", "envsubst '${BASE_URL_ROUTE}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]

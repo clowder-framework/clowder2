@@ -1,0 +1,20 @@
+server {
+  listen 80;
+
+  root /usr/share/nginx/html;
+
+  location ${BASE_URL_ROUTE}/ {
+    root /usr/share/nginx/html/;
+    index index.html;
+    try_files $uri ${BASE_URL_ROUTE}/index.html;
+  }
+
+  location ${BASE_URL_ROUTE}/public/ {
+    root /usr/share/nginx/html;
+  }
+
+  error_page 500 502 503 504 /50x.html;
+  location = /50x.html {
+    root /usr/share/nginx/html;
+  }
+}
