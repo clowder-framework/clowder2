@@ -6,14 +6,14 @@ server {
   location ${BASE_URL_ROUTE}/ {
     root /usr/share/nginx/html/;
     index index.html;
-    try_files $uri ${BASE_URL_ROUTE}/index.html;
+    try_files $uri $uri/ ${BASE_URL_ROUTE}/index.html;
   }
 
   location ${BASE_URL_ROUTE}/public/ {
     root /usr/share/nginx/html${BASE_URL_ROUTE};
   }
 
-  location ${BASE_URL_ROUTE}/public/ {
+  location ${BASE_URL_ROUTE}/style/ {
     root /usr/share/nginx/html${BASE_URL_ROUTE};
   }
 
