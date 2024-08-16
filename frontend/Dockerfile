@@ -7,6 +7,8 @@ WORKDIR /usr/src/app
 
 ARG BASE_URL_ROUTE
 ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
+RUN BASE_URL_ROUTE=${BASE_URL_ROUTE%/} && BASE_URL_ROUTE=${BASE_URL_ROUTE#/} && BASE_URL_ROUTE=/${BASE_URL_ROUTE}
+RUN echo "BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
 
 # copy only package for caching purposes
 COPY ["package.json", "package-lock.json*", "./"]
@@ -29,10 +31,11 @@ FROM nginx:alpine as clowder-runtime
 # Set the environment variable with a default value if not provided
 ARG BASE_URL_ROUTE
 ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
+RUN BASE_URL_ROUTE=${BASE_URL_ROUTE%/} && BASE_URL_ROUTE=${BASE_URL_ROUTE#/} && BASE_URL_ROUTE=/${BASE_URL_ROUTE}
 RUN echo "BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
 
 # Adjust the paths based on BASE_URL_ROUTE
-RUN rm -rf /usr/share/nginx/html/ && \
+RUN rm -rf /usr/share/nginx/html/ &&  \
   mkdir -p /usr/share/nginx/html${BASE_URL_ROUTE}/public && \
   mkdir -p /usr/share/nginx/html${BASE_URL_ROUTE}/styles
 
