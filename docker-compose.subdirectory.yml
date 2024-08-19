@@ -52,12 +52,12 @@ services:
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
       API_HOST: ${API_HOST:-http://backend}
       elasticsearch_url: http://elasticsearch:9200
-      auth_base: http://localhost
+      auth_base: http://localhost/${BASE_URL_ROUTE}
       auth_realm: clowder
       auth_client_id: clowder2-backend
       auth_redirect_uri: http://localhost:80/${BASE_URL_ROUTE}/api/v2/auth
       auth_url: http://localhost/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
-      oauth2_scheme_auth_url: http://${BASE_URL_ROUTE}/keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+      oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       auth_register_url: http://localhost/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=http://localhost:80/api/v2/auth&scope=openid%20email
       auth_token_url: http://keycloak:8080/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/token
       auth_server_url: http://keycloak:8080/${BASE_URL_ROUTE}/keycloak/
@@ -196,7 +196,7 @@ services:
     networks:
       - clowder2
     volumes:
-      - ./scripts/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
+      - ./scripts/keycloak/clowder-realm-subdirectory-example.json:/opt/keycloak/data/import/realm.json:ro
       - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
     command:
       - start-dev
