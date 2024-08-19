@@ -32,7 +32,9 @@ export default {
 	target: "web",
 	output: {
 		path: path.resolve(__dirname, "dist"),
-		publicPath: "",
+		publicPath: process.env.BASE_URL_ROUTE
+			? `${process.env.BASE_URL_ROUTE}/`
+			: "/", // Ensure trailing slash
 		filename: "[name].bundle.js",
 		chunkFilename: "[name].chunk.bundle.js",
 	},
@@ -58,13 +60,15 @@ export default {
 		new webpack.HotModuleReplacementPlugin(),
 		new HtmlWebpackPlugin({
 			template: "src/index.ejs",
-			favicon: "./src/public/favicon.ico",
+			favicon: "src/public/favicon.ico",
 			minify: {
 				removeComments: true,
 				collapseWhitespace: true,
 			},
 			inject: true,
-			publicPath: process.env.BASE_URL_ROUTE || "", // Ensure paths are prefixed correctly
+			publicPath: process.env.BASE_URL_ROUTE
+				? `${process.env.BASE_URL_ROUTE}/`
+				: "/", // Ensure trailing slash
 		}),
 		new webpack.LoaderOptionsPlugin({
 			debug: true,
