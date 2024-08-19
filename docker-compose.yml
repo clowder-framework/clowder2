@@ -74,8 +74,8 @@ services:
       - rabbitmq
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`${BASE_URL_ROUTE}/api`)"
-      - "traefik.http.routers.swagger.rule=PathPrefix(`${BASE_URL_ROUTE}/docs`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.swagger.rule=PathPrefix(`/docs`)"
       - "traefik.http.services.backend.loadbalancer.server.port=80"
       - "traefik.http.routers.backend.priority=5"
 

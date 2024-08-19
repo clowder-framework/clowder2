@@ -80,6 +80,9 @@ from pydantic import BaseConfig
 
 logger = logging.getLogger(__name__)
 
+if not settings.API_V2_STR.startswith("/"):
+    settings.API_V2_STR = "/" + settings.API_V2_STR
+
 app = FastAPI(
     title=settings.APP_NAME,
     openapi_url=f"{settings.API_V2_STR}/openapi.json",
@@ -261,9 +264,6 @@ api_router.include_router(
 )
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
-
-if not settings.API_V2_STR.startswith("/"):
-    settings.API_V2_STR = "/" + settings.API_V2_STR
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
 
