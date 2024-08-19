@@ -26,10 +26,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -71,10 +71,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
 
     depends_on:
       - minio1
@@ -92,10 +92,10 @@ services:
         resources:
           limits:
             cpus: '0.50'
-            memory: 50M
+            memory: 16G
           reservations:
             cpus: '0.25'
-            memory: 16G
+            memory: 50M
       environment:
         POSTGRES_DB: keycloak_dev
         POSTGRES_USER: keycloak
@@ -126,10 +126,10 @@ services:
         resources:
           limits:
             cpus: '0.50'
-            memory: 450M
+            memory: 16G
           reservations:
             cpus: '0.25'
-            memory: 16G
+            memory: 50M
       depends_on:
         - postgres
 
@@ -142,10 +142,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
 
   # message broker
   rabbitmq:
@@ -161,10 +161,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -181,10 +181,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     environment:
       - cluster.name=clowder2
       - discovery.type=single-node
@@ -213,10 +213,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     depends_on:
@@ -237,10 +237,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 17G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     depends_on:
