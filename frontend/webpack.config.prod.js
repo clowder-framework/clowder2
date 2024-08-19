@@ -35,6 +35,7 @@ export default {
 		filename: "[name].bundle.js",
 		chunkFilename: "[name].chunk.bundle.js",
 		path: path.resolve(__dirname, "dist"),
+		publicPath: "",
 	},
 	plugins: [
 		// NOTE: `npm run preinstall` currently runs eslint
