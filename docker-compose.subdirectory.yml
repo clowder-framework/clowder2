@@ -55,14 +55,15 @@ services:
       auth_base: http://localhost
       auth_realm: clowder
       auth_client_id: clowder2-backend
-      auth_redirect_uri: http://localhost:80/api/v2/auth
-      auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
-      oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
-      auth_register_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=http://localhost:80/api/v2/auth&scope=openid%20email
-      auth_token_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/token
-      auth_server_url: http://keycloak:8080/keycloak/
-      keycloak_base: http://localhost/api
-      frontend_url: http://localhost
+      auth_redirect_uri: http://localhost:80/${BASE_URL_ROUTE}/api/v2/auth
+      auth_url: http://localhost/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+      oauth2_scheme_auth_url: http://${BASE_URL_ROUTE}/keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+      auth_register_url: http://localhost/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=http://localhost:80/api/v2/auth&scope=openid%20email
+      auth_token_url: http://keycloak:8080/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/token
+      auth_server_url: http://keycloak:8080/${BASE_URL_ROUTE}/keycloak/
+      keycloak_base: http://localhost/${BASE_URL_ROUTE}/api
+      frontend_url: http://localhost/${BASE_URL_ROUTE}
+      API_V2_STR: /${BASE_URL_ROUTE}/api/v2
     depends_on:
       - mongo
       - minio-nginx
@@ -71,13 +72,13 @@ services:
       - rabbitmq
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
-      - "traefik.http.routers.swagger.rule=PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/${BASE_URL_ROUTE}/api`)"
+      - "traefik.http.routers.swagger.rule=PathPrefix(`/${BASE_URL_ROUTE}/docs`)"
       - "traefik.http.services.backend.loadbalancer.server.port=80"
       - "traefik.http.routers.backend.priority=5"
 
   frontend:
-    image: "clowder/clowder2-frontend:2.0.0-beta.2"
+    image: "clowder/clowder2-frontend:basename"
     restart: unless-stopped
     build:
       context: ./frontend
@@ -87,7 +88,6 @@ services:
       - backend
     environment:
       NODE_ENV: production
-      CLOWDER_REMOTE_HOSTNAME: ${CLOWDER_REMOTE_HOSTNAME:-http://localhost}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
@@ -200,7 +200,7 @@ services:
       - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
     command:
       - start-dev
-      - --http-relative-path /keycloak
+      - --http-relative-path /${BASE_URL_ROUTE}/keycloak
       - --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
@@ -214,7 +214,7 @@ services:
       - postgres
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.keycloak.rule=PathPrefix(`/keycloak`)"
+      - "traefik.http.routers.keycloak.rule=PathPrefix(`/${BASE_URL_ROUTE}/keycloak`)"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
       - "traefik.http.routers.keycloak.priority=10"
 
