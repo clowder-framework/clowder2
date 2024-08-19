@@ -5,10 +5,11 @@
 FROM node:16.15.1 AS clowder-build
 WORKDIR /usr/src/app
 
-ARG BASE_URL_ROUTE
-ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
-RUN BASE_URL_ROUTE=${BASE_URL_ROUTE%/} && BASE_URL_ROUTE=${BASE_URL_ROUTE#/} && BASE_URL_ROUTE=/${BASE_URL_ROUTE}
-RUN echo "BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
+# Define the argument and environment variable
+# Make sure BASE_URL_ROUTE starts with a slash and does not end with a slash
+ARG BASE_URL_ROUTE=""
+ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-}
+RUN echo "Build time BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
 
 # copy only package for caching purposes
 COPY ["package.json", "package-lock.json*", "./"]
@@ -28,21 +29,21 @@ RUN npm run build
 
 FROM nginx:alpine as clowder-runtime
 
-# Set the environment variable with a default value if not provided
-ARG BASE_URL_ROUTE
-ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-/}
-RUN BASE_URL_ROUTE=${BASE_URL_ROUTE%/} && BASE_URL_ROUTE=${BASE_URL_ROUTE#/} && BASE_URL_ROUTE=/${BASE_URL_ROUTE}
-RUN echo "BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
+# Define the argument and environment variable
+# Make sure BASE_URL_ROUTE starts with a slash and does not end with a slash
+ARG BASE_URL_ROUTE=""
+ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-}
+RUN echo "Runtime BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
 
 # Adjust the paths based on BASE_URL_ROUTE
 RUN rm -rf /usr/share/nginx/html/ &&  \
-  mkdir -p /usr/share/nginx/html${BASE_URL_ROUTE}/public && \
-  mkdir -p /usr/share/nginx/html${BASE_URL_ROUTE}/styles
+  mkdir -p /usr/share/nginx/html/${BASE_URL_ROUTE}/public && \
+  mkdir -p /usr/share/nginx/html/${BASE_URL_ROUTE}/styles
 
 # Copy the built application from the previous stage
-COPY --from=clowder-build /usr/src/app/dist/ /usr/share/nginx/html${BASE_URL_ROUTE}/
-COPY src/public /usr/share/nginx/html${BASE_URL_ROUTE}/public/
-COPY src/styles /usr/share/nginx/html${BASE_URL_ROUTE}/styles/
+COPY --from=clowder-build /usr/src/app/dist/ /usr/share/nginx/html/${BASE_URL_ROUTE}
+COPY src/public /usr/share/nginx/html/${BASE_URL_ROUTE}/public/
+COPY src/styles /usr/share/nginx/html/${BASE_URL_ROUTE}/styles/
 
 # Copy the NGINX configuration template
 COPY clowder.conf.template /etc/nginx/conf.d/default.conf.template
