@@ -30,6 +30,14 @@ services:
       - "80:80"
       # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -41,6 +49,14 @@ services:
     restart: unless-stopped
     build:
       context: ./backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     environment:
@@ -81,6 +97,14 @@ services:
     restart: unless-stopped
     build:
       context: ./frontend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     depends_on:
@@ -99,6 +123,14 @@ services:
     build:
       context: backend
       dockerfile: heartbeat.Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     restart: unless-stopped
@@ -116,6 +148,14 @@ services:
     build:
       context: backend
       dockerfile: messages.Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     environment:
       MONGODB_URL: mongodb://mongo:27017
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
@@ -131,6 +171,14 @@ services:
   mongo:
     image: mongo:5.0
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -168,6 +216,14 @@ services:
     image: nginx:1.19.2-alpine
     restart: unless-stopped
     hostname: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -181,6 +237,14 @@ services:
   postgres:
     image: postgres
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -193,6 +257,14 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:20.0
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -232,6 +304,14 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "5672" ]
       interval: 3s
@@ -245,6 +325,14 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 16G
+        reservations:
+          cpus: '0.25'
+          memory: 50M
     networks:
       - clowder2
     environment:
