@@ -34,10 +34,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -53,10 +53,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     environment:
@@ -101,10 +101,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     depends_on:
@@ -127,10 +127,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     restart: unless-stopped
@@ -152,10 +152,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     environment:
       MONGODB_URL: mongodb://mongo:27017
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
@@ -175,10 +175,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -220,10 +220,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -241,10 +241,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -261,10 +261,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     volumes:
@@ -308,10 +308,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "5672" ]
       interval: 3s
@@ -329,10 +329,10 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 16G
         reservations:
           cpus: '0.25'
-          memory: 16G
+          memory: 50M
     networks:
       - clowder2
     environment:
