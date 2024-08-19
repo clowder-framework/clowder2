@@ -32,9 +32,6 @@ export default {
 	target: "web",
 	output: {
 		path: path.resolve(__dirname, "dist"),
-		publicPath: process.env.BASE_URL_ROUTE
-			? `${process.env.BASE_URL_ROUTE}/`
-			: "/", // Ensure trailing slash
 		filename: "[name].bundle.js",
 		chunkFilename: "[name].chunk.bundle.js",
 	},
@@ -66,9 +63,6 @@ export default {
 				collapseWhitespace: true,
 			},
 			inject: true,
-			publicPath: process.env.BASE_URL_ROUTE
-				? `${process.env.BASE_URL_ROUTE}/`
-				: "/", // Ensure trailing slash
 		}),
 		new webpack.LoaderOptionsPlugin({
 			debug: true,
