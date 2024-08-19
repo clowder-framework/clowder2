@@ -65,7 +65,7 @@ services:
       frontend_url: http://localhost
 #      For deploy to subdirectory
       BASE_URL_ROUTE: ${BASE_URL_ROUTE:-}
-      API_V2_STR: "/${BASE_URL_ROUTE}/api/v2"
+      API_V2_STR: "${BASE_URL_ROUTE}/api/v2"
     depends_on:
       - mongo
       - minio-nginx
