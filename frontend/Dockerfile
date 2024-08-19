@@ -11,6 +11,11 @@ ARG BASE_URL_ROUTE=""
 ENV BASE_URL_ROUTE=${BASE_URL_ROUTE:-}
 RUN echo "Build time BASE_URL_ROUTE: ${BASE_URL_ROUTE}"
 
+# Add the build argument for CLOWDER_REMOTE_HOSTNAME to work with backend at a different host
+ARG CLOWDER_REMOTE_HOSTNAME=""
+ENV CLOWDER_REMOTE_HOSTNAME=${CLOWDER_REMOTE_HOSTNAME:-}
+RUN echo "Build time CLOWDER_REMOTE_HOSTNAME: ${CLOWDER_REMOTE_HOSTNAME}"
+
 # copy only package for caching purposes
 COPY ["package.json", "package-lock.json*", "./"]
 COPY tools/ /usr/src/app/tools/

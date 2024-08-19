@@ -63,6 +63,9 @@ services:
       auth_server_url: http://keycloak:8080/keycloak/
       keycloak_base: http://localhost/api
       frontend_url: http://localhost
+#      For deploy to subdirectory
+      BASE_URL_ROUTE: ${BASE_URL_ROUTE:-}
+      API_V2_STR: "/${BASE_URL_ROUTE}/api/v2"
     depends_on:
       - mongo
       - minio-nginx
@@ -71,8 +74,8 @@ services:
       - rabbitmq
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
-      - "traefik.http.routers.swagger.rule=PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`${BASE_URL_ROUTE}/api`)"
+      - "traefik.http.routers.swagger.rule=PathPrefix(`${BASE_URL_ROUTE}/docs`)"
       - "traefik.http.services.backend.loadbalancer.server.port=80"
       - "traefik.http.routers.backend.priority=5"
 

@@ -35,9 +35,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
-          env:
-            - name: BASE_URL_ROUTE
-              value: ""
           ports:
             - name: http
               containerPort: 80
