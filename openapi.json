@@ -11608,6 +11608,47 @@
         ]
       }
     },
+    "/api/v2/llm": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "Llm",
+        "operationId": "llm_api_v2_llm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Root",
@@ -11912,6 +11953,61 @@
             "title": "File",
             "type": "string",
             "format": "binary"
+          }
+        }
+      },
+      "ChatCompletionMessage": {
+        "title": "ChatCompletionMessage",
+        "required": [
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "enum": [
+              "assistant"
+            ],
+            "type": "string"
+          },
+          "function_call": {
+            "$ref": "#/components/schemas/FunctionCall"
+          },
+          "tool_calls": {
+            "title": "Tool Calls",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionMessageToolCall"
+            }
+          }
+        }
+      },
+      "ChatCompletionMessageToolCall": {
+        "title": "ChatCompletionMessageToolCall",
+        "required": [
+          "id",
+          "function",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "function": {
+            "$ref": "#/components/schemas/Function"
+          },
+          "type": {
+            "title": "Type",
+            "enum": [
+              "function"
+            ],
+            "type": "string"
           }
         }
       },
@@ -12954,6 +13050,42 @@
           }
         }
       },
+      "Function": {
+        "title": "Function",
+        "required": [
+          "arguments",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "arguments": {
+            "title": "Arguments",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        }
+      },
+      "FunctionCall": {
+        "title": "FunctionCall",
+        "required": [
+          "arguments",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "arguments": {
+            "title": "Arguments",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        }
+      },
       "GroupAndRole": {
         "title": "GroupAndRole",
         "required": [
@@ -13887,6 +14019,31 @@
             "type": "array",
             "items": {},
             "default": []
+          }
+        }
+      },
+      "PromptRequest": {
+        "title": "PromptRequest",
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          }
+        }
+      },
+      "PromptResponse": {
+        "title": "PromptResponse",
+        "required": [
+          "response"
+        ],
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ChatCompletionMessage"
           }
         }
       },

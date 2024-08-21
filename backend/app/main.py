@@ -52,6 +52,7 @@ from app.routers import (
     keycloak,
     licenses,
     listeners,
+    llm,
     metadata,
     metadata_datasets,
     metadata_files,
@@ -261,6 +262,9 @@ api_router.include_router(
 )
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
+
+api_router.include_router(llm.router, prefix="/llm", tags=["llm"])
+
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
 

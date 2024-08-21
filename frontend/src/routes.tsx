@@ -15,6 +15,8 @@ import { CreateDataset } from "./components/datasets/CreateDataset";
 import { Groups as GroupListComponent } from "./components/groups/Groups";
 import { Group as GroupComponent } from "./components/groups/Group";
 
+import { ChatPage as ChatComponent } from "./components/chat/ChatPage";
+
 import { RedirectRegister as RedirectRegisterComponent } from "./components/auth/RedirectRegister";
 import { Auth as AuthComponent } from "./components/auth/Auth";
 import { RedirectLogin as RedirectLoginComponent } from "./components/auth/RedirectLogin";
@@ -199,6 +201,9 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route path="/public_files/:fileId" element={<PublicFileComponent />} />
+
+				<Route path="/chat" element={<ChatComponent />} />
+
 				<Route path="/auth/register" element={<RedirectRegisterComponent />} />
 				<Route path="/auth/login" element={<RedirectLoginComponent />} />
 				<Route path="/auth/logout" element={<RedirectLogoutComponent />} />

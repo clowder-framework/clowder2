@@ -1,7 +1,19 @@
 version: '3.7'
-
-
 services:
+
+
+  detr-resnet-50-panoptic:
+    image: clowder/extractors-detr-resnet-50-panoptic:${CLOWDER_VERSION:-latest}
+    networks:
+      - clowder2
+    depends_on:
+      - rabbitmq
+      - extractors-messages
+      - extractors-heartbeat
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+
   name-entity-recognition:
     image: socialmediamacroscope/name_entity_recognition_extractor:latest
     environment:

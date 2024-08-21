@@ -1,0 +1,15 @@
+version: '3'
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    networks:
+      - clowder2
+    volumes:
+        - qdrant-data:/qdrant/storage
+        - qdrant-snapshots:/qdrant/snapshots
+    ports:
+      - "6333:6333"
+
+volumes:
+    qdrant-data:
+    qdrant-snapshots:
