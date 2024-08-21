@@ -20,6 +20,9 @@ import {
 	VisualizationDataOut,
 } from "../openapi/v2";
 
+export interface ChatMessage {
+	messages: string[];
+}
 export interface Folder {
 	id: string;
 	name: string;

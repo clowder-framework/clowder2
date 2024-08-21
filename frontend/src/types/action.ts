@@ -23,6 +23,7 @@ import {
 	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
+	PromptResponse,
 } from "../openapi/v2";
 import {
 	LIST_USERS,
@@ -30,6 +31,10 @@ import {
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
 
+interface CHAT_MESSAGES {
+	type: "CHAT_MESSAGES";
+	promptResponse: PromptResponse;
+}
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
 	files: Paged;
@@ -725,6 +730,7 @@ interface DELETE_FEED {
 }
 
 export type DataAction =
+	| CHAT_MESSAGES
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET

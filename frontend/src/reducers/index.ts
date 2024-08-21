@@ -12,6 +12,7 @@ import group from "./group";
 import visualization from "./visualization";
 import publicVisualization from "./public_visualization";
 import feeds from "./feeds";
+import llm from "./llm";
 
 const rootReducer = combineReducers({
 	file: file,
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
 	visualization: visualization,
 	publicVisualization: publicVisualization,
 	feed: feeds,
+	llm: llm,
 });
 
 export default rootReducer;

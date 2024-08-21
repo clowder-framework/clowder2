@@ -1,24 +1,42 @@
 // src/Chat.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Box,
 	TextField,
 	IconButton,
-	Typography,
 	Paper,
 	List,
 	ListItem,
 	ListItemText,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import { useDispatch, useSelector } from "react-redux";
+import { sendChatPromptSent } from "../../actions/chat";
+import { RootState } from "../../types/data";
 
 export const Chat = () => {
+	const dispatch = useDispatch();
 	const [messages, setMessages] = useState([]);
 	const [input, setInput] = useState("");
+	const promptResponse = useSelector(
+		(state: RootState) => state.llm.promptResponse
+	);
+
+	useEffect(() => {
+		if (promptResponse.response && promptResponse.response.content) {
+			setMessages([
+				...messages,
+				{ text: promptResponse.response.content, sender: "User" },
+			]);
+		}
+	}, [promptResponse]);
+
+	const sendPrompt = (prompt: string) => dispatch(sendChatPromptSent(prompt));
 
 	const handleSend = () => {
 		if (input.trim()) {
 			setMessages([...messages, { text: input, sender: "User" }]);
+			sendPrompt({ prompt: input });
 			setInput("");
 		}
 	};

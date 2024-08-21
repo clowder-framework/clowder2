@@ -1,9 +1,10 @@
+import os
+
+from fastapi import APIRouter, HTTPException
 from openai import OpenAI
-from fastapi import APIRouter, Depends, HTTPException
 from openai.types.chat import ChatCompletionMessage
 from pydantic import BaseModel
-from qdrant_client import QdrantClient, models
-import os
+from qdrant_client import QdrantClient
 
 router = APIRouter()
 
@@ -18,7 +19,6 @@ class PromptResponse(BaseModel):
 
 @router.post("", response_model=PromptResponse)
 async def llm(request: PromptRequest):
-
     def get_embedding(text, model="text-embedding-ada-002"):
         text = text.replace("\n", " ")
         return client.embeddings.create(input=[text], model=model).data[0].embedding
@@ -45,8 +45,10 @@ async def llm(request: PromptRequest):
     # ]
 
     # Extract context from search results
-    context_list = [point.payload['page_content'] for point in search_result]
-    context = "\n\n".join([f"... doc {i + 1} ...\n{doc}" for i, doc in enumerate(context_list)])
+    context_list = [point.payload["page_content"] for point in search_result]
+    context = "\n\n".join(
+        [f"... doc {i + 1} ...\n{doc}" for i, doc in enumerate(context_list)]
+    )
 
     # Format the message according to the specified structure
     formatted_message = f"""Please answer the question using the provided context.
@@ -72,7 +74,7 @@ async def llm(request: PromptRequest):
             model="gpt-4o-mini",
             messages=messages,
             max_tokens=150,
-            temperature=0.7
+            temperature=0.7,
         )
         return PromptResponse(response=completion.choices[0].message)
     except Exception as e:
