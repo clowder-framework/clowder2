@@ -34,7 +34,7 @@ spec:
           imagePullPolicy: {{ .Values.message.image.pullPolicy }}
           env:
             - name: MONGODB_URL
-              value: {{ .Values.message.env.MONGODB_URL }}
+              value: mongodb://{{ include "clowder2.releaseName" . }}-mongodb:27017
             - name: RABBITMQ_USER
               value: {{ .Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
@@ -50,7 +50,7 @@ spec:
                   key: rabbitmq-password
               {{- end }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.message.env.RABBITMQ_HOST }}
+              value: {{ include "clowder2.releaseName" .  }}-rabbitmq
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

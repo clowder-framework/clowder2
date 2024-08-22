@@ -39,13 +39,13 @@ spec:
             - name: WEB_CONCURRENCY
               value: "1"
             - name: MINIO_SERVER_URL
-              value: {{ .Values.backend.env.MINIO_SERVER_URL }}
+              value: {{ include "clowder2.releaseName" . }}-minio:9000
             - name: MINIO_EXTERNAL_SERVER_URL
               value: minio-api.{{ .Values.hostname }}
             - name: MINIO_SECURE
-              value: {{ .Values.backend.env.MINIO_SECURE | quote }}
+              value: "true"
             - name: MINIO_BUCKET_NAME
-              value: {{ .Values.backend.env.MINIO_BUCKET_NAME }}
+              value: clowder
             - name: MINIO_ACCESS_KEY
               value: {{ .Values.minio.auth.rootUser }}
             - name: MINIO_SECRET_KEY
@@ -61,9 +61,9 @@ spec:
                   key: root-password
               {{- end }}
             - name: MINIO_UPLOAD_CHUNK_SIZE
-              value: {{ .Values.backend.env.MINIO_UPLOAD_CHUNK_SIZE | quote}}
+              value: "10485760"
             - name: MONGODB_URL
-              value: {{ .Values.backend.env.MONGODB_URL }}
+              value: mongodb://{{ include "clowder2.releaseName" . }}-mongodb:27017
             - name: MONGO_DATABASE
               value: {{ .Values.mongodb.database }}
             - name: CLOWDER2_URL
@@ -79,11 +79,11 @@ spec:
             - name: auth_url
               value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
-              value: {{ .Values.backend.env.oauth2_scheme_auth_url }}
+              value: http://{{ include "clowder2.releaseName" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: auth_register_url
-              value: $(CLOWDER2_URL){{ .Values.backend.env.auth_register_url }}
+              value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=$(auth_redirect_uri)&scope=openid%20email
             - name: auth_token_url
-              value: {{ .Values.backend.env.auth_token_url }}
+              value: http://{{ include "clowder2.releaseName" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
             - name: auth_server_url
               value: $(CLOWDER2_URL)/keycloak/
             - name: keycloak_base
@@ -91,7 +91,7 @@ spec:
             - name: frontend_url
               value: $(CLOWDER2_URL)
             - name: elasticsearch_url
-              value: {{ .Values.backend.env.elasticsearch_url }}
+              value: http://{{ include "clowder2.releaseName" . }}-elasticsearch:9200
             - name: elasticsearch_no_of_shards
               value: "5"
             - name: elasticsearch_no_of_replicas
@@ -111,11 +111,11 @@ spec:
                   key: rabbitmq-password
               {{- end }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.backend.env.RABBITMQ_HOST }}
+              value: {{ include "clowder2.releaseName" .  }}-rabbitmq
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
             - name: API_HOST
-              value: {{ .Values.backend.env.API_HOST }}
+              value: http://{{ include "clowder2.fullname" . }}-backend:{{ .Values.backend.service.port }}
           ports:
             - name: http
               containerPort: 80
