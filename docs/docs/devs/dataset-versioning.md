@@ -140,8 +140,7 @@ The following configuration changes need to be made to integrate DOI generation 
 In the backend module, the following configurations should be set:
 ```python
 DOI_ENABLED = True # Enable or disable DOI generation
-DATACITE_TEST_URL = "https://api.test.datacite.org/dois" # DataCite test URL
-DATACITE_URL = "https://api.datacite.org/dois" # DataCite production URL
+DATACITE_API_URL = "https://api.test.datacite.org/" # DataCite API URL (production URL is https://api.datacite.org/)
 ```
 
 Also, following environment variables should be set when running the backend module:
