@@ -115,6 +115,15 @@ const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
 	};
 
 	const handleMouseUp = (event: React.MouseEvent) => {
+		/*
+		The logic here is to calculate the bounding box of the drawn rectangle
+		The bounding box is calculated by:
+		1. Getting the start and end points of the drawn rectangle
+		2. Getting the dimensions of the original image
+		3. Calculating the aspect ratios of the image and the container
+		4. Calculating the scale factor for the image based on the aspect ratios
+		5. Scaling the drawn rectangle to the image dimensions
+		*/
 		event.preventDefault();
 		if (!isDrawing || !startPoint) return;
 
@@ -125,7 +134,57 @@ const ImageAnnotatorImage: React.FC<ImageAnnotatorImageProps> = ({
 		const width = Math.abs(endPoint[0] - startPoint[0]);
 		const height = Math.abs(endPoint[1] - startPoint[1]);
 
-		setBoundingBox([x, y, width, height]);
+		const container = containerRef.current;
+		if (!image || !container) return;
+
+		const displayImage = new Image();
+		displayImage.src = image;
+		displayImage.onload = () => {
+			const imageWidth = displayImage.naturalWidth;
+			const imageHeight = displayImage.naturalHeight;
+
+			const containerWidth = container.clientWidth;
+			const containerHeight = container.clientHeight;
+
+			// Calculate aspect ratios
+			const containerAspect = containerWidth / containerHeight;
+			const imageAspect = imageWidth / imageHeight;
+
+			let scale,
+				offsetX = 0,
+				offsetY = 0;
+
+			if (containerAspect > imageAspect) {
+				// Container is wider than the image's aspect ratio
+				scale = imageHeight / containerHeight; // Keep the same scale for X to preserve aspect ratio
+				offsetX = (containerWidth - imageWidth / scale) / 2; // Center horizontally
+			} else {
+				// Container is taller than the image's aspect ratio
+				scale = imageWidth / containerWidth; // Keep the same scale for Y to preserve aspect ratio
+				offsetY = (containerHeight - imageHeight / scale) / 2; // Center vertically
+			}
+
+			// Adjust x and y to account for offset
+			let adjustedX = (x - offsetX) * scale;
+			let adjustedY = (y - offsetY) * scale;
+
+			function roundToTwo(num: number) {
+				return parseFloat(num.toFixed(2));
+			}
+
+			// Make sure bounding box is within image bounds
+			adjustedX = roundToTwo(Math.max(0, adjustedX));
+			adjustedY = roundToTwo(Math.max(0, adjustedY));
+
+			const adjustedWidth = roundToTwo(
+				Math.min(width * scale, imageWidth - adjustedX)
+			);
+			const adjustedHeight = roundToTwo(
+				Math.min(height * scale, imageHeight - adjustedY)
+			);
+
+			setBoundingBox([adjustedX, adjustedY, adjustedWidth, adjustedHeight]);
+		};
 	};
 
 	return (
