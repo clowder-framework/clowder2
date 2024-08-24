@@ -86,10 +86,12 @@ def get_clowder_v1_user_spaces_members(space_id):
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return response.json()
 
+
 def get_clowder_v2_space_datasets(space_id):
     endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return response.json()
+
 
 def share_dataset_with_group(group_id, dataset, headers):
     endpoint = f"{CLOWDER_V2}/authorizations/datasets/{dataset['id']}/group_role/{group_id}/viewer"
@@ -284,18 +286,17 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
     user_v2_api_key = create_local_user(user_v1)
-    USER_MAP[user_v1['id']] = user_v2_api_key
+    USER_MAP[user_v1["id"]] = user_v2_api_key
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
         "content-type": "application/json",
         "accept": "application/json",
     }
 
-
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
         dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
-        DATASET_MAP[dataset['id']] = dataset_v2_id
+        DATASET_MAP[dataset["id"]] = dataset_v2_id
         add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
         print("Created folders in the new dataset")
 
@@ -352,13 +353,13 @@ if __name__ == "__main__":
     for user_v1 in users_v1:
         print(f"Migrating spaces of user {user_v1['email']}")
         user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
-        user_v2_api_key = USER_MAP[user_v1['id']]
+        user_v2_api_key = USER_MAP[user_v1["id"]]
         for space in user_v1_spaces:
             group_id = create_v2_group(space, headers=user_v2_api_key)
             add_v1_space_members_to_v2_group(space, group_id, headers=user_v2_api_key)
-            space_datasets = get_clowder_v2_space_datasets(space['id'])
+            space_datasets = get_clowder_v2_space_datasets(space["id"])
             for space_dataset in space_datasets:
-                dataset_v2_id = DATASET_MAP[space_dataset['id']]
+                dataset_v2_id = DATASET_MAP[space_dataset["id"]]
                 share_dataset_with_group(group_id, space, headers=user_v2_api_key)
         print(f"Migrated spaces of user {user_v1['email']}")
     print("Migration complete.")
