@@ -75,6 +75,29 @@ def get_clowder_v1_user_datasets(user_id):
     return [dataset for dataset in response.json() if dataset["authorId"] == user_id]
 
 
+def get_clowder_v1_user_spaces(user_id):
+    endpoint = f"{CLOWDER_V1}/api/spaces?limit=0"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return [space for space in response.json() if space["creator"] == user_id]
+
+
+def get_clowder_v1_user_spaces_members(space_id):
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return response.json()
+
+
+def add_v1_space_members_to_v2_group(space, group_id, headers):
+    space_members = get_clowder_v1_user_spaces_members(space["id"])
+    for member in space_members:
+        member_email = member["email"]
+        endpoint = f"{CLOWDER_V2}/api/v2/groups/{group_id}/add/{member_email}"
+        response = requests.post(
+            endpoint,
+            headers=headers,
+        )
+
+
 def create_local_user(user_v1):
     """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
     # Search for the user by email
@@ -138,6 +161,13 @@ def create_v2_dataset(dataset, headers):
     response = requests.post(
         dataset_in_v2_endpoint, headers=headers, json=dataset_example
     )
+    return response.json()["id"]
+
+
+def create_v2_group(space, headers):
+    group = {"name": space["name"], "description": space["description"]}
+    group_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/groups"
+    response = requests.post(group_in_v2_endpoint, json=group, headers=headers)
     return response.json()["id"]
 
 
@@ -250,6 +280,11 @@ def process_user_and_resources(user_v1):
         "accept": "application/json",
     }
 
+    user_v1_spaces = get_clowder_v1_user_spaces(user_id=user_v1["id"])
+    for space in user_v1_spaces:
+        group_id = create_v2_group(space, headers=user_headers_v2)
+        add_v1_space_members_to_v2_group(space, group_id, headers=user_headers_v2)
+
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
         dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
@@ -271,6 +306,7 @@ def process_user_and_resources(user_v1):
             download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, user_headers_v2
             )
+        # TODO add dataset to space if it is in a space
 
 
 if __name__ == "__main__":
