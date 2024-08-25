@@ -63,7 +63,7 @@ def generate_user_api_key(user, password):
 def get_clowder_v1_users():
     """Retrieve all users from Clowder v1."""
     endpoint = f"{CLOWDER_V1}/api/users"
-    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    response = requests.get(endpoint, headers=base_headers_v1, verify=False)
     return response.json()
 
 
@@ -304,7 +304,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
         # Retrieve files for the dataset in Clowder v1
         dataset_files_endpoint = (
-            f"{CLOWDER_V1}api/datasets/{dataset['id']}/files?superAdmin=true"
+            f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files?superAdmin=true"
         )
         files_response = requests.get(
             dataset_files_endpoint, headers=clowder_headers_v1, verify=False
@@ -340,6 +340,7 @@ if __name__ == "__main__":
             "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
         }
     ]
+    users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         if (
             "[Local Account]" in user_v1["identityProvider"]
