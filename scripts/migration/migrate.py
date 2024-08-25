@@ -36,10 +36,10 @@ clowder_headers_v2 = {
 }
 
 admin_user = {
-    "email": "a@a.com",
+    "email": "abc@abc.com",
     "password": "admin",
-    "first_name": "aa",
-    "last_name": "aa",
+    "first_name": "abc",
+    "last_name": "abc",
 }
 
 
@@ -75,10 +75,10 @@ def get_clowder_v1_user_datasets(user_id):
     return [dataset for dataset in response.json() if dataset["authorId"] == user_id]
 
 
-def get_clowder_v1_user_spaces(user_id):
-    endpoint = f"{CLOWDER_V1}/api/spaces?limit=0"
+def get_clowder_v1_user_spaces(user_v1):
+    endpoint = f"{CLOWDER_V1}/api/spaces"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
-    return [space for space in response.json() if space["creator"] == user_id]
+    return [space for space in response.json() if space["creator"] == user_v1['id']]
 
 
 def get_clowder_v1_user_spaces_members(space_id):
@@ -315,7 +315,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, user_headers_v2
             )
-        # TODO add dataset to space if it is in a space
+    return [USER_MAP, DATASET_MAP]
 
 
 if __name__ == "__main__":
@@ -346,7 +346,7 @@ if __name__ == "__main__":
             "[Local Account]" in user_v1["identityProvider"]
             and user_v1["email"] != admin_user["email"]
         ):
-            process_user_and_resources(user_v1, USER_MAP, DATASET_MAP)
+            [USER_MAP, DATASET_MAP] = process_user_and_resources(user_v1, USER_MAP, DATASET_MAP)
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
@@ -356,11 +356,11 @@ if __name__ == "__main__":
         user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
         user_v2_api_key = USER_MAP[user_v1["id"]]
         for space in user_v1_spaces:
-            group_id = create_v2_group(space, headers=user_v2_api_key)
-            add_v1_space_members_to_v2_group(space, group_id, headers=user_v2_api_key)
+            group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
+            add_v1_space_members_to_v2_group(space, group_id, headers={"X-API-key": user_v2_api_key})
             space_datasets = get_clowder_v2_space_datasets(space["id"])
             for space_dataset in space_datasets:
                 dataset_v2_id = DATASET_MAP[space_dataset["id"]]
-                share_dataset_with_group(group_id, space, headers=user_v2_api_key)
+                share_dataset_with_group(group_id, space, headers={"X-API-key": user_v2_api_key})
         print(f"Migrated spaces of user {user_v1['email']}")
     print("Migration complete.")
