@@ -36,10 +36,10 @@ clowder_headers_v2 = {
 }
 
 admin_user = {
-    "email": "a@a.com",
+    "email": "admin@example.com",
     "password": "admin",
-    "first_name": "aa",
-    "last_name": "aa",
+    "first_name": "admin",
+    "last_name": "admin",
 }
 
 
@@ -63,7 +63,7 @@ def generate_user_api_key(user, password):
 def get_clowder_v1_users():
     """Retrieve all users from Clowder v1."""
     endpoint = f"{CLOWDER_V1}/api/users"
-    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    response = requests.get(endpoint, headers=base_headers_v1, verify=False)
     return response.json()
 
 
@@ -73,6 +73,41 @@ def get_clowder_v1_user_datasets(user_id):
     endpoint = f"{CLOWDER_V1}/api/datasets?limit=0"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return [dataset for dataset in response.json() if dataset["authorId"] == user_id]
+
+
+def get_clowder_v1_user_spaces(user_v1):
+    endpoint = f"{CLOWDER_V1}/api/spaces"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return [space for space in response.json() if space["creator"] == user_v1["id"]]
+
+
+def get_clowder_v1_user_spaces_members(space_id):
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return response.json()
+
+
+def get_clowder_v2_space_datasets(space_id):
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return response.json()
+
+
+def share_dataset_with_group(group_id, dataset, headers):
+    endpoint = f"{CLOWDER_V2}/authorizations/datasets/{dataset['id']}/group_role/{group_id}/viewer"
+    response = requests.get(endpoint, headers=headers, verify=False)
+    return response.json()
+
+
+def add_v1_space_members_to_v2_group(space, group_id, headers):
+    space_members = get_clowder_v1_user_spaces_members(space["id"])
+    for member in space_members:
+        member_email = member["email"]
+        endpoint = f"{CLOWDER_V2}/api/v2/groups/{group_id}/add/{member_email}"
+        response = requests.post(
+            endpoint,
+            headers=headers,
+        )
 
 
 def create_local_user(user_v1):
@@ -138,6 +173,13 @@ def create_v2_dataset(dataset, headers):
     response = requests.post(
         dataset_in_v2_endpoint, headers=headers, json=dataset_example
     )
+    return response.json()["id"]
+
+
+def create_v2_group(space, headers):
+    group = {"name": space["name"], "description": space["description"]}
+    group_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/groups"
+    response = requests.post(group_in_v2_endpoint, json=group, headers=headers)
     return response.json()["id"]
 
 
@@ -240,10 +282,11 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     print(f"Completed upload for file: {filename}")
 
 
-def process_user_and_resources(user_v1):
+def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
     user_v2_api_key = create_local_user(user_v1)
+    USER_MAP[user_v1["id"]] = user_v2_api_key
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
         "content-type": "application/json",
@@ -253,6 +296,7 @@ def process_user_and_resources(user_v1):
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
         dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
+        DATASET_MAP[dataset["id"]] = dataset_v2_id
         add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
         print("Created folders in the new dataset")
 
@@ -260,7 +304,7 @@ def process_user_and_resources(user_v1):
 
         # Retrieve files for the dataset in Clowder v1
         dataset_files_endpoint = (
-            f"{CLOWDER_V1}api/datasets/{dataset['id']}/files?superAdmin=true"
+            f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files?superAdmin=true"
         )
         files_response = requests.get(
             dataset_files_endpoint, headers=clowder_headers_v1, verify=False
@@ -271,10 +315,13 @@ def process_user_and_resources(user_v1):
             download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, user_headers_v2
             )
+    return [USER_MAP, DATASET_MAP]
 
 
 if __name__ == "__main__":
     # users_v1 = get_clowder_v1_users()
+    USER_MAP = {}
+    DATASET_MAP = {}
     users_v1 = [
         {
             "@context": {
@@ -293,14 +340,33 @@ if __name__ == "__main__":
             "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
         }
     ]
+    users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         if (
             "[Local Account]" in user_v1["identityProvider"]
             and user_v1["email"] != admin_user["email"]
         ):
-            process_user_and_resources(user_v1)
+            [USER_MAP, DATASET_MAP] = process_user_and_resources(
+                user_v1, USER_MAP, DATASET_MAP
+            )
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
-
+    print(f"Now migrating spaces")
+    for user_v1 in users_v1:
+        print(f"Migrating spaces of user {user_v1['email']}")
+        user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
+        user_v2_api_key = USER_MAP[user_v1["id"]]
+        for space in user_v1_spaces:
+            group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
+            add_v1_space_members_to_v2_group(
+                space, group_id, headers={"X-API-key": user_v2_api_key}
+            )
+            space_datasets = get_clowder_v2_space_datasets(space["id"])
+            for space_dataset in space_datasets:
+                dataset_v2_id = DATASET_MAP[space_dataset["id"]]
+                share_dataset_with_group(
+                    group_id, space, headers={"X-API-key": user_v2_api_key}
+                )
+        print(f"Migrated spaces of user {user_v1['email']}")
     print("Migration complete.")
