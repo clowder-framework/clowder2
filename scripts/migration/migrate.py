@@ -36,10 +36,10 @@ clowder_headers_v2 = {
 }
 
 admin_user = {
-    "email": "abc@abc.com",
+    "email": "admin@example.com",
     "password": "admin",
-    "first_name": "abc",
-    "last_name": "abc",
+    "first_name": "admin",
+    "last_name": "admin",
 }
 
 
