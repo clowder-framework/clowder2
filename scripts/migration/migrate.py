@@ -1,144 +1,174 @@
-import asyncio
 import os
-from secrets import token_urlsafe
+from datetime import datetime
 
-import nest_asyncio
 import requests
-from app.config import settings
-from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
-from app.routers.files import add_file_entry
-from bson import ObjectId
-from dotenv import dotenv_values, load_dotenv
-from faker import Faker
-from itsdangerous.url_safe import URLSafeSerializer
-from minio import Minio
-from pymongo import MongoClient
+from dotenv import dotenv_values
 
-nest_asyncio.apply()
-from app import dependencies
-from app.models.users import UserAPIKeyDB, UserDB, UserOut
-from beanie import init_beanie
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, FastAPI
-from motor.motor_asyncio import AsyncIOMotorClient
-from pika.adapters.blocking_connection import BlockingChannel
+# Configuration and Constants
+DEFAULT_PASSWORD = "Password123&"
 
-mongo_client = MongoClient("mongodb://localhost:27018", connect=False)
-mongo_client_v2 = MongoClient("mongodb://localhost:27017", connect=False)
-db = mongo_client["clowder"]
-db_v2 = mongo_client_v2["clowder2"]
-print("got the db")
-v1_users = db["social.users"].find({})
-for u in v1_users:
-    print(u)
+# Get the current timestamp
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+OUTPUT_FILE = f"migrated_new_users_{timestamp}.log"
 
-app = FastAPI()
-
-
-@app.on_event("startup")
-async def start_db():
-    client = AsyncIOMotorClient(str(settings.MONGODB_URL))
-    await init_beanie(
-        database=getattr(client, settings.MONGO_DATABASE),
-        # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
-        document_models=[
-            FileDB,
-            FileDBViewList,
-            UserDB,
-            UserAPIKeyDB,
-        ],
-        recreate_views=True,
-    )
-
-
-asyncio.run(start_db())
-output_file = "new_users.txt"
-
-
-fake = Faker()
-
+# Load environment variables
 path_to_env = os.path.join(os.getcwd(), ".env")
-print(os.path.isfile(path_to_env))
 config = dotenv_values(dotenv_path=path_to_env)
 
 CLOWDER_V1 = config["CLOWDER_V1"]
 ADMIN_KEY_V1 = config["ADMIN_KEY_V1"]
-
 CLOWDER_V2 = config["CLOWDER_V2"]
 ADMIN_KEY_V2 = config["ADMIN_KEY_V2"]
-# ADMIN_KEY_V2 = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IlU1dllaWnB4elNDREl1Q0xObDZ3TWcifQ.LRiLqSH0fJlFSObKrNz-qexkoHw'
+
 base_headers_v1 = {"X-API-key": ADMIN_KEY_V1}
+base_headers_v2 = {"X-API-key": ADMIN_KEY_V2}
+
 clowder_headers_v1 = {
     **base_headers_v1,
     "Content-type": "application/json",
     "accept": "application/json",
 }
 
-base_headers_v2 = {"X-API-key": ADMIN_KEY_V2}
 clowder_headers_v2 = {
     **base_headers_v2,
     "Content-type": "application/json",
     "accept": "application/json",
 }
 
-TEST_DATASET_NAME = "Migration Test Dataset"
-# TODO this is just for testing
-DEFAULT_PASSWORD = "Password123&"
+admin_user = {
+    "email": "admin@example.com",
+    "password": "admin",
+    "first_name": "admin",
+    "last_name": "admin",
+}
 
 
-def email_user_new_login(user):
-    print("login to the new clowder instance")
+def email_user_new_login(user_email):
+    """Send an email to the user with the new login details."""
+    print(f"Login to the new Clowder instance: {user_email}")
 
 
 def generate_user_api_key(user, password):
-    user_example = {
-        "email": user["email"],
-        "password": password,
-        "first_name": user["first_name"],
-        "last_name": user["last_name"],
-    }
-    login_endpoint = CLOWDER_V2 + "api/v2/login"
-    response = requests.post(login_endpoint, json=user_example)
+    """Generate an API key for a user."""
+    login_endpoint = f"{CLOWDER_V2}/api/v2/login"
+    response = requests.post(login_endpoint, json=user)
     token = response.json().get("token")
-    current_headers = {"Authorization": "Bearer " + token}
-    auth = {"username": user["email"], "password": password}
-    api_key_endpoint = CLOWDER_V2 + "api/v2/users/keys?name=migration&mins=0"
+    current_headers = {"Authorization": f"Bearer {token}"}
+
+    api_key_endpoint = f"{CLOWDER_V2}/api/v2/users/keys?name=migration&mins=0"
     result = requests.post(api_key_endpoint, headers=current_headers)
-    api_key = result.json()
-    return api_key
+    return result.json()
 
 
 def get_clowder_v1_users():
-    endpoint = CLOWDER_V1 + "api/users"
-    print(base_headers_v1)
-    r = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
-    return r.json()
+    """Retrieve all users from Clowder v1."""
+    endpoint = f"{CLOWDER_V1}/api/users"
+    response = requests.get(endpoint, headers=base_headers_v1, verify=False)
+    return response.json()
 
 
-def get_clowder_v2_users():
-    endpoint = CLOWDER_V2 + "api/v2/users"
-    r = requests.get(endpoint, headers=base_headers_v2, verify=False)
-    return r.json()
+def get_clowder_v1_user_datasets(user_id):
+    """Retrieve datasets created by a specific user in Clowder v1."""
+    # TODO what about pagination
+    endpoint = f"{CLOWDER_V1}/api/datasets?limit=0"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return [dataset for dataset in response.json() if dataset["authorId"] == user_id]
 
 
-def get_clowder_v2_user_by_name(username):
-    endpoint = CLOWDER_V2 + "api/v2/users/username/" + username
-    r = requests.get(endpoint, headers=base_headers_v2, verify=False)
-    return r.json()
+def get_clowder_v1_user_spaces(user_v1):
+    endpoint = f"{CLOWDER_V1}/api/spaces"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return [space for space in response.json() if space["creator"] == user_v1["id"]]
 
 
-async def create_v2_dataset(headers, dataset, user_email):
-    print(dataset)
-    default_license_id = "CC BY"
-    dataset_name = dataset["name"]
-    dataset_description = dataset["description"]
-    dataset_in_v2_endpoint = (
-        CLOWDER_V2 + f"api/v2/datasets?license_id={default_license_id}"
+def get_clowder_v1_user_spaces_members(space_id):
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return response.json()
+
+
+def get_clowder_v2_space_datasets(space_id):
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets"
+    response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
+    return response.json()
+
+
+def share_dataset_with_group(group_id, dataset, headers):
+    endpoint = f"{CLOWDER_V2}/authorizations/datasets/{dataset['id']}/group_role/{group_id}/viewer"
+    response = requests.get(endpoint, headers=headers, verify=False)
+    return response.json()
+
+
+def add_v1_space_members_to_v2_group(space, group_id, headers):
+    space_members = get_clowder_v1_user_spaces_members(space["id"])
+    for member in space_members:
+        member_email = member["email"]
+        endpoint = f"{CLOWDER_V2}/api/v2/groups/{group_id}/add/{member_email}"
+        response = requests.post(
+            endpoint,
+            headers=headers,
+        )
+
+
+def create_local_user(user_v1):
+    """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
+    # Search for the user by email
+    search_endpoint = f"{CLOWDER_V2}/api/v2/users/search"
+    search_params = {"text": user_v1["email"]}
+    search_response = requests.get(
+        search_endpoint, headers=clowder_headers_v2, params=search_params
     )
-    # create dataset
+
+    # Check if user already exists
+    if search_response.status_code == 200:
+        search_data = search_response.json()
+        if search_data.get("metadata", {}).get("total_count", 0) > 0:
+            for existing_user in search_response.json().get("data", []):
+                if existing_user.get("email") == user_v1["email"]:
+                    print(f"User {user_v1['email']} already exists in Clowder v2.")
+                    return generate_user_api_key(
+                        user_v1, DEFAULT_PASSWORD
+                    )  # Return the existing user's API key
+
+    # User does not exist, proceed to create a new user
+    user_json = {
+        "email": user_v1["email"],
+        "password": DEFAULT_PASSWORD,
+        "first_name": user_v1["firstName"],
+        "last_name": user_v1["lastName"],
+    }
+
+    # Create the user
+    create_user_response = requests.post(f"{CLOWDER_V2}/api/v2/users", json=user_json)
+    if create_user_response.status_code == 200:
+        print(f"Created user {user_v1['email']} in Clowder v2.")
+        email_user_new_login(user_v1["email"])
+
+        # Generate and return API key for the new user
+        api_key = generate_user_api_key(user_json, DEFAULT_PASSWORD)
+        with open(OUTPUT_FILE, "a") as f:
+            f.write(f"{user_v1['email']},{DEFAULT_PASSWORD},{api_key}\n")
+        return api_key
+    else:
+        print(
+            f"Failed to create user {user_v1['email']}. Status code: {create_user_response.status_code}"
+        )
+        return None
+
+
+def create_admin_user():
+    """Create an admin user and return the API key."""
+    requests.post(f"{CLOWDER_V2}/api/v2/users", json=admin_user)
+    return generate_user_api_key(admin_user, admin_user["password"])
+
+
+def create_v2_dataset(dataset, headers):
+    """Create a dataset in Clowder v2."""
+    # TODO: GET correct license
+    dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id=CC BY"
     dataset_example = {
-        "name": dataset_name,
-        "description": dataset_description,
+        "name": dataset["name"],
+        "description": dataset["description"],
     }
     response = requests.post(
         dataset_in_v2_endpoint, headers=headers, json=dataset_example
@@ -146,312 +176,197 @@ async def create_v2_dataset(headers, dataset, user_email):
     return response.json()["id"]
 
 
-def get_clowder_v1_user_datasets(user_id):
-    user_datasets = []
-    endpoint = CLOWDER_V1 + "api/datasets?limit=0"
-    r = requests.get(endpoint, headers=base_headers_v1, verify=False)
-    request_json = r.json()
-    for dataset in request_json:
-        if dataset["authorId"] == user_id:
-            user_datasets.append(dataset)
-    return user_datasets
+def create_v2_group(space, headers):
+    group = {"name": space["name"], "description": space["description"]}
+    group_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/groups"
+    response = requests.post(group_in_v2_endpoint, json=group, headers=headers)
+    return response.json()["id"]
 
 
-def create_local_user(user_v1):
-    first_name = user_v1["firstName"]
-    last_name = user_v1["lastName"]
-    email = user_v1["email"]
-    # password = fake.password(20)
-    password = "Password123&"
-    user_json = {
-        "email": email,
-        "password": password,
-        "first_name": first_name,
-        "last_name": last_name,
-    }
-    response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
-    email_user_new_login(email)
-    api_key = generate_user_api_key(user_json, DEFAULT_PASSWORD)
-    # api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
-    print("Local user created and api key generated")
-    if os.path.exists(output_file):
-        print("it exists.")
-    else:
-        f = open(output_file, "x")
-    with open(output_file, "a") as f:
-        entry = email + "," + password + "," + api_key + "\n"
-        f.write(entry)
-    return api_key
-
-
-def create_admin_user():
-    user_json = {
-        "email": "a@a.com",
-        "password": "admin",
-        "first_name": "aa",
-        "last_name": "aa",
-    }
-    response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
-    api_key = generate_user_api_key(user_json, "admin")
-    return api_key
-
-
-async def add_folder_entry_to_dataset(dataset_id, folder_name, current_headers):
-    current_dataset_folders = []
-    dataset_folder_url = CLOWDER_V2 + "api/v2/datasets/" + dataset_id + "/folders"
-    response = requests.get(dataset_folder_url, headers=current_headers)
-    response_json = response.json()
-    existing_folder_names = dict()
-    if "data" in response_json:
-        existing_folders = response_json["data"]
-        for existing_folder in existing_folders:
-            existing_folder_names[existing_folder["name"]] = existing_folder["id"]
-    if folder_name.startswith("/"):
-        folder_name = folder_name.lstrip("/")
-    folder_parts = folder_name.split("/")
-    parent = None
-    for folder_part in folder_parts:
-        folder_data = {"name": folder_part}
-        # TODO create or get folder
-        if folder_part not in existing_folder_names:
-            create_folder_endpoint = (
-                CLOWDER_V2 + "api/v2/datasets/" + dataset_id + "/folders"
-            )
-            folder_api_call = requests.post(
-                create_folder_endpoint, json=folder_data, headers=current_headers
-            )
-            print("created folder")
-        else:
-            parent = folder_part
-            print("this one already exists")
-    print("got folder parts")
-
-
-# gets all folders and subfolders in a dataset
-async def get_folder_and_subfolders(dataset_id, folder, current_headers):
-    total_folders = []
-    if folder:
-        path_url = (
-            CLOWDER_V2
-            + "api/v2/datasets/"
-            + dataset_id
-            + "/folders_and_files?folder_id="
-            + folder["id"]
-        )
-        folder_result = requests.get(path_url, headers=current_headers)
-        folder_json_data = folder_result.json()["data"]
-        for data in folder_json_data:
-            if data["object_type"] == "folder":
-                total_folders.append(data)
-    else:
-        path_url = CLOWDER_V2 + "api/v2/datasets/" + dataset_id + "/folders"
-        folder_result = requests.get(path_url, headers=current_headers)
-        folder_json_data = folder_result.json()["data"]
-        for data in folder_json_data:
-            total_folders.append(data)
-        print("we got the base level now")
-    current_subfolders = []
-    for current_folder in total_folders:
-        subfolders = await get_folder_and_subfolders(
-            dataset_id, current_folder, current_headers
-        )
-        current_subfolders += subfolders
-    total_folders += current_subfolders
-    return total_folders
-
-
-async def create_folder_if_not_exists_or_get(
-    folder, parent, dataset_v2, current_headers
-):
-    clowder_v2_folder_endpoint = (
-        CLOWDER_V2 + "api/v2/datasets/" + dataset_v2 + "/folders"
-    )
-    current_dataset_folders = await get_folder_and_subfolders(
-        dataset_id=dataset_v2, folder=None, current_headers=current_headers
-    )
-    current_folder_data = {"name": folder}
-    found_folder = None
-    if parent:
-        current_folder_data["parent_folder"] = parent
-    for each in current_dataset_folders:
-        if each["name"] == folder:
-            found_folder = each
-    if not found_folder:
-        response = requests.post(
-            f"{CLOWDER_V2}api/v2/datasets/{dataset_v2}/folders",
-            json=current_folder_data,
-            headers=current_headers,
-        )
-        found_folder = response.json()
-        print("We just created", found_folder)
-    return found_folder
-
-
-async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
-    current_dataset_folders = await get_folder_and_subfolders(
-        dataset_id=dataset_v2, folder=None, current_headers=current_headers
-    )
-    folder_json_data = current_dataset_folders
+def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
+    """Add folder hierarchy to a dataset in Clowder v2."""
     hierarchy_parts = folder_hierarchy.split("/")
-    hierarchy_parts.remove("")
     current_parent = None
     for part in hierarchy_parts:
-        result = await create_folder_if_not_exists_or_get(
-            part, current_parent, dataset_v2, current_headers=current_headers
+        result = create_folder_if_not_exists_or_get(
+            part, current_parent, dataset_v2, headers
         )
         if result:
             current_parent = result["id"]
 
 
-async def add_dataset_folders(dataset_v1, dataset_v2, current_headers):
-    dataset_folders_endpoint = (
-        CLOWDER_V1 + "api/datasets/" + dataset_v1["id"] + "/folders?superAdmin=true"
+def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
+    """Create a folder if it does not exist or return the existing folder."""
+    current_folders = get_folder_and_subfolders(dataset_v2, headers)
+    folder_data = (
+        {"name": folder, "parent_folder": parent} if parent else {"name": folder}
     )
-    dataset_folders = requests.get(dataset_folders_endpoint, headers=base_headers_v1)
-    dataset_folders_json = dataset_folders.json()
-    folder_names = []
-    for folder in dataset_folders_json:
-        folder_names.append(folder["name"])
-    for folder in folder_names:
-        new = await add_folder_hierarchy(
-            folder_hierarchy=folder,
-            dataset_v2=dataset_v2,
-            current_headers=current_headers,
+
+    for existing_folder in current_folders:
+        if existing_folder["name"] == folder:
+            return existing_folder
+
+    response = requests.post(
+        f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2}/folders",
+        json=folder_data,
+        headers=headers,
+    )
+    return response.json()
+
+
+def get_folder_and_subfolders(dataset_id, headers):
+    """Retrieve all folders and subfolders in a dataset."""
+    endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_id}/folders_and_files"
+    response = requests.get(endpoint, headers=headers)
+    return [
+        folder
+        for folder in response.json().get("data", [])
+        if folder["object_type"] == "folder"
+    ]
+
+
+def add_dataset_folders(dataset_v1, dataset_v2, headers):
+    """Add folders from a Clowder v1 dataset to a Clowder v2 dataset."""
+    endpoint = f"{CLOWDER_V1}/api/datasets/{dataset_v1['id']}/folders?superAdmin=true"
+    folders = requests.get(endpoint, headers=clowder_headers_v1).json()
+
+    for folder in folders:
+        add_folder_hierarchy(folder["name"], dataset_v2, headers)
+
+
+def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v2):
+    """Download a file from Clowder v1 and upload it to Clowder v2."""
+    filename = file["filename"]
+    file_id = file["id"]
+    file_folder = file.get("folders", None)
+
+    # Download the file from Clowder v1
+    v1_download_url = f"{CLOWDER_V1}/api/files/{file_id}?superAdmin=true"
+    print(f"Downloading file: {filename}")
+    download_response = requests.get(v1_download_url, headers=clowder_headers_v1)
+
+    with open(filename, "wb") as f:
+        f.write(download_response.content)
+
+    # Determine the correct folder in Clowder v2 for the upload
+    matching_folder = None
+    if file_folder:
+        matching_folder = next(
+            (
+                folder
+                for folder in all_dataset_folders
+                if folder["name"] == file_folder["name"]
+            ),
+            None,
         )
-        print("added", folder)
+
+    # Upload the file to Clowder v2
+    dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
+    if matching_folder:
+        dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
+
+    with open(filename, "rb") as file_data:
+        response = requests.post(
+            dataset_file_upload_endpoint, files={"file": file_data}, headers=headers_v2
+        )
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+
+    # Clean up the local file after upload
+    try:
+        os.remove(filename)
+    except Exception as e:
+        print(f"Could not delete locally downloaded file: {filename}")
+        print(e)
+    print(f"Completed upload for file: {filename}")
 
 
-async def process_user(
-    user_v1,
-    fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-):
-    print("migrating v1 user", user_v1)
-    id = user_v1["id"]
-    email = user_v1["email"]
-    firstName = user_v1["firstName"]
-    lastName = user_v1["lastName"]
+def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
+    """Process user resources from Clowder v1 to Clowder v2."""
+    user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
+    user_v2_api_key = create_local_user(user_v1)
+    USER_MAP[user_v1["id"]] = user_v2_api_key
+    user_headers_v2 = {
+        "x-api-key": user_v2_api_key,
+        "content-type": "application/json",
+        "accept": "application/json",
+    }
 
-    id_provider = user_v1["identityProvider"]
-    if "[Local Account]" in user_v1["identityProvider"]:
-        # get the v2 users
-        # create a user account in v2 with this username
-        if email != "a@a.com":
-            user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
-            # TODO check if there is already a local user
-            user_v2 = create_local_user(user_v1)
-            user_v2_api_key = user_v2
-            user_base_headers_v2 = {"X-API-key": user_v2_api_key}
-            user_headers_v2 = {
-                **user_base_headers_v2,
-                "Content-type": "application/json",
-                "accept": "application/json",
-            }
-            for dataset in user_v1_datasets:
-                print("creating a dataset in v2", dataset["id"], dataset["name"])
-                dataset_v2_id = await create_v2_dataset(
-                    user_base_headers_v2, dataset, email
-                )
-                folders = await add_dataset_folders(
-                    dataset, dataset_v2_id, user_headers_v2
-                )
-                print("Created folders in new dataset")
+    for dataset in user_v1_datasets:
+        print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
+        dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
+        DATASET_MAP[dataset["id"]] = dataset_v2_id
+        add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
+        print("Created folders in the new dataset")
 
-                all_dataset_folders = await get_folder_and_subfolders(
-                    dataset_id=dataset_v2_id,
-                    folder=None,
-                    current_headers=user_headers_v2,
-                )
-                dataset_files_endpoint = (
-                    CLOWDER_V1
-                    + "api/datasets/"
-                    + dataset["id"]
-                    + "/files?=superAdmin=true"
-                )
-                r_files = requests.get(
-                    dataset_files_endpoint, headers=clowder_headers_v1, verify=False
-                )
-                files_result = r_files.json()
-                for file in files_result:
-                    file_folder = None
-                    file_id = file["id"]
-                    filename = file["filename"]
-                    if "folders" in file:
-                        file_folder = file["folders"]
-                    # TODO download the file from v1 using api routes
-                    v1_download_url = (
-                        CLOWDER_V1 + "api/files/" + file_id + "?superAdmin=true"
-                    )
-                    print("downloading file", filename)
-                    download = requests.get(v1_download_url, headers=clowder_headers_v1)
-                    with open(filename, "wb") as f:
-                        f.write(download.content)
-                    file_data = {"file": open(filename, "rb")}
-                    matching_folder = None
-                    if file_folder:
-                        for folder in all_dataset_folders:
-                            if folder["name"] == file_folder["name"]:
-                                matching_folder = folder
-                    if matching_folder:
-                        upload_files = {"files": open(filename, "rb")}
-                        dataset_file_upload_endpoint = (
-                            CLOWDER_V2
-                            + "api/v2/datasets/"
-                            + dataset_v2_id
-                            + "/filesMultiple?folder_id="
-                            + matching_folder["id"]
-                        )
-                        response = requests.post(
-                            dataset_file_upload_endpoint,
-                            files=upload_files,
-                            headers=user_base_headers_v2,
-                        )
+        all_dataset_folders = get_folder_and_subfolders(dataset_v2_id, user_headers_v2)
 
-                    else:
-                        dataset_file_upload_endpoint = (
-                            CLOWDER_V2 + "api/v2/datasets/" + dataset_v2_id + "/files"
-                        )
-                        response = requests.post(
-                            dataset_file_upload_endpoint,
-                            files=file_data,
-                            headers=user_base_headers_v2,
-                        )
-                    if response.status_code == 200:
-                        result = response.json()
-                        print("added file", result)
-                    try:
-                        os.remove(filename)
-                    except Exception as e:
-                        print("could not delete locally downloaded file")
-                        print(e)
-                    print("done with file upload")
+        # Retrieve files for the dataset in Clowder v1
+        dataset_files_endpoint = (
+            f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files?superAdmin=true"
+        )
+        files_response = requests.get(
+            dataset_files_endpoint, headers=clowder_headers_v1, verify=False
+        )
+        files_result = files_response.json()
+
+        for file in files_result:
+            download_and_upload_file(
+                file, all_dataset_folders, dataset_v2_id, user_headers_v2
+            )
+    return [USER_MAP, DATASET_MAP]
 
 
-async def process_users(
-    fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-):
-    print("We create a v2 admin user")
-    NEW_ADMIN_KEY_V2 = create_admin_user()
+if __name__ == "__main__":
+    # users_v1 = get_clowder_v1_users()
+    USER_MAP = {}
+    DATASET_MAP = {}
+    users_v1 = [
+        {
+            "@context": {
+                "firstName": "http://schema.org/Person/givenName",
+                "lastName": "http://schema.org/Person/familyName",
+                "email": "http://schema.org/Person/email",
+                "affiliation": "http://schema.org/Person/affiliation",
+            },
+            "id": "576313ce1407b25fe19fc381",
+            "firstName": "Chen",
+            "lastName": "Wang",
+            "fullName": "Chen Wang",
+            "email": "cwang138-clowder2@illinois.edu",
+            "avatar": "http://www.gravatar.com/avatar/2f97a52f2214949c4172d7fb796f173e?d=404",
+            "profile": {},
+            "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
+        }
+    ]
     users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
-        print("migrating v1 user", user_v1)
-        id = user_v1["id"]
-        email = user_v1["email"]
-        firstName = user_v1["firstName"]
-        lastName = user_v1["lastName"]
-
-        id_provider = user_v1["identityProvider"]
-        if "[Local Account]" in user_v1["identityProvider"]:
-            # get the v2 users
-            # create a user account in v2 with this username
-            await process_user(user_v1, fs=fs, es=es, rabbitmq_client=rabbitmq_client)
-            print("Migrated user", user_v1)
-
+        if (
+            "[Local Account]" in user_v1["identityProvider"]
+            and user_v1["email"] != admin_user["email"]
+        ):
+            [USER_MAP, DATASET_MAP] = process_user_and_resources(
+                user_v1, USER_MAP, DATASET_MAP
+            )
+            print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
-            print("not a local account, not migrated at this time")
-
-
-asyncio.run(process_users())
+            print(f"Skipping user {user_v1['email']} as it is not a local account.")
+    print(f"Now migrating spaces")
+    for user_v1 in users_v1:
+        print(f"Migrating spaces of user {user_v1['email']}")
+        user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
+        user_v2_api_key = USER_MAP[user_v1["id"]]
+        for space in user_v1_spaces:
+            group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
+            add_v1_space_members_to_v2_group(
+                space, group_id, headers={"X-API-key": user_v2_api_key}
+            )
+            space_datasets = get_clowder_v2_space_datasets(space["id"])
+            for space_dataset in space_datasets:
+                dataset_v2_id = DATASET_MAP[space_dataset["id"]]
+                share_dataset_with_group(
+                    group_id, space, headers={"X-API-key": user_v2_api_key}
+                )
+        print(f"Migrated spaces of user {user_v1['email']}")
+    print("Migration complete.")
