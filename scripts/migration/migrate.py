@@ -48,9 +48,10 @@ def email_user_new_login(user_email):
     print(f"Login to the new Clowder instance: {user_email}")
 
 
-def generate_user_api_key(user, password):
+def generate_user_api_key(user, password=DEFAULT_PASSWORD):
     """Generate an API key for a user."""
     login_endpoint = f"{CLOWDER_V2}/api/v2/login"
+    user.update({"password": password})
     response = requests.post(login_endpoint, json=user)
     token = response.json().get("token")
     current_headers = {"Authorization": f"Bearer {token}"}
@@ -104,7 +105,7 @@ def add_v1_space_members_to_v2_group(space, group_id, headers):
     for member in space_members:
         member_email = member["email"]
         endpoint = f"{CLOWDER_V2}/api/v2/groups/{group_id}/add/{member_email}"
-        response = requests.post(
+        requests.post(
             endpoint,
             headers=headers,
         )
@@ -127,7 +128,7 @@ def create_local_user(user_v1):
                 if existing_user.get("email") == user_v1["email"]:
                     print(f"User {user_v1['email']} already exists in Clowder v2.")
                     return generate_user_api_key(
-                        user_v1, DEFAULT_PASSWORD
+                        existing_user, DEFAULT_PASSWORD
                     )  # Return the existing user's API key
 
     # User does not exist, proceed to create a new user
@@ -264,11 +265,11 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
     if matching_folder:
         dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
-
-    with open(filename, "rb") as file_data:
-        response = requests.post(
-            dataset_file_upload_endpoint, files={"file": file_data}, headers=headers_v2
-        )
+    file_exists = os.path.exists(filename)
+    # with open(filename, "rb") as file_data:
+    response = requests.post(
+        dataset_file_upload_endpoint, headers=headers_v2, files={"file": open(filename, "rb")}
+    )
 
     if response.status_code == 200:
         print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
@@ -287,6 +288,9 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
     user_v2_api_key = create_local_user(user_v1)
     USER_MAP[user_v1["id"]] = user_v2_api_key
+    base_user_headers_v2 = {
+        "x-api-key": user_v2_api_key
+    }
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
         "content-type": "application/json",
@@ -313,7 +317,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
         for file in files_result:
             download_and_upload_file(
-                file, all_dataset_folders, dataset_v2_id, user_headers_v2
+                file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
             )
     return [USER_MAP, DATASET_MAP]
 
@@ -352,7 +356,8 @@ if __name__ == "__main__":
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
-    print(f"Now migrating spaces")
+
+    print("Now migrating spaces.")
     for user_v1 in users_v1:
         print(f"Migrating spaces of user {user_v1['email']}")
         user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
