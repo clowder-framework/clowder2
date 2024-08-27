@@ -316,6 +316,8 @@ async def startup_beanie():
             ThumbnailDBViewList,
             LicenseDB,
         ],
+        # If view exists, will not recreate
+        # When view query changes, make sure to manually drop view and recreate
         recreate_views=False,
     )
 
