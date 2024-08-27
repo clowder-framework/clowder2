@@ -265,11 +265,11 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
     if matching_folder:
         dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
-
-    with open(filename, "rb") as file_data:
-        response = requests.post(
-            dataset_file_upload_endpoint, files={"file": file_data}, headers=headers_v2
-        )
+    file_exists = os.path.exists(filename)
+    # with open(filename, "rb") as file_data:
+    response = requests.post(
+        dataset_file_upload_endpoint, headers=headers_v2, files={"file": open(filename, "rb")}
+    )
 
     if response.status_code == 200:
         print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
@@ -288,6 +288,9 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
     user_v2_api_key = create_local_user(user_v1)
     USER_MAP[user_v1["id"]] = user_v2_api_key
+    base_user_headers_v2 = {
+        "x-api-key": user_v2_api_key
+    }
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
         "content-type": "application/json",
@@ -314,7 +317,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
         for file in files_result:
             download_and_upload_file(
-                file, all_dataset_folders, dataset_v2_id, user_headers_v2
+                file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
             )
     return [USER_MAP, DATASET_MAP]
 
@@ -341,7 +344,7 @@ if __name__ == "__main__":
             "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
         }
     ]
-    # users_v1 = get_clowder_v1_users()
+    users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         if (
             "[Local Account]" in user_v1["identityProvider"]
