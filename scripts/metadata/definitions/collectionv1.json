@@ -46,7 +46,7 @@
             "list" : false,
             "widgetType": "TextField",
             "config": {
-                "type" : "float"
+                "type" : "str"
             },
             "required" : false
         }
