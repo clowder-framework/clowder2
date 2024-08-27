@@ -48,9 +48,10 @@ def email_user_new_login(user_email):
     print(f"Login to the new Clowder instance: {user_email}")
 
 
-def generate_user_api_key(user, password):
+def generate_user_api_key(user, password=DEFAULT_PASSWORD):
     """Generate an API key for a user."""
     login_endpoint = f"{CLOWDER_V2}/api/v2/login"
+    user.update({"password": password})
     response = requests.post(login_endpoint, json=user)
     token = response.json().get("token")
     current_headers = {"Authorization": f"Bearer {token}"}
@@ -104,7 +105,7 @@ def add_v1_space_members_to_v2_group(space, group_id, headers):
     for member in space_members:
         member_email = member["email"]
         endpoint = f"{CLOWDER_V2}/api/v2/groups/{group_id}/add/{member_email}"
-        response = requests.post(
+        requests.post(
             endpoint,
             headers=headers,
         )
@@ -127,7 +128,7 @@ def create_local_user(user_v1):
                 if existing_user.get("email") == user_v1["email"]:
                     print(f"User {user_v1['email']} already exists in Clowder v2.")
                     return generate_user_api_key(
-                        user_v1, DEFAULT_PASSWORD
+                        existing_user, DEFAULT_PASSWORD
                     )  # Return the existing user's API key
 
     # User does not exist, proceed to create a new user
@@ -340,7 +341,7 @@ if __name__ == "__main__":
             "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
         }
     ]
-    users_v1 = get_clowder_v1_users()
+    # users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         if (
             "[Local Account]" in user_v1["identityProvider"]
@@ -352,7 +353,8 @@ if __name__ == "__main__":
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
-    print(f"Now migrating spaces")
+
+    print("Now migrating spaces.")
     for user_v1 in users_v1:
         print(f"Migrating spaces of user {user_v1['email']}")
         user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
