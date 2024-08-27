@@ -110,6 +110,25 @@ def add_v1_space_members_to_v2_group(space, group_id, headers):
             headers=headers,
         )
 
+def get_clowder_v1_user_collections(headers, user_v1):
+    endpoint = f"{CLOWDER_V1}/api/collections"
+    response = requests.get(endpoint, headers=headers)
+    return [col for col in response.json() if col["authorId"] == user_v1["id"]]
+
+def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
+    matching_collections = []
+    endpoint = f"{CLOWDER_V1}/api/collections"
+    response = requests.get(endpoint, headers=headers)
+    user_collections =[col for col in response.json() if col["authorId"] == user_v1["id"]]
+    for collection in user_collections:
+        collection_id = collection["id"]
+        collection_dataset_endpoint =  f"{CLOWDER_V1}/api/collections/{collection_id}/datasets"
+        dataset_response = requests.get(collection_dataset_endpoint, headers)
+        datasets = dataset_response.json()
+        for ds in datasets:
+            if ds['id'] == dataset_id:
+                matching_collections.append(collection)
+    return matching_collections
 
 def create_local_user(user_v1):
     """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
@@ -319,6 +338,11 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
             )
+        dataset_collections = get_clowder_v1_dataset_collections(headers=clowder_headers_v1, user_v1=user_v1, dataset_id=dataset['id'])
+        # TODO for now taking the first collection, assuming a dataset is in one collection only
+        dataset_collection = dataset_collections[0]
+        dataset_collection_name = dataset_collection['collectionname']
+        dataset_collection_id = dataset_collection['id']
     return [USER_MAP, DATASET_MAP]
 
 
