@@ -51,6 +51,7 @@ def email_user_new_login(user_email):
 def generate_user_api_key(user, password):
     """Generate an API key for a user."""
     login_endpoint = f"{CLOWDER_V2}/api/v2/login"
+    user['password'] = DEFAULT_PASSWORD
     response = requests.post(login_endpoint, json=user)
     token = response.json().get("token")
     current_headers = {"Authorization": f"Bearer {token}"}
@@ -285,7 +286,10 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
-    user_v2_api_key = create_local_user(user_v1)
+    try:
+        user_v2_api_key = create_local_user(user_v1)
+    except Exception as e:
+        print(e)
     USER_MAP[user_v1["id"]] = user_v2_api_key
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
