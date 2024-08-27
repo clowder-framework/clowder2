@@ -316,7 +316,7 @@ async def startup_beanie():
             ThumbnailDBViewList,
             LicenseDB,
         ],
-        recreate_views=True,
+        recreate_views=False,
     )
 
 
