@@ -110,25 +110,32 @@ def add_v1_space_members_to_v2_group(space, group_id, headers):
             headers=headers,
         )
 
+
 def get_clowder_v1_user_collections(headers, user_v1):
     endpoint = f"{CLOWDER_V1}/api/collections"
     response = requests.get(endpoint, headers=headers)
     return [col for col in response.json() if col["authorId"] == user_v1["id"]]
 
+
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
     endpoint = f"{CLOWDER_V1}/api/collections"
     response = requests.get(endpoint, headers=headers)
-    user_collections =[col for col in response.json() if col["authorId"] == user_v1["id"]]
+    user_collections = [
+        col for col in response.json() if col["authorId"] == user_v1["id"]
+    ]
     for collection in user_collections:
         collection_id = collection["id"]
-        collection_dataset_endpoint =  f"{CLOWDER_V1}/api/collections/{collection_id}/datasets"
+        collection_dataset_endpoint = (
+            f"{CLOWDER_V1}/api/collections/{collection_id}/datasets"
+        )
         dataset_response = requests.get(collection_dataset_endpoint, headers)
         datasets = dataset_response.json()
         for ds in datasets:
-            if ds['id'] == dataset_id:
+            if ds["id"] == dataset_id:
                 matching_collections.append(collection)
     return matching_collections
+
 
 def create_local_user(user_v1):
     """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
@@ -287,7 +294,9 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     file_exists = os.path.exists(filename)
     # with open(filename, "rb") as file_data:
     response = requests.post(
-        dataset_file_upload_endpoint, headers=headers_v2, files={"file": open(filename, "rb")}
+        dataset_file_upload_endpoint,
+        headers=headers_v2,
+        files={"file": open(filename, "rb")},
     )
 
     if response.status_code == 200:
@@ -307,9 +316,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
     user_v2_api_key = create_local_user(user_v1)
     USER_MAP[user_v1["id"]] = user_v2_api_key
-    base_user_headers_v2 = {
-        "x-api-key": user_v2_api_key
-    }
+    base_user_headers_v2 = {"x-api-key": user_v2_api_key}
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
         "content-type": "application/json",
@@ -338,11 +345,28 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
             )
-        dataset_collections = get_clowder_v1_dataset_collections(headers=clowder_headers_v1, user_v1=user_v1, dataset_id=dataset['id'])
+        dataset_collections = get_clowder_v1_dataset_collections(
+            headers=clowder_headers_v1, user_v1=user_v1, dataset_id=dataset["id"]
+        )
         # TODO for now taking the first collection, assuming a dataset is in one collection only
         dataset_collection = dataset_collections[0]
-        dataset_collection_name = dataset_collection['collectionname']
-        dataset_collection_id = dataset_collection['id']
+        dataset_collection_name = dataset_collection["collectionname"]
+        dataset_collection_id = dataset_collection["id"]
+        # TODO this assumes that the COLLECTION DEFINITION is already in the db
+        metadata_using_definition = {
+            "content": {
+                "collection_name": dataset_collection_name,
+                "collection_id": dataset_collection_id,
+            },
+            "definition": "Collection",
+        }
+        response = requests.post(
+            f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata",
+            headers=user_headers_v2,
+            json=metadata_using_definition,
+        )
+        if response.status_code == 200:
+            print("Successfully uploaded collection metadata")
     return [USER_MAP, DATASET_MAP]
 
 
