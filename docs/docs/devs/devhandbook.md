@@ -1,3 +1,5 @@
+# Clowder Developer Handbook
+
 # 1. Change Clowder Core
 
 ## 1.1 Backend
@@ -162,7 +164,7 @@ The frontend consists of various React components, each serving specific
 functions. **Before developing a new component, please review the
 existing ones to see if any can be reused.**
 
-![](media/image12.png)
+![](devhandbookmedia/image12.png)
 
 #### 1.2.1.1 Reuse Components
 
@@ -384,7 +386,7 @@ CancelablePromise < Paged > {
 
 ### 1.2.2 Redux
 
-![](media/image10.png)
+![](devhandbookmedia/image10.png)
 
 - Add an action under the action folder
   [here](https://github.com/clowder-framework/clowder2/tree/bb35e0b5040443abb847e658ad61f622f189f6bb/frontend/src/actions)
@@ -524,7 +526,7 @@ Run the main file in your extractor in the IDE, with environment
 parameters set. Similar to above, **CLOWDER_VERSION** and
 **RABBITMQ_URI** are required.
 
-![](media/image14.png)
+![](devhandbookmedia/image14.png)
 
 Alternatively, using command line
 
@@ -544,13 +546,13 @@ python run pyclowder/sample-extractors/image-preview-v2/binary_extractor.py
 - Go to extractors tab at the side menu, you should be able to see
   your extractors with information
 
-![](media/image11.png)
-![](media/image13.png)
+![](devhandbookmedia/image11.png)
+![](devhandbookmedia/image13.png)
 
 - Go to the file/dataset that are compatible with that extractor.
   Submit and watch the logs
 
-![](media/image9.png)
+![](devhandbookmedia/image9.png)
 
 ### 2.4 Create Custom Widget submitting to Extractor
 
@@ -563,9 +565,9 @@ In order to create custom widgets, we need to take the following steps:
   the parameters. In my example, I am creating an Image Annotator, so
   I need to save the name and points of the annotation
 
-> ![](media/image2.png)
+> ![](devhandbookmedia/image2.png)
 >
-> ![](media/image4.png)
+> ![](devhandbookmedia/image4.png)
 
 - Create a component in a directory (I use StyledComponents), this
   offers us to customize the component for the extractor but mainly
@@ -573,7 +575,7 @@ In order to create custom widgets, we need to take the following steps:
   form passes an object which contains a parameter and title that I
   use to create a title
 
-> ![](media/image3.png)
+> ![](devhandbookmedia/image3.png)
 
 #### 2.4.2 Adding to the RSJF
 
@@ -583,7 +585,7 @@ file SubmitExtraction.tsx. The steps are:
 Import the widget component and add to the widgets object that gives the
 form a map to the different custom widgets
 
-![](media/image1.png)
+![](devhandbookmedia/image1.png)
 
 In order to map the parameter to the widget, we use the second parameter
 for the form uiSchema. In the extractor-info.json, we give the parameter
@@ -593,7 +595,7 @@ the extractor.
 We use a for loop in the file here to go through the parameters and add
 it to the uiSchema if a parameter needs a custom widget
 
-![](media/image6.png)
+![](devhandbookmedia/image6.png)
 
 #### 2.4.3 In the extractor-info.json
 
@@ -616,14 +618,14 @@ ImageAnnotator to map to this widget, I create the following
 
 When we open the extractor, we should the be able to see the widget,
 
-![](media/image5.png)
+![](devhandbookmedia/image5.png)
 
-![](media/image7.png)
+![](devhandbookmedia/image7.png)
 
 When you submit the extractor, you can see the parameters are passed in
 if you extractor script logs the parameters it receives
 
-![](media/image8.png)
+![](devhandbookmedia/image8.png)
 
 # 3. Custom Visualization Component
 
