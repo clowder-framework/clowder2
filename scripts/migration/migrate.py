@@ -4,6 +4,11 @@ from datetime import datetime
 import requests
 from dotenv import dotenv_values
 
+from scripts.migration.migrate_metadata_definitions import (
+    get_clowder_v1_metadata_definitions,
+    post_metadata_definition,
+)
+
 # Configuration and Constants
 DEFAULT_PASSWORD = "Password123&"
 
@@ -63,7 +68,7 @@ def generate_user_api_key(user, password=DEFAULT_PASSWORD):
 
 def get_clowder_v1_users():
     """Retrieve all users from Clowder v1."""
-    endpoint = f"{CLOWDER_V1}/api/users"
+    endpoint = f"{CLOWDER_V1}/api/users?superAdmin=true"
     response = requests.get(endpoint, headers=base_headers_v1, verify=False)
     return response.json()
 
@@ -71,25 +76,25 @@ def get_clowder_v1_users():
 def get_clowder_v1_user_datasets(user_id):
     """Retrieve datasets created by a specific user in Clowder v1."""
     # TODO what about pagination
-    endpoint = f"{CLOWDER_V1}/api/datasets?limit=0"
+    endpoint = f"{CLOWDER_V1}/api/datasets?limit=0&superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return [dataset for dataset in response.json() if dataset["authorId"] == user_id]
 
 
 def get_clowder_v1_user_spaces(user_v1):
-    endpoint = f"{CLOWDER_V1}/api/spaces"
+    endpoint = f"{CLOWDER_V1}/api/spaces?superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return [space for space in response.json() if space["creator"] == user_v1["id"]]
 
 
 def get_clowder_v1_user_spaces_members(space_id):
-    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users"
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users?superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return response.json()
 
 
 def get_clowder_v2_space_datasets(space_id):
-    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets"
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets?superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return response.json()
 
@@ -265,10 +270,10 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
     if matching_folder:
         dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
-    file_exists = os.path.exists(filename)
-    # with open(filename, "rb") as file_data:
     response = requests.post(
-        dataset_file_upload_endpoint, headers=headers_v2, files={"file": open(filename, "rb")}
+        dataset_file_upload_endpoint,
+        headers=headers_v2,
+        files={"file": open(filename, "rb")},
     )
 
     if response.status_code == 200:
@@ -283,14 +288,52 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     print(f"Completed upload for file: {filename}")
 
 
+def add_dataset_metadata(dataset_v1, dataset_v2_id, v1_headers, v2_headers):
+    # Get metadata from Clowder V1
+    endpoint = (
+        f"{CLOWDER_V1}/api/datasets/{dataset_v1['id']}/metadata.jsonld?superAdmin=true"
+    )
+    metadata_v1 = requests.get(endpoint, headers=v1_headers).json()
+
+    # Iterate through the metadata and post it to Clowder V2
+    for metadata in metadata_v1:
+        # Extract and map each key-value pair from the metadata's content
+        if "content" in metadata:
+            for key, value in metadata["content"].items():
+                # Define the payload to send to V2
+                metadata_payload_v2 = {
+                    "definition": key,
+                    "content": metadata["content"],
+                }
+
+                # Post the metadata to Clowder V2
+                v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+                response = requests.post(
+                    v2_endpoint, json=metadata_payload_v2, headers=v2_headers
+                )
+
+                if response.status_code != 200:
+                    print(f"Failed to post metadata to V2: {response.text}")
+                else:
+                    print(f"Successfully posted metadata to V2: {response.json()}")
+
+
+def get_key_with_prefix(context, key):
+    # Search the context for a prefix associated with the key
+    for item in context:
+        if isinstance(item, dict):
+            for prefix, url in item.items():
+                if key in url:
+                    return f"{prefix}:{key}"
+    return key
+
+
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
     user_v2_api_key = create_local_user(user_v1)
     USER_MAP[user_v1["id"]] = user_v2_api_key
-    base_user_headers_v2 = {
-        "x-api-key": user_v2_api_key
-    }
+    base_user_headers_v2 = {"x-api-key": user_v2_api_key}
     user_headers_v2 = {
         "x-api-key": user_v2_api_key,
         "content-type": "application/json",
@@ -301,6 +344,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
         dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
         DATASET_MAP[dataset["id"]] = dataset_v2_id
+        add_dataset_metadata(dataset, dataset_v2_id, base_headers_v1, user_headers_v2)
         add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
         print("Created folders in the new dataset")
 
@@ -323,7 +367,24 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
 
 if __name__ == "__main__":
-    # users_v1 = get_clowder_v1_users()
+    ##############################################################################################################
+    # migrate metadata definition
+    v1_md_definitions = get_clowder_v1_metadata_definitions(CLOWDER_V1, base_headers_v1)
+    posted_ids = []
+    for v1_md in v1_md_definitions:
+        definition_id = post_metadata_definition(v1_md, CLOWDER_V2, clowder_headers_v2)
+        if definition_id:
+            posted_ids.append(definition_id)
+
+    # Get the current timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"migrated_metadata_definition_{timestamp}.log"
+    with open(filename, "w") as file:
+        for id in posted_ids:
+            file.write(f"{id}\n")
+
+    ##############################################################################################################
+    # migrate users and resources
     USER_MAP = {}
     DATASET_MAP = {}
     users_v1 = [
@@ -344,7 +405,7 @@ if __name__ == "__main__":
             "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
         }
     ]
-    users_v1 = get_clowder_v1_users()
+    # users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         if (
             "[Local Account]" in user_v1["identityProvider"]
@@ -357,21 +418,21 @@ if __name__ == "__main__":
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
 
-    print("Now migrating spaces.")
-    for user_v1 in users_v1:
-        print(f"Migrating spaces of user {user_v1['email']}")
-        user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
-        user_v2_api_key = USER_MAP[user_v1["id"]]
-        for space in user_v1_spaces:
-            group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
-            add_v1_space_members_to_v2_group(
-                space, group_id, headers={"X-API-key": user_v2_api_key}
-            )
-            space_datasets = get_clowder_v2_space_datasets(space["id"])
-            for space_dataset in space_datasets:
-                dataset_v2_id = DATASET_MAP[space_dataset["id"]]
-                share_dataset_with_group(
-                    group_id, space, headers={"X-API-key": user_v2_api_key}
-                )
-        print(f"Migrated spaces of user {user_v1['email']}")
+    # print("Now migrating spaces.")
+    # for user_v1 in users_v1:
+    #     print(f"Migrating spaces of user {user_v1['email']}")
+    #     user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
+    #     user_v2_api_key = USER_MAP[user_v1["id"]]
+    #     for space in user_v1_spaces:
+    #         group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
+    #         add_v1_space_members_to_v2_group(
+    #             space, group_id, headers={"X-API-key": user_v2_api_key}
+    #         )
+    #         space_datasets = get_clowder_v2_space_datasets(space["id"])
+    #         for space_dataset in space_datasets:
+    #             dataset_v2_id = DATASET_MAP[space_dataset["id"]]
+    #             share_dataset_with_group(
+    #                 group_id, space, headers={"X-API-key": user_v2_api_key}
+    #             )
+    #     print(f"Migrated spaces of user {user_v1['email']}")
     print("Migration complete.")

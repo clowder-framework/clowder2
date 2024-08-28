@@ -84,8 +84,8 @@ def fetch_definitions(definitions_url, headers=base_headers_v1):
 
 def transform_metadata_v1_to_v2(v1_metadata):
     # Extracting data from v1 format
-    label = v1_metadata.get("json", {}).get("label", "")
     uri = v1_metadata.get("json", {}).get("uri", "")
+    label = uri.split("/")[-1]
     type_ = v1_metadata.get("json", {}).get("type", "string")
     definitions_url = v1_metadata.get("json", {}).get("definitions_url", "")
 
@@ -104,10 +104,10 @@ def transform_metadata_v1_to_v2(v1_metadata):
             "description", f"Metadata for {label}"
         ),
         "required_for_items": {"datasets": False, "files": False},
-        "context": [{label.lower(): uri}],
+        "context": [{label: uri}],
         "fields": [
             {
-                "name": label.lower(),
+                "name": label,
                 "list": is_list,
                 "widgetType": widget_type,
                 "config": field_config,
