@@ -136,6 +136,36 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
                 matching_collections.append(collection)
     return matching_collections
 
+def get_clowder_v1_parent_collection(collection_id, headers):
+    all_collections_v1_endpoint = (
+        f"{CLOWDER_V1}/api/collections/allCollections"
+    )
+    response = requests.get(all_collections_v1_endpoint, headers=headers)
+    all_collections = response.json()
+    for collection in all_collections:
+        children_entry = collection['child_collection_ids']
+        children_entry = children_entry.lstrip('List(')
+        children_entry = children_entry.rstrip(')')
+        child_ids = children_entry.split(',')
+        for child in child_ids:
+            if child == collection_id:
+                collection_endpoint = (
+                    f"{CLOWDER_V1}/api/collections/{child}"
+                )
+                collection_response = requests.get(collection_endpoint, headers=headers)
+                parent_collection = collection_response.json()
+                return parent_collection
+    return None
+
+# this route takes a collection and gets the collections that contain it up to the root level
+# it will return a json object
+def get_clowder_v1_collection_hierarchy(collection_id, headers):
+    all_collections_v1_endpoint = (
+            f"{CLOWDER_V1}/api/collections/allCollections"
+        )
+    response = requests.get(all_collections_v1_endpoint, headers=headers)
+    all_collections = response.json()
+    for collection in all_collections:
 
 def create_local_user(user_v1):
     """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
@@ -369,6 +399,11 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             print("Successfully uploaded collection metadata")
     return [USER_MAP, DATASET_MAP]
 
+migration_listener_info = {'name':'clowder.v1.migration',
+                           'version':'1.0',
+                           'description': 'migration script to migrate data from v1 to v2'}
+
+{'context_url': 'https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld', 'content': {'lines': '47', 'words': '225', 'characters': '2154'}, 'contents': {'lines': '47', 'words': '225', 'characters': '2154'}, 'listener': {'name': 'ncsa.wordcount', 'version': '2.0', 'description': '2.0'}}
 
 if __name__ == "__main__":
     # users_v1 = get_clowder_v1_users()
