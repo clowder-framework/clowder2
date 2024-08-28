@@ -144,7 +144,7 @@ def post_metadata_definition(
 def cleanup_metadata_definition(
     definition_id, clowder_v2_url=CLOWDER_V2_URL, headers=clowder_headers_v2
 ):
-    delete_url = f"{clowder_v2_url}/metadata/definition/{definition_id}"
+    delete_url = f"{clowder_v2_url}/api/v2/metadata/definition/{definition_id}"
     response = requests.delete(delete_url, headers=headers)
 
     if response.status_code == 204:
@@ -153,6 +153,23 @@ def cleanup_metadata_definition(
         print(
             f"Failed to delete metadata definition with ID: {definition_id}. Status code: {response.status_code}"
         )
+
+
+def check_metadata_definition_exists(clowder_v2_url, definition_name, headers):
+    # Construct the API endpoint URL
+    endpoint = f"{clowder_v2_url}/api/v2/metadata/definition/search/{definition_name}?skip=0&limit=100000"
+
+    # Make the GET request to the API
+    response = requests.get(endpoint, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        # Check if the definition is present in the response
+        for item in data.get("data", []):
+            if item.get("name") == definition_name:
+                return True
+
+    return False
 
 
 if __name__ == "__main__":
