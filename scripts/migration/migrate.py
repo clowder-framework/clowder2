@@ -136,9 +136,30 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
                 matching_collections.append(collection)
     return matching_collections
 
-def get_clowder_v1_parent_collection(collection_id, headers):
+def get_clowder_v1_collection(collection_id, headers):
+    endpoint = (
+        f"{CLOWDER_V1}/api/collections/{collection_id}"
+    )
+    response = requests.get(endpoint, headers=headers)
+    return response.json()
+
+def get_clowder_v1_collection_self_and_ancestors(collection_id, self_and_ancestors, headers):
+    endpoint = (
+        f"{CLOWDER_V1}/api/collections/{collection_id}"
+    )
+    response = requests.get(endpoint, headers=headers)
+    self = response.json()
+    self_and_ancestors.append(self)
+    parents = get_clowder_v1_parent_collection(self, headers=headers)
+    self_and_ancestors.append(parents)
+    for parent in parents:
+        get_clowder_v1_collection_self_and_ancestors(parent['id'],self_and_ancestors, headers=headers)
+    print("got parents")
+
+def get_clowder_v1_parent_collection(current_collection, headers):
+    parents = []
     all_collections_v1_endpoint = (
-        f"{CLOWDER_V1}/api/collections/allCollections"
+        f"{CLOWDER_V1}/api/collections/allCollections?limit=0&showAll=true"
     )
     response = requests.get(all_collections_v1_endpoint, headers=headers)
     all_collections = response.json()
@@ -148,24 +169,16 @@ def get_clowder_v1_parent_collection(collection_id, headers):
         children_entry = children_entry.rstrip(')')
         child_ids = children_entry.split(',')
         for child in child_ids:
-            if child == collection_id:
+            if child == current_collection['id']:
                 collection_endpoint = (
                     f"{CLOWDER_V1}/api/collections/{child}"
                 )
                 collection_response = requests.get(collection_endpoint, headers=headers)
                 parent_collection = collection_response.json()
-                return parent_collection
-    return None
+                # result = get_clowder_v1_parent_collection(parent_collection, headers=headers)
+                parents.append(collection)
+    return parents
 
-# this route takes a collection and gets the collections that contain it up to the root level
-# it will return a json object
-def get_clowder_v1_collection_hierarchy(collection_id, headers):
-    all_collections_v1_endpoint = (
-            f"{CLOWDER_V1}/api/collections/allCollections"
-        )
-    response = requests.get(all_collections_v1_endpoint, headers=headers)
-    all_collections = response.json()
-    for collection in all_collections:
 
 def create_local_user(user_v1):
     """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
@@ -407,6 +420,10 @@ migration_listener_info = {'name':'clowder.v1.migration',
 
 if __name__ == "__main__":
     # users_v1 = get_clowder_v1_users()
+    current_hierarch = {}
+    current_collection = get_clowder_v1_collection('66cf6e4ecc50c8c5f1c067bf', headers=clowder_headers_v1)
+    collection_entry = {'collection_id': current_collection['id'], 'collection_name': current_collection['name']}
+    hierarchy = get_clowder_v1_collection_self_and_ancestors(current_collection['id'], [], headers=base_headers_v1)
     USER_MAP = {}
     DATASET_MAP = {}
     users_v1 = [
