@@ -153,8 +153,10 @@ def get_clowder_v1_collection_self_and_ancestors(collection_id, self_and_ancesto
     parents = get_clowder_v1_parent_collection(self, headers=headers)
     self_and_ancestors.append(parents)
     for parent in parents:
-        get_clowder_v1_collection_self_and_ancestors(parent['id'],self_and_ancestors, headers=headers)
+        current_self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(parent['id'],self_and_ancestors, headers=headers)
+        self_and_ancestors += current_self_and_ancestors
     print("got parents")
+    return self_and_ancestors
 
 def get_clowder_v1_parent_collection(current_collection, headers):
     parents = []
@@ -414,7 +416,9 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
 migration_listener_info = {'name':'clowder.v1.migration',
                            'version':'1.0',
-                           'description': 'migration script to migrate data from v1 to v2'}
+                           'description': 'migration script to migrate data from v1 to v2',
+                           "content":"STUFF HERE,",
+                           'contents':"STUFF HERE"}
 
 {'context_url': 'https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld', 'content': {'lines': '47', 'words': '225', 'characters': '2154'}, 'contents': {'lines': '47', 'words': '225', 'characters': '2154'}, 'listener': {'name': 'ncsa.wordcount', 'version': '2.0', 'description': '2.0'}}
 
