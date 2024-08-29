@@ -540,6 +540,65 @@ def register_migration_extractor():
             f"Failed to register migration extractor in Clowder v2. Status code: {response.status_code}"
         )
 
+def add_children(collection_hierarchy_json, remaining_collections):
+    new_json = []
+    new_remaining_collections = []
+    for collection in remaining_collections:
+        collection_parents = collection["parent_collection_ids"]
+        current_collection_parents = []
+        for entry in collection_hierarchy_json:
+            if entry["id"] in collection_parents:
+                current_collection_parents.append(entry)
+        print("We got the parents now")
+        if len(current_collection_parents) > 0:
+            current_collection_entry = {
+                "id": collection["id"],
+                "name": collection["name"],
+                "parents": current_collection_parents,
+            }
+            new_json.append(current_collection_entry)
+        else:
+            new_remaining_collections.append(collection)
+    return new_json, new_remaining_collections
+
+
+def build_collection_hierarchy(collection_id, headers):
+    self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
+        collection_id=collection_id, self_and_ancestors=[], headers=headers
+    )
+    self_and_ancestors_collections = get_clowder_v1_collections(
+        self_and_ancestors, headers=clowder_headers_v1
+    )
+    children = []
+    remaining_collections = []
+    for col in self_and_ancestors_collections:
+        parent_collection_ids = col["parent_collection_ids"]
+        parent_collection_ids = parent_collection_ids.lstrip("List(")
+        parent_collection_ids = parent_collection_ids.rstrip(")")
+        parent_collection_ids = parent_collection_ids.lstrip(" ")
+        parent_collection_ids = parent_collection_ids.rstrip(" ")
+        if parent_collection_ids == "":
+            root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
+            children.append(root_col_entry)
+        else:
+            remaining_collections.append(col)
+
+    while len(remaining_collections) > 0:
+        children, remaining_collections = add_children(
+            children, remaining_collections
+        )
+    print("Now we are done")
+    return children
+
+def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
+    dataset_collections = get_clowder_v1_dataset_collections(headers=headers, user_v1=user_v1, dataset_id=dataset_id)
+
+    collection_data = []
+    for collection in dataset_collections:
+        collection_children = build_collection_hierarchy(collection_id=collection['id'], headers=headers)
+        for child in collection_children:
+            collection_data.append(child)
+    return collection_data
 
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
