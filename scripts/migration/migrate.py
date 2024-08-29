@@ -636,6 +636,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             )
             if file_v2_id is not None:
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
+        # posting the collection hierarchy as metadata
+        collection_metadata = build_collection_metadata_for_v1_dataset(dataset_id=dataset['id'],user_v1=user_v1, headers=clowder_headers_v1)
 
     return [USER_MAP, DATASET_MAP]
 
