@@ -511,6 +511,16 @@ def build_collection_hierarchy(collection_id, headers):
     print("Now we are done")
     return children
 
+def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
+    dataset_collections = get_clowder_v1_dataset_collections(headers=headers, user_v1=user_v1, dataset_id=dataset_id)
+
+    collection_data = []
+    for collection in dataset_collections:
+        collection_children = build_collection_hierarchy(collection_id=collection['id'], headers=headers)
+        for child in collection_children:
+            collection_data.append(child)
+    return collection_data
+
 
 if __name__ == "__main__":
     # users_v1 = get_clowder_v1_users()
