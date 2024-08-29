@@ -4,6 +4,8 @@ from datetime import datetime
 import requests
 from dotenv import dotenv_values
 
+V1_TEST_DATASET_ID = "66d0a6e1e4b09db0f11b24ef"
+
 # Configuration and Constants
 DEFAULT_PASSWORD = "Password123&"
 
@@ -136,29 +138,60 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
                 matching_collections.append(collection)
     return matching_collections
 
+
 def get_clowder_v1_collection(collection_id, headers):
-    endpoint = (
-        f"{CLOWDER_V1}/api/collections/{collection_id}"
-    )
+    endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
     response = requests.get(endpoint, headers=headers)
     return response.json()
 
-def get_clowder_v1_collection_self_and_ancestors(collection_id, self_and_ancestors, headers):
-    endpoint = (
-        f"{CLOWDER_V1}/api/collections/{collection_id}"
-    )
+
+def get_clowder_v1_collections(collection_ids, headers):
+    collections = []
+    for collection_id in collection_ids:
+        endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
+        response = requests.get(endpoint, headers=headers)
+        collections.append(response.json())
+    return collections
+
+
+def get_clowder_v1_collection_self_and_ancestors(
+    collection_id, self_and_ancestors, headers
+):
+    endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
     response = requests.get(endpoint, headers=headers)
     self = response.json()
-    self_and_ancestors.append(self)
-    parents = get_clowder_v1_parent_collection(self, headers=headers)
-    self_and_ancestors.append(parents)
-    for parent in parents:
-        current_self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(parent['id'],self_and_ancestors, headers=headers)
-        self_and_ancestors += current_self_and_ancestors
-    print("got parents")
+    if "id" not in self:
+        print("HERE")
+    if self["id"] not in self_and_ancestors:
+        self_and_ancestors.append(self["id"])
+    parents_entry = self["parent_collection_ids"]
+    parents_entry = parents_entry.lstrip("List(")
+    parents_entry = parents_entry.rstrip(")")
+    print(parents_entry)
+    if parents_entry != "":
+        parents = parents_entry.split(",")
+        for parent in parents:
+            # replace empty space
+            parent = parent.lstrip(" ")
+            parent = parent.rstrip(" ")
+            if parent not in self_and_ancestors:
+                self_and_ancestors.append(parent)
+        for parent in parents:
+            parent = parent.lstrip(" ")
+            parent = parent.rstrip(" ")
+            if parent != "" and parent is not None:
+                current_self_and_ancestors = (
+                    get_clowder_v1_collection_self_and_ancestors(
+                        parent, self_and_ancestors, headers=headers
+                    )
+                )
+                for col_id in current_self_and_ancestors:
+                    if col_id not in self_and_ancestors:
+                        self_and_ancestors.append(col_id)
     return self_and_ancestors
 
-def get_clowder_v1_parent_collection(current_collection, headers):
+
+def get_clowder_v1_parent_collection_ids(current_collection_id, headers):
     parents = []
     all_collections_v1_endpoint = (
         f"{CLOWDER_V1}/api/collections/allCollections?limit=0&showAll=true"
@@ -166,19 +199,16 @@ def get_clowder_v1_parent_collection(current_collection, headers):
     response = requests.get(all_collections_v1_endpoint, headers=headers)
     all_collections = response.json()
     for collection in all_collections:
-        children_entry = collection['child_collection_ids']
-        children_entry = children_entry.lstrip('List(')
-        children_entry = children_entry.rstrip(')')
-        child_ids = children_entry.split(',')
+        collection_name = collection["name"]
+        if collection_name == "ROOT C" or collection_name == "ROOT D":
+            print("C OR D")
+        children_entry = collection["child_collection_ids"]
+        children_entry = children_entry.lstrip("List(")
+        children_entry = children_entry.rstrip(")")
+        child_ids = children_entry.split(",")
         for child in child_ids:
-            if child == current_collection['id']:
-                collection_endpoint = (
-                    f"{CLOWDER_V1}/api/collections/{child}"
-                )
-                collection_response = requests.get(collection_endpoint, headers=headers)
-                parent_collection = collection_response.json()
-                # result = get_clowder_v1_parent_collection(parent_collection, headers=headers)
-                parents.append(collection)
+            if child == current_collection_id:
+                parents.append(collection["id"])
     return parents
 
 
@@ -414,20 +444,107 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             print("Successfully uploaded collection metadata")
     return [USER_MAP, DATASET_MAP]
 
-migration_listener_info = {'name':'clowder.v1.migration',
-                           'version':'1.0',
-                           'description': 'migration script to migrate data from v1 to v2',
-                           "content":"STUFF HERE,",
-                           'contents':"STUFF HERE"}
 
-{'context_url': 'https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld', 'content': {'lines': '47', 'words': '225', 'characters': '2154'}, 'contents': {'lines': '47', 'words': '225', 'characters': '2154'}, 'listener': {'name': 'ncsa.wordcount', 'version': '2.0', 'description': '2.0'}}
+migration_listener_info = {
+    "name": "clowder.v1.migration",
+    "version": "1.0",
+    "description": "migration script to migrate data from v1 to v2",
+    "content": "STUFF HERE,",
+    "contents": "STUFF HERE",
+}
+
+{
+    "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
+    "content": {"lines": "47", "words": "225", "characters": "2154"},
+    "contents": {"lines": "47", "words": "225", "characters": "2154"},
+    "listener": {"name": "ncsa.wordcount", "version": "2.0", "description": "2.0"},
+}
+
+
+def add_children(collection_hierarchy_json, remaining_collections):
+    new_json = []
+    new_remaining_collections = []
+    for collection in remaining_collections:
+        collection_parents = collection["parent_collection_ids"]
+        current_collection_parents = []
+        for entry in collection_hierarchy_json:
+            if entry["id"] in collection_parents:
+                current_collection_parents.append(entry)
+        print("We got the parents now")
+        if len(current_collection_parents) > 0:
+            current_collection_entry = {
+                "id": collection["id"],
+                "name": collection["name"],
+                "parents": current_collection_parents,
+            }
+            new_json.append(current_collection_entry)
+        else:
+            new_remaining_collections.append(collection)
+    return new_json, new_remaining_collections
+
+
+def build_collection_hierarchy(collection_id, headers):
+    self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
+        collection_id=TEST_COL_ID, self_and_ancestors=[], headers=clowder_headers_v1
+    )
+    self_and_ancestors_collections = get_clowder_v1_collections(
+        self_and_ancestors, headers=clowder_headers_v1
+    )
+    root_collections = []
+    children = []
+    remaining_collections = []
+    for col in self_and_ancestors_collections:
+        parent_collection_ids = col["parent_collection_ids"]
+        parent_collection_ids = parent_collection_ids.lstrip("List(")
+        parent_collection_ids = parent_collection_ids.rstrip(")")
+        parent_collection_ids = parent_collection_ids.lstrip(" ")
+        parent_collection_ids = parent_collection_ids.rstrip(" ")
+        if parent_collection_ids == "":
+            root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
+            root_collections.append(root_col_entry)
+        else:
+            remaining_collections.append(col)
+    while len(remaining_collections) > 0:
+        children, remaining_collections = add_children(
+            root_collections, remaining_collections
+        )
+    print("Now we are done")
+    return children
+
 
 if __name__ == "__main__":
     # users_v1 = get_clowder_v1_users()
-    current_hierarch = {}
-    current_collection = get_clowder_v1_collection('66cf6e4ecc50c8c5f1c067bf', headers=clowder_headers_v1)
-    collection_entry = {'collection_id': current_collection['id'], 'collection_name': current_collection['name']}
-    hierarchy = get_clowder_v1_collection_self_and_ancestors(current_collection['id'], [], headers=base_headers_v1)
+    TEST_COL_ID = "66d0a6c0e4b09db0f11b24e4"
+    ROOT_COL_ID = "66d0a6aae4b09db0f11b24dd"
+    result = build_collection_hierarchy(
+        collection_id=TEST_COL_ID, headers=clowder_headers_v1
+    )
+    # parents = get_clowder_v1_parent_collection_ids(current_collection_id=TEST_COL_ID, headers=clowder_headers_v1)
+    self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
+        collection_id=TEST_COL_ID, self_and_ancestors=[], headers=clowder_headers_v1
+    )
+    self_and_ancestors_collections = get_clowder_v1_collections(
+        self_and_ancestors, headers=clowder_headers_v1
+    )
+    root_collections = []
+    remaining_collections = []
+    for col in self_and_ancestors_collections:
+        parent_collection_ids = col["parent_collection_ids"]
+        parent_collection_ids = parent_collection_ids.lstrip("List(")
+        parent_collection_ids = parent_collection_ids.rstrip(")")
+        parent_collection_ids = parent_collection_ids.lstrip(" ")
+        parent_collection_ids = parent_collection_ids.rstrip(" ")
+        if parent_collection_ids == "":
+            root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
+            root_collections.append(root_col_entry)
+        else:
+            remaining_collections.append(col)
+
+        print("the parent col")
+    print("got root collections")
+    children, remaining_collections = add_children(
+        root_collections, remaining_collections
+    )
     USER_MAP = {}
     DATASET_MAP = {}
     users_v1 = [
