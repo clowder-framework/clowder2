@@ -20,6 +20,7 @@ FIELD_TYPES = {
     "int": int,
     "float": float,
     "str": str,
+    "string": str,
     "TextField": str,
     "bool": bool,
     # TODO figure out how to parse "yyyymmdd hh:mm:ssssssz" into datetime object
