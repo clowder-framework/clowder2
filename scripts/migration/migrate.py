@@ -121,21 +121,24 @@ def get_clowder_v1_user_collections(headers, user_v1):
 
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
-    endpoint = f"{CLOWDER_V1}/api/collections"
+    endpoint = f"{CLOWDER_V1}/api/collections/allCollections"
     response = requests.get(endpoint, headers=headers)
-    user_collections = [
-        col for col in response.json() if col["authorId"] == user_v1["id"]
-    ]
+    user_collections = response.json()
     for collection in user_collections:
         collection_id = collection["id"]
+        if collection['name'] == 'subchild':
+            print("HERE")
         collection_dataset_endpoint = (
             f"{CLOWDER_V1}/api/collections/{collection_id}/datasets"
         )
-        dataset_response = requests.get(collection_dataset_endpoint, headers)
-        datasets = dataset_response.json()
-        for ds in datasets:
-            if ds["id"] == dataset_id:
-                matching_collections.append(collection)
+        try:
+            dataset_response = requests.get(collection_dataset_endpoint, headers=headers)
+            datasets = dataset_response.json()
+            for ds in datasets:
+                if ds["id"] == dataset_id:
+                    matching_collections.append(collection)
+        except Exception as e:
+            print('Exception', e)
     return matching_collections
 
 
@@ -485,12 +488,11 @@ def add_children(collection_hierarchy_json, remaining_collections):
 
 def build_collection_hierarchy(collection_id, headers):
     self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
-        collection_id=TEST_COL_ID, self_and_ancestors=[], headers=clowder_headers_v1
+        collection_id=collection_id, self_and_ancestors=[], headers=headers
     )
     self_and_ancestors_collections = get_clowder_v1_collections(
         self_and_ancestors, headers=clowder_headers_v1
     )
-    root_collections = []
     children = []
     remaining_collections = []
     for col in self_and_ancestors_collections:
@@ -501,12 +503,13 @@ def build_collection_hierarchy(collection_id, headers):
         parent_collection_ids = parent_collection_ids.rstrip(" ")
         if parent_collection_ids == "":
             root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
-            root_collections.append(root_col_entry)
+            children.append(root_col_entry)
         else:
             remaining_collections.append(col)
+
     while len(remaining_collections) > 0:
         children, remaining_collections = add_children(
-            root_collections, remaining_collections
+            children, remaining_collections
         )
     print("Now we are done")
     return children
@@ -524,11 +527,15 @@ def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
 
 if __name__ == "__main__":
     # users_v1 = get_clowder_v1_users()
+    endpoint = 'https://clowder.ncsa.illinois.edu/clowder/api/me'
+    response = requests.get(endpoint, headers=base_headers_v1)
+    user_v1 = response.json()
     TEST_COL_ID = "66d0a6c0e4b09db0f11b24e4"
     ROOT_COL_ID = "66d0a6aae4b09db0f11b24dd"
-    result = build_collection_hierarchy(
-        collection_id=TEST_COL_ID, headers=clowder_headers_v1
-    )
+    TEST_DATASET_ID = '66d0a604e4b09db0f11b2494'
+    # ds_cols = get_clowder_v1_dataset_collections(headers=base_headers_v1, user_v1=user_v1, dataset_id=TEST_DATASET_ID)
+
+    result = build_collection_metadata_for_v1_dataset(dataset_id=TEST_DATASET_ID, user_v1=user_v1, headers=clowder_headers_v1)
     # parents = get_clowder_v1_parent_collection_ids(current_collection_id=TEST_COL_ID, headers=clowder_headers_v1)
     self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
         collection_id=TEST_COL_ID, self_and_ancestors=[], headers=clowder_headers_v1
