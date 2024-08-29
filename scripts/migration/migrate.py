@@ -616,6 +616,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
         dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
         DATASET_MAP[dataset["id"]] = dataset_v2_id
+        add_dataset_metadata(dataset, dataset_v2_id, base_headers_v1, user_headers_v2)
         add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
         print("Created folders in the new dataset")
 
@@ -639,6 +640,28 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         # posting the collection hierarchy as metadata
         # TODO need to actually post this
         collection_metadata_dict = build_collection_metadata_for_v1_dataset(dataset_id=dataset['id'],user_v1=user_v1, headers=clowder_headers_v1)
+        migration_extractor_collection_metadata = {
+            "listener" : {
+            "name": "migration",
+            "version": "1",
+            "description": "Migration of metadata from Clowder v1 to Clowder v2",
+            },
+            "content": collection_metadata_dict,
+            "contents": collection_metadata_dict,
+        }
+        v2_metadata_endpoint = (
+            f"{CLOWDER_V2}/api/v2/metadata/{dataset_v2_id}/metadata"
+        )
+        response = requests.post(
+            v2_metadata_endpoint, json=migration_extractor_collection_metadata, headers=clowder_headers_v2
+        )
+        if response.status_code == 200:
+            print("Successfully added collection info as metadata in v2.")
+        else:
+            print(
+                f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
+            )
+
 
     return [USER_MAP, DATASET_MAP]
 
