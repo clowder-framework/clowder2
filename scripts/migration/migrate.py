@@ -4,7 +4,11 @@ from datetime import datetime
 import requests
 from dotenv import dotenv_values
 
-V1_TEST_DATASET_ID = "66d0a6e1e4b09db0f11b24ef"
+from scripts.migration.migrate_metadata_definitions import (
+    check_metadata_definition_exists,
+    get_clowder_v1_metadata_definitions,
+    post_metadata_definition,
+)
 
 # Configuration and Constants
 DEFAULT_PASSWORD = "Password123&"
@@ -65,7 +69,7 @@ def generate_user_api_key(user, password=DEFAULT_PASSWORD):
 
 def get_clowder_v1_users():
     """Retrieve all users from Clowder v1."""
-    endpoint = f"{CLOWDER_V1}/api/users"
+    endpoint = f"{CLOWDER_V1}/api/users?superAdmin=true"
     response = requests.get(endpoint, headers=base_headers_v1, verify=False)
     return response.json()
 
@@ -73,25 +77,25 @@ def get_clowder_v1_users():
 def get_clowder_v1_user_datasets(user_id):
     """Retrieve datasets created by a specific user in Clowder v1."""
     # TODO what about pagination
-    endpoint = f"{CLOWDER_V1}/api/datasets?limit=0"
+    endpoint = f"{CLOWDER_V1}/api/datasets?limit=0&superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return [dataset for dataset in response.json() if dataset["authorId"] == user_id]
 
 
 def get_clowder_v1_user_spaces(user_v1):
-    endpoint = f"{CLOWDER_V1}/api/spaces"
+    endpoint = f"{CLOWDER_V1}/api/spaces?superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return [space for space in response.json() if space["creator"] == user_v1["id"]]
 
 
 def get_clowder_v1_user_spaces_members(space_id):
-    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users"
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/users?superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return response.json()
 
 
 def get_clowder_v2_space_datasets(space_id):
-    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets"
+    endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}/datasets?superAdmin=true"
     response = requests.get(endpoint, headers=clowder_headers_v1, verify=False)
     return response.json()
 
@@ -369,16 +373,11 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
     if matching_folder:
         dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
-    file_exists = os.path.exists(filename)
-    # with open(filename, "rb") as file_data:
     response = requests.post(
         dataset_file_upload_endpoint,
         headers=headers_v2,
         files={"file": open(filename, "rb")},
     )
-
-    if response.status_code == 200:
-        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
 
     # Clean up the local file after upload
     try:
@@ -386,7 +385,160 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     except Exception as e:
         print(f"Could not delete locally downloaded file: {filename}")
         print(e)
-    print(f"Completed upload for file: {filename}")
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+        return response.json().get("id")
+    else:
+        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
+
+    return None
+
+
+def add_file_metadata(file_v1, file_v2_id, headers_v1, headers_v2):
+    # Get metadata from Clowder V1
+    endpoint = f"{CLOWDER_V1}/api/files/{file_v1['id']}/metadata.jsonld?superAdmin=true"
+    metadata_v1 = requests.get(endpoint, headers=headers_v1).json()
+
+    # Iterate through the metadata and post it to Clowder V2
+    for metadata in metadata_v1:
+        # Extract and map each key-value pair from the metadata's content
+        if "content" in metadata:
+            for key, value in metadata["content"].items():
+                # Define the payload to send to V2
+                metadata_payload_v2 = {
+                    "definition": key,
+                    "content": metadata["content"],
+                }
+
+                # Check if the metadata definition exists;
+                # if exists, post to user metadat; otherwise, post to machine metadata
+                v2_metadata_endpoint = (
+                    f"{CLOWDER_V2}/api/v2/files/{file_v2_id}/metadata"
+                )
+                if check_metadata_definition_exists(
+                    CLOWDER_V2, key, headers=headers_v2
+                ):
+                    response = requests.post(
+                        v2_metadata_endpoint,
+                        json=metadata_payload_v2,
+                        headers=headers_v2,
+                    )
+
+                    if response.status_code != 200:
+                        print(f"Failed to post file metadata to V2: {response.text}")
+                    else:
+                        print(f"Successfully posted file metadata to V2: {key}")
+                else:
+                    if "agent" in metadata and "listener" not in metadata:
+                        metadata["listener"] = {
+                            "name": "migration",
+                            "version": "1",
+                            "description": "Migration of metadata from Clowder v1 to Clowder v2",
+                        }
+                    response = requests.post(
+                        v2_metadata_endpoint, json=metadata, headers=headers_v2
+                    )
+
+                    if response.status_code != 200:
+                        print(f"Failed to post file metadata to V2: {response.text}")
+                    else:
+                        print("Successfully posted file machine metadata to V2")
+                    break  # machine metadata no need to iterate through all the keys
+
+
+def add_dataset_metadata(dataset_v1, dataset_v2_id, headers_v1, headers_v2):
+    # Get metadata from Clowder V1
+    endpoint = (
+        f"{CLOWDER_V1}/api/datasets/{dataset_v1['id']}/metadata.jsonld?superAdmin=true"
+    )
+    metadata_v1 = requests.get(endpoint, headers=headers_v1).json()
+
+    # Iterate through the metadata and post it to Clowder V2
+    for metadata in metadata_v1:
+        # Extract and map each key-value pair from the metadata's content
+        if "content" in metadata:
+            for key, value in metadata["content"].items():
+                # Define the payload to send to V2
+                metadata_payload_v2 = {
+                    "definition": key,
+                    "content": metadata["content"],
+                }
+
+                # Check if the metadata definition exists;
+                # if exists, post to user metadat; otherwise, post to machine metadata
+                v2_metadata_endpoint = (
+                    f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+                )
+                if check_metadata_definition_exists(
+                    CLOWDER_V2, key, headers=headers_v2
+                ):
+                    response = requests.post(
+                        v2_metadata_endpoint,
+                        json=metadata_payload_v2,
+                        headers=headers_v2,
+                    )
+
+                    if response.status_code != 200:
+                        print(f"Failed to post dataset metadata to V2: {response.text}")
+                    else:
+                        print(f"Successfully posted dataset metadata to V2: {key}")
+                else:
+                    if "agent" in metadata and "listener" not in metadata:
+                        metadata["listener"] = {
+                            "name": "migration",
+                            "version": "1",
+                            "description": "Migration of metadata from Clowder v1 to Clowder v2",
+                        }
+                    response = requests.post(
+                        v2_metadata_endpoint, json=metadata, headers=headers_v2
+                    )
+
+                    if response.status_code != 200:
+                        print(f"Failed to post dataset metadata to V2: {response.text}")
+                    else:
+                        print("Successfully posted dataset machine metadata to V2")
+                    break  # machine metadata no need to iterate through all the keys
+
+
+def register_migration_extractor():
+    """Register the migration extractor in Clowder v2."""
+    migration_extractor = {
+        "name": "migration",
+        "description": "Migration of metadata from Clowder v1 to Clowder v2",
+        "version": "1",
+        "author": "Clowder Devs",
+    }
+
+    # check if migration extractor already exists
+    search_endpoint = f"{CLOWDER_V2}/api/v2/listeners/search"
+    search_params = {"text": migration_extractor["name"]}
+    search_response = requests.get(
+        search_endpoint, headers=clowder_headers_v2, params=search_params
+    )
+
+    # Check if extractor already exists
+    if search_response.status_code == 200:
+        search_data = search_response.json()
+        if search_data.get("metadata", {}).get("total_count", 0) > 0:
+            for existing_extractor in search_response.json().get("data", []):
+                if existing_extractor.get("name") == migration_extractor["name"]:
+                    print(
+                        f"Extractor {migration_extractor['name']} already exists in Clowder v2."
+                    )
+                    return
+
+    endpoint = f"{CLOWDER_V2}/api/v2/extractors"
+    response = requests.post(
+        endpoint, json=migration_extractor, headers=clowder_headers_v2
+    )
+
+    if response.status_code == 200:
+        print("Successfully registered migration extractor in Clowder v2.")
+    else:
+        print(
+            f"Failed to register migration extractor in Clowder v2. Status code: {response.status_code}"
+        )
 
 
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
@@ -420,168 +572,33 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         files_result = files_response.json()
 
         for file in files_result:
-            download_and_upload_file(
+            file_v2_id = download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
             )
-        dataset_collections = get_clowder_v1_dataset_collections(
-            headers=clowder_headers_v1, user_v1=user_v1, dataset_id=dataset["id"]
-        )
-        # TODO for now taking the first collection, assuming a dataset is in one collection only
-        dataset_collection = dataset_collections[0]
-        dataset_collection_name = dataset_collection["collectionname"]
-        dataset_collection_id = dataset_collection["id"]
-        # TODO this assumes that the COLLECTION DEFINITION is already in the db
-        metadata_using_definition = {
-            "content": {
-                "collection_name": dataset_collection_name,
-                "collection_id": dataset_collection_id,
-            },
-            "definition": "Collection",
-        }
-        response = requests.post(
-            f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata",
-            headers=user_headers_v2,
-            json=metadata_using_definition,
-        )
-        if response.status_code == 200:
-            print("Successfully uploaded collection metadata")
+            if file_v2_id is not None:
+                add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
+
     return [USER_MAP, DATASET_MAP]
 
 
-migration_listener_info = {
-    "name": "clowder.v1.migration",
-    "version": "1.0",
-    "description": "migration script to migrate data from v1 to v2",
-    "content": "STUFF HERE,",
-    "contents": "STUFF HERE",
-}
-
-{
-    "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
-    "content": {"lines": "47", "words": "225", "characters": "2154"},
-    "contents": {"lines": "47", "words": "225", "characters": "2154"},
-    "listener": {"name": "ncsa.wordcount", "version": "2.0", "description": "2.0"},
-}
-
-
-def add_children(collection_hierarchy_json, remaining_collections):
-    new_json = []
-    new_remaining_collections = []
-    for collection in remaining_collections:
-        collection_parents = collection["parent_collection_ids"]
-        current_collection_parents = []
-        for entry in collection_hierarchy_json:
-            if entry["id"] in collection_parents:
-                current_collection_parents.append(entry)
-        print("We got the parents now")
-        if len(current_collection_parents) > 0:
-            current_collection_entry = {
-                "id": collection["id"],
-                "name": collection["name"],
-                "parents": current_collection_parents,
-            }
-            new_json.append(current_collection_entry)
-        else:
-            new_remaining_collections.append(collection)
-    return new_json, new_remaining_collections
-
-
-def build_collection_hierarchy(collection_id, headers):
-    self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
-        collection_id=collection_id, self_and_ancestors=[], headers=headers
-    )
-    self_and_ancestors_collections = get_clowder_v1_collections(
-        self_and_ancestors, headers=clowder_headers_v1
-    )
-    children = []
-    remaining_collections = []
-    for col in self_and_ancestors_collections:
-        parent_collection_ids = col["parent_collection_ids"]
-        parent_collection_ids = parent_collection_ids.lstrip("List(")
-        parent_collection_ids = parent_collection_ids.rstrip(")")
-        parent_collection_ids = parent_collection_ids.lstrip(" ")
-        parent_collection_ids = parent_collection_ids.rstrip(" ")
-        if parent_collection_ids == "":
-            root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
-            children.append(root_col_entry)
-        else:
-            remaining_collections.append(col)
-
-    while len(remaining_collections) > 0:
-        children, remaining_collections = add_children(
-            children, remaining_collections
-        )
-    print("Now we are done")
-    return children
-
-def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
-    dataset_collections = get_clowder_v1_dataset_collections(headers=headers, user_v1=user_v1, dataset_id=dataset_id)
-
-    collection_data = []
-    for collection in dataset_collections:
-        collection_children = build_collection_hierarchy(collection_id=collection['id'], headers=headers)
-        for child in collection_children:
-            collection_data.append(child)
-    return collection_data
-
-
 if __name__ == "__main__":
-    # users_v1 = get_clowder_v1_users()
-    endpoint = 'https://clowder.ncsa.illinois.edu/clowder/api/me'
-    response = requests.get(endpoint, headers=base_headers_v1)
-    user_v1 = response.json()
-    TEST_COL_ID = "66d0a6c0e4b09db0f11b24e4"
-    ROOT_COL_ID = "66d0a6aae4b09db0f11b24dd"
-    TEST_DATASET_ID = '66d0a604e4b09db0f11b2494'
-    # ds_cols = get_clowder_v1_dataset_collections(headers=base_headers_v1, user_v1=user_v1, dataset_id=TEST_DATASET_ID)
+    ##############################################################################################################
+    # migrate metadata definition
+    v1_md_definitions = get_clowder_v1_metadata_definitions(CLOWDER_V1, base_headers_v1)
+    posted_ids = []
+    for v1_md in v1_md_definitions:
+        definition_id = post_metadata_definition(v1_md, CLOWDER_V2, clowder_headers_v2)
+        if definition_id:
+            posted_ids.append(definition_id)
 
-    result = build_collection_metadata_for_v1_dataset(dataset_id=TEST_DATASET_ID, user_v1=user_v1, headers=clowder_headers_v1)
-    # parents = get_clowder_v1_parent_collection_ids(current_collection_id=TEST_COL_ID, headers=clowder_headers_v1)
-    self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
-        collection_id=TEST_COL_ID, self_and_ancestors=[], headers=clowder_headers_v1
-    )
-    self_and_ancestors_collections = get_clowder_v1_collections(
-        self_and_ancestors, headers=clowder_headers_v1
-    )
-    root_collections = []
-    remaining_collections = []
-    for col in self_and_ancestors_collections:
-        parent_collection_ids = col["parent_collection_ids"]
-        parent_collection_ids = parent_collection_ids.lstrip("List(")
-        parent_collection_ids = parent_collection_ids.rstrip(")")
-        parent_collection_ids = parent_collection_ids.lstrip(" ")
-        parent_collection_ids = parent_collection_ids.rstrip(" ")
-        if parent_collection_ids == "":
-            root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
-            root_collections.append(root_col_entry)
-        else:
-            remaining_collections.append(col)
+    ##############################################################################################################
+    # Register the migration extractor in Clowder v2
+    register_migration_extractor()
 
-        print("the parent col")
-    print("got root collections")
-    children, remaining_collections = add_children(
-        root_collections, remaining_collections
-    )
+    ##############################################################################################################
+    # migrate users and resources
     USER_MAP = {}
     DATASET_MAP = {}
-    users_v1 = [
-        {
-            "@context": {
-                "firstName": "http://schema.org/Person/givenName",
-                "lastName": "http://schema.org/Person/familyName",
-                "email": "http://schema.org/Person/email",
-                "affiliation": "http://schema.org/Person/affiliation",
-            },
-            "id": "576313ce1407b25fe19fc381",
-            "firstName": "Chen",
-            "lastName": "Wang",
-            "fullName": "Chen Wang",
-            "email": "cwang138-clowder2@illinois.edu",
-            "avatar": "http://www.gravatar.com/avatar/2f97a52f2214949c4172d7fb796f173e?d=404",
-            "profile": {},
-            "identityProvider": "Chen Wang (cwang138@illinois.edu) [Local Account]",
-        }
-    ]
     users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         if (
@@ -595,21 +612,23 @@ if __name__ == "__main__":
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
 
-    print("Now migrating spaces.")
-    for user_v1 in users_v1:
-        print(f"Migrating spaces of user {user_v1['email']}")
-        user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
-        user_v2_api_key = USER_MAP[user_v1["id"]]
-        for space in user_v1_spaces:
-            group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
-            add_v1_space_members_to_v2_group(
-                space, group_id, headers={"X-API-key": user_v2_api_key}
-            )
-            space_datasets = get_clowder_v2_space_datasets(space["id"])
-            for space_dataset in space_datasets:
-                dataset_v2_id = DATASET_MAP[space_dataset["id"]]
-                share_dataset_with_group(
-                    group_id, space, headers={"X-API-key": user_v2_api_key}
-                )
-        print(f"Migrated spaces of user {user_v1['email']}")
+    ##############################################################################################################
+    # migrate spaces
+    # print("Now migrating spaces.")
+    # for user_v1 in users_v1:
+    #     print(f"Migrating spaces of user {user_v1['email']}")
+    #     user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
+    #     user_v2_api_key = USER_MAP[user_v1["id"]]
+    #     for space in user_v1_spaces:
+    #         group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
+    #         add_v1_space_members_to_v2_group(
+    #             space, group_id, headers={"X-API-key": user_v2_api_key}
+    #         )
+    #         space_datasets = get_clowder_v2_space_datasets(space["id"])
+    #         for space_dataset in space_datasets:
+    #             dataset_v2_id = DATASET_MAP[space_dataset["id"]]
+    #             share_dataset_with_group(
+    #                 group_id, space, headers={"X-API-key": user_v2_api_key}
+    #             )
+    #     print(f"Migrated spaces of user {user_v1['email']}")
     print("Migration complete.")
