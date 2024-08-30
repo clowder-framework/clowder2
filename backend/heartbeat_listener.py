@@ -62,6 +62,7 @@ async def callback(message: AbstractIncomingMessage):
         if existing_extractor is not None:
             extractor_db.id = existing_extractor.id
             extractor_db.created = existing_extractor.created
+            extractor_db.active = existing_extractor.active
 
             # Update existing listener version
             existing_version = existing_extractor.version

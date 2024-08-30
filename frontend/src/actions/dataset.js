@@ -142,6 +142,7 @@ export function submitDatasetExtractionAction(
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
 			datasetId,
 			extractorName,
+			null,
 			requestBody
 		)
 			.then((json) => {

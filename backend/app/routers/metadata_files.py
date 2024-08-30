@@ -149,7 +149,7 @@ async def add_file_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_file(es, FileOut(**file.dict()))
+        await index_file(es, FileOut(**file.dict()), update=True)
         return md.dict()
 
 

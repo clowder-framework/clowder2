@@ -6,7 +6,6 @@ import Drawer from "@mui/material/Drawer";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -23,6 +22,7 @@ import { RootState } from "../types/data";
 import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -40,6 +40,8 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
+
+import config from "../app.config";
 
 const drawerWidth = 240;
 
@@ -273,7 +275,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
-					<Divider orientation="horizontal" />
 					{currUserProfile.admin ? (
 						<>
 							<MenuItem onClick={() => toggleAdminMode(!adminMode)}>
@@ -293,8 +294,6 @@ export default function PersistentDrawerLeft(props) {
 									</>
 								)}
 							</MenuItem>
-
-							<Divider orientation="horizontal" />
 						</>
 					) : (
 						<></>
@@ -306,7 +305,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>API Key</ListItemText>
 					</MenuItem>
-					<Divider orientation="horizontal" />
 					<MenuItem component={RouterLink} to="/auth/logout">
 						<ListItemIcon>
 							<LogoutIcon fontSize="small" />
@@ -338,7 +336,6 @@ export default function PersistentDrawerLeft(props) {
 						)}
 					</IconButton>
 				</DrawerHeader>
-				<Divider />
 				<List>
 					<ListItem key={"explore"} disablePadding>
 						<ListItemButton component={RouterLink} to="/">
@@ -349,7 +346,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					<ListItem key={"search"} disablePadding>
 						<ListItemButton component={RouterLink} to="/search">
@@ -360,26 +356,21 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				{currUserProfile.admin ? (
-					<>
-						<List>
-							<ListItem key={"manage-user"} disablePadding>
-								<ListItemButton component={RouterLink} to="/manage-users">
-									<ListItemIcon>
-										<ManageAccountsIcon />
-									</ListItemIcon>
-									<ListItemText primary={"Manage Users"} />
-								</ListItemButton>
-							</ListItem>
-						</List>
-						<Divider />
-					</>
+					<List>
+						<ListItem key={"manage-user"} disablePadding>
+							<ListItemButton component={RouterLink} to="/manage-users">
+								<ListItemIcon>
+									<ManageAccountsIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Manage Users"} />
+							</ListItemButton>
+						</ListItem>
+					</List>
 				) : null}
-				<List>
-					{currUserProfile.read_only_user ? (
-						<></>
-					) : (
+
+				{currUserProfile.read_only_user ? null : (
+					<List>
 						<ListItem key={"groups"} disablePadding>
 							<ListItemButton component={RouterLink} to="/groups">
 								<ListItemIcon>
@@ -388,13 +379,12 @@ export default function PersistentDrawerLeft(props) {
 								<ListItemText primary={"Groups"} />
 							</ListItemButton>
 						</ListItem>
-					)}
-				</List>
-				<Divider />
-				<List>
-					{currUserProfile.read_only_user ? (
-						<></>
-					) : (
+					</List>
+				)}
+				{currUserProfile.read_only_user ? (
+					<></>
+				) : (
+					<List>
 						<ListItem key={"newdataset"} disablePadding>
 							<ListItemButton component={RouterLink} to="/create-dataset">
 								<ListItemIcon>
@@ -403,9 +393,8 @@ export default function PersistentDrawerLeft(props) {
 								<ListItemText primary={"New Dataset"} />
 							</ListItemButton>
 						</ListItem>
-					)}
-				</List>
-				<Divider />
+					</List>
+				)}
 				<List>
 					<ListItem key={"metadataDefinition"} disablePadding>
 						<ListItemButton component={RouterLink} to="/metadata-definitions">
@@ -416,7 +405,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					<ListItem key={"extractions"} disablePadding>
 						<ListItemButton component={RouterLink} to="/extractions">
@@ -427,7 +415,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					<ListItem key={"listeners"} disablePadding>
 						<ListItemButton component={RouterLink} to="/listeners">
@@ -438,7 +425,22 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
+				{/*TODO: Need to make link dynamic */}
+				<List>
+					<ListItem key={"jupyter"} disablePadding>
+						<ListItemButton
+							component={RouterLink}
+							to={config.jupyterHubURL}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<ListItemIcon>
+								<MenuBookIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Jupyter Notebook"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
 				<List>
 					<ListItem key={"feeds"} disablePadding>
 						<ListItemButton component={RouterLink} to="/feeds">
