@@ -646,11 +646,12 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             "version": "1",
             "description": "Migration of metadata from Clowder v1 to Clowder v2",
             },
+            "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
             "content": collection_metadata_dict,
             "contents": collection_metadata_dict,
         }
         v2_metadata_endpoint = (
-            f"{CLOWDER_V2}/api/v2/metadata/{dataset_v2_id}/metadata"
+            f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
         )
         response = requests.post(
             v2_metadata_endpoint, json=migration_extractor_collection_metadata, headers=clowder_headers_v2
