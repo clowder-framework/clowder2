@@ -337,7 +337,7 @@ def add_dataset_license(v1_license, headers):
 def create_v2_dataset(dataset, headers):
     """Create a dataset in Clowder v2."""
     # TODO: GET correct license
-    print(f"Creating dataset license in Clowder v2.")
+    print("Creating dataset license in Clowder v2.")
     v2_license_id = add_dataset_license(dataset["license"], headers)
 
     dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
@@ -660,7 +660,34 @@ def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
     dataset_collections = get_clowder_v1_dataset_collections(
         headers=headers, user_v1=user_v1, dataset_id=dataset_id
     )
+    return dataset_collections
 
+
+def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
+    dataset_id = dataset["id"]
+    dataset_collections = get_clowder_v1_dataset_collections(
+        headers=headers, user_v1=user_v1, dataset_id=dataset_id
+    )
+    dataset_spaces = dataset["spaces"]
+    space_entries = []
+    for space_id in dataset_spaces:
+        space_endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}"
+        response = requests.get(space_endpoint, headers=headers)
+        space = response.json()
+        try:
+            space_entry = {
+                "id": space["id"],
+                "name": space["name"],
+                "creator": space["creator"],
+            }
+            space_entries.append(space_entry)
+        except Exception as e:
+            print(e)
+        try:
+            space_entry = {"id": space["id"], "name": space["name"]}
+            space_entries.append(space_entry)
+        except Exception as e:
+            print(e)
     collection_data = []
     for collection in dataset_collections:
         collection_children = build_collection_hierarchy(
@@ -668,7 +695,8 @@ def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
         )
         for child in collection_children:
             collection_data.append(child)
-    return collection_data
+    metadata = {"spaces": space_entries, "collections": collection_data}
+    return metadata
 
 
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
@@ -710,8 +738,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
         # posting the collection hierarchy as metadata
         # TODO need to actually post this
-        collection_metadata_dict = build_collection_metadata_for_v1_dataset(
-            dataset_id=dataset["id"], user_v1=user_v1, headers=clowder_headers_v1
+        collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
+            dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
         )
         migration_extractor_collection_metadata = {
             "listener": {
@@ -720,8 +748,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 "description": "Migration of metadata from Clowder v1 to Clowder v2",
             },
             "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
-            "content": collection_metadata_dict,
-            "contents": collection_metadata_dict,
+            "content": collection_space_metadata_dict,
+            "contents": collection_space_metadata_dict,
         }
         v2_metadata_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
         response = requests.post(
@@ -735,6 +763,9 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             print(
                 f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
             )
+
+            if file_v2_id is not None:
+                add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
 
     return [USER_MAP, DATASET_MAP]
 
