@@ -273,10 +273,74 @@ def create_admin_user():
     return generate_user_api_key(admin_user, admin_user["password"])
 
 
+def add_dataset_license(v1_license, headers):
+    """Create appropriate license (standard/custom) based on v1 license details"""
+    license_id = "CC-BY"
+    # standard licenses
+    if v1_license["license_type"] == "license2":
+        if (
+            not v1_license["ccAllowCommercial"]
+            and not v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-NC-ND"
+        elif (
+            v1_license["ccAllowCommercial"]
+            and not v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-ND"
+        elif (
+            not v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-NC"
+        elif (
+            not v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-NC-SA"
+        elif (
+            v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-SA"
+        elif (
+            v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY"
+    elif v1_license["license_type"] == "license3":
+        license_id = "CCO Public Domain Dedication"
+    else:
+        # custom license
+        license_body = {
+            "name": v1_license["license_text"],
+            "url": v1_license["license_url"],
+            "holders": v1_license["holders"],
+        }
+        if license_body["url"] == "":
+            license_body["url"] = "https://dbpedia.org/page/All_rights_reserved"
+        license_v2_endpoint = f"{CLOWDER_V2}/api/v2/licenses?"
+        response = requests.post(
+            license_v2_endpoint, headers=headers, json=license_body
+        )
+        print(response.json())
+        license_id = response.json()["id"]
+    return license_id
+
+
 def create_v2_dataset(dataset, headers):
     """Create a dataset in Clowder v2."""
     # TODO: GET correct license
-    dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id=CC BY"
+    print("Creating dataset license in Clowder v2.")
+    v2_license_id = add_dataset_license(dataset["license"], headers)
+
+    dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
     dataset_example = {
         "name": dataset["name"],
         "description": dataset["description"],
@@ -592,6 +656,13 @@ def build_collection_hierarchy(collection_id, headers):
     return children
 
 
+def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
+    dataset_collections = get_clowder_v1_dataset_collections(
+        headers=headers, user_v1=user_v1, dataset_id=dataset_id
+    )
+    return dataset_collections
+
+
 def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     dataset_id = dataset["id"]
     dataset_collections = get_clowder_v1_dataset_collections(
@@ -660,6 +731,9 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         files_result = files_response.json()
 
         for file in files_result:
+            file_v2_id = download_and_upload_file(
+                file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
+            )
             if file_v2_id is not None:
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
         # posting the collection hierarchy as metadata
@@ -689,6 +763,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             print(
                 f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
             )
+
             if file_v2_id is not None:
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
 
