@@ -592,7 +592,7 @@ def build_collection_hierarchy(collection_id, headers):
     return children
 
 
-def build_collection_metadata_for_v1_dataset(dataset, user_v1, headers):
+def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     dataset_id = dataset["id"]
     dataset_collections = get_clowder_v1_dataset_collections(
         headers=headers, user_v1=user_v1, dataset_id=dataset_id
@@ -667,7 +667,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
         # posting the collection hierarchy as metadata
         # TODO need to actually post this
-        collection_metadata_dict = build_collection_metadata_for_v1_dataset(
+        collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
             dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
         )
         migration_extractor_collection_metadata = {
@@ -677,8 +677,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 "description": "Migration of metadata from Clowder v1 to Clowder v2",
             },
             "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
-            "content": collection_metadata_dict,
-            "contents": collection_metadata_dict,
+            "content": collection_space_metadata_dict,
+            "contents": collection_space_metadata_dict,
         }
         v2_metadata_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
         response = requests.post(
