@@ -660,9 +660,6 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         files_result = files_response.json()
 
         for file in files_result:
-            file_v2_id = download_and_upload_file(
-                file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
-            )
             if file_v2_id is not None:
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
         # posting the collection hierarchy as metadata
@@ -692,6 +689,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             print(
                 f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
             )
+            if file_v2_id is not None:
+                add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
 
     return [USER_MAP, DATASET_MAP]
 
