@@ -590,15 +590,32 @@ def build_collection_hierarchy(collection_id, headers):
     print("Now we are done")
     return children
 
-def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
+def build_collection_metadata_for_v1_dataset(dataset, user_v1, headers):
+    dataset_id = dataset['id']
     dataset_collections = get_clowder_v1_dataset_collections(headers=headers, user_v1=user_v1, dataset_id=dataset_id)
-
+    dataset_spaces = dataset['spaces']
+    space_entries = []
+    for space_id in dataset_spaces:
+        space_endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}"
+        response = requests.get(space_endpoint, headers=headers)
+        space = response.json()
+        try:
+            space_entry = {'id': space['id'], 'name': space['name'], 'creator': space['creator']}
+            space_entries.append(space_entry)
+        except Exception as e:
+            print(e)
+        try:
+            space_entry = {'id': space['id'], 'name': space['name']}
+            space_entries.append(space_entry)
+        except Exception as e:
+            print(e)
     collection_data = []
     for collection in dataset_collections:
         collection_children = build_collection_hierarchy(collection_id=collection['id'], headers=headers)
         for child in collection_children:
             collection_data.append(child)
-    return collection_data
+    metadata = {'spaces': space_entries, 'collections': collection_data}
+    return metadata
 
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
@@ -639,7 +656,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
         # posting the collection hierarchy as metadata
         # TODO need to actually post this
-        collection_metadata_dict = build_collection_metadata_for_v1_dataset(dataset_id=dataset['id'],user_v1=user_v1, headers=clowder_headers_v1)
+        collection_metadata_dict = build_collection_metadata_for_v1_dataset(dataset=dataset,user_v1=user_v1, headers=clowder_headers_v1)
         migration_extractor_collection_metadata = {
             "listener" : {
             "name": "migration",
@@ -668,6 +685,31 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
 
 if __name__ == "__main__":
+    TEST_DATASET_ID = '66d0a6e1e4b09db0f11b24ef'
+    dataset_endpoint = (
+        f"{CLOWDER_V1}/api/datasets/{TEST_DATASET_ID}"
+    )
+    response = requests.get(dataset_endpoint, headers=clowder_headers_v1)
+    dataset = response.json()
+    user_v1 = {
+  "@context": {
+    "firstName": "http://schema.org/Person/givenName",
+    "lastName": "http://schema.org/Person/familyName",
+    "email": "http://schema.org/Person/email",
+    "affiliation": "http://schema.org/Person/affiliation"
+  },
+  "id": "5aeb6ca81736f5ec9a743459",
+  "firstName": "Todd",
+  "lastName": "Nicholson",
+  "fullName": "Todd Nicholson",
+  "email": "tcnichol@illinois.edu",
+  "avatar": "https://www.gravatar.com/avatar/51bc1fa489ae8268632daaecfc371c05?s=256&d=mm",
+  "profile": {
+
+  },
+  "identityProvider": "Todd Nicholson (tcnichol@illinois.edu) [Local Account]"
+}
+    md = build_collection_metadata_for_v1_dataset(dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1)
     ##############################################################################################################
     # migrate metadata definition
     v1_md_definitions = get_clowder_v1_metadata_definitions(CLOWDER_V1, base_headers_v1)
