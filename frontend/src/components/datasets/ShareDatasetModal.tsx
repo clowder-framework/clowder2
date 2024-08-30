@@ -85,34 +85,11 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	}, [users, myProfile.email]);
 
 	const onShare = async () => {
-		setShowFailAlert(false);
-		setShowSuccessAlert(false);
 		await setUserRole(datasetId, email, role);
+		// setGroup({ label: "", id: "" });
+		setRole("viewer");
+		setShowSuccessAlert(true);
 		getRoles(datasetId);
-		const currentRoles = datasetRoles;
-		// TODO check for roles
-		let found_user = false;
-		if (currentRoles !== undefined && currentRoles.user_roles !== undefined) {
-			currentRoles.user_roles.map((currentRole) => {
-				if (currentRole.user.email === email) {
-					if (currentRole.role.toString() === role.toString()) {
-						found_user = true;
-					}
-				}
-			});
-		}
-		if (found_user) {
-			setEmail("");
-			setRole("viewer");
-			setShowFailAlert(false);
-			setShowSuccessAlert(true);
-			getRoles(datasetId);
-		} else {
-			setEmail("");
-			setRole("viewer");
-			setShowFailAlert(true);
-			getRoles(datasetId);
-		}
 	};
 
 	return (
