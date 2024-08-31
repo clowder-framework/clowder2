@@ -32,7 +32,7 @@ async def callback(message: AbstractIncomingMessage):
 
         extractor_info = msg["extractor_info"]
         owner = msg["owner"]
-        if owner is not None:
+        if owner is not None and owner != "":
             # Extractor name should match queue, which includes secret key with common extractor_info["name"]
             orig_properties = ExtractorInfo(**extractor_info)
             extractor_name = msg["queue"]
@@ -51,7 +51,7 @@ async def callback(message: AbstractIncomingMessage):
         else:
             extractor_name = extractor_info["name"]
             extractor_db = EventListenerDB(
-                **extractor_info, properties=ExtractorInfo(**extractor_info)
+                **extractor_info, properties=ExtractorInfo(**extractor_info), access=None,
             )
             logger.info(f"Received heartbeat from {extractor_name}")
             existing_extractor = await EventListenerDB.find_one(
