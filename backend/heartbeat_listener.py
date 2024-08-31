@@ -32,7 +32,7 @@ async def callback(message: AbstractIncomingMessage):
 
         extractor_info = msg["extractor_info"]
         owner = msg["owner"]
-        if owner is not None:
+        if owner is not None and owner != "":
             # Extractor name should match queue, which includes secret key with common extractor_info["name"]
             orig_properties = ExtractorInfo(**extractor_info)
             extractor_name = msg["queue"]
