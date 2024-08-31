@@ -1,7 +1,6 @@
+from app.models.folders import FolderDBViewList
 from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException
-
-from app.models.folders import FolderDBViewList
 
 router = APIRouter()
 

@@ -1,9 +1,9 @@
 from app.config import settings
 from app.tests.utils import (
-    create_user,
     create_dataset,
-    upload_file,
+    create_user,
     register_v1_extractor,
+    upload_file,
 )
 from fastapi.testclient import TestClient
 

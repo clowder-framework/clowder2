@@ -1,12 +1,12 @@
 import json
 import logging
-import pika
-from beanie import PydanticObjectId
 
+import pika
 from app.config import settings
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.models.search import SearchCriteria
 from app.routers.feeds import FeedDB, FeedListener
+from beanie import PydanticObjectId
 from packaging import version
 from pymongo import MongoClient
 

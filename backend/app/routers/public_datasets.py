@@ -6,16 +6,6 @@ import shutil
 import tempfile
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import And, Or
-from bson import json_util
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, Form, HTTPException
-from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPBearer
-from minio import Minio
-from rocrate.rocrate import ROCrate
-
 from app import dependencies
 from app.config import settings
 from app.db.dataset.download import _increment_data_downloads
@@ -33,6 +23,15 @@ from app.models.folders import FolderDB, FolderDBViewList, FolderOut
 from app.models.metadata import MetadataDBViewList, MetadataDefinitionDB, MetadataOut
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.search.index import index_dataset, index_folder
+from beanie import PydanticObjectId
+from beanie.operators import And, Or
+from bson import json_util
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPBearer
+from minio import Minio
+from rocrate.rocrate import ROCrate
 
 router = APIRouter()
 security = HTTPBearer()

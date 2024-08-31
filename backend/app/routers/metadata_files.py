@@ -1,11 +1,5 @@
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or
-from bson import ObjectId
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, Form, HTTPException
-
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
@@ -28,6 +22,11 @@ from app.models.metadata import (
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
 
 router = APIRouter()
 

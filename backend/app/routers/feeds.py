@@ -1,10 +1,5 @@
 from typing import Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from fastapi import APIRouter, Depends, HTTPException
-from pika.adapters.blocking_connection import BlockingChannel
-
 from app.deps.authorization_deps import FeedAuthorization, ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
@@ -16,6 +11,10 @@ from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
 from app.routers.authentication import get_admin, get_admin_mode
 from app.search.connect import check_search_result
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
+from pika.adapters.blocking_connection import BlockingChannel
 
 router = APIRouter()
 

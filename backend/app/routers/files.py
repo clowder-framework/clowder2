@@ -23,7 +23,7 @@ from app.models.users import UserOut
 from app.rabbitmq.listeners import EventListenerJobDB, submit_file_job
 from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
-from app.search.connect import insert_record, update_record, delete_document_by_id
+from app.search.connect import delete_document_by_id, insert_record, update_record
 from app.search.index import index_file, index_thumbnail
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.logical import Or

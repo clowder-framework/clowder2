@@ -7,12 +7,11 @@ from datetime import datetime
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
-from packaging import version
-
 from app.config import settings
 from app.main import startup_beanie
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
+from packaging import version
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -51,7 +50,9 @@ async def callback(message: AbstractIncomingMessage):
         else:
             extractor_name = extractor_info["name"]
             extractor_db = EventListenerDB(
-                **extractor_info, properties=ExtractorInfo(**extractor_info), access=None,
+                **extractor_info,
+                properties=ExtractorInfo(**extractor_info),
+                access=None,
             )
             logger.info(f"Received heartbeat from {extractor_name}")
             existing_extractor = await EventListenerDB.find_one(
