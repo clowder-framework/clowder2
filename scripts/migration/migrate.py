@@ -130,8 +130,6 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     user_collections = response.json()
     for collection in user_collections:
         collection_id = collection["id"]
-        if collection["name"] == "subchild":
-            print("HERE")
         collection_dataset_endpoint = (
             f"{CLOWDER_V1}/api/collections/{collection_id}/datasets"
         )
@@ -169,14 +167,11 @@ def get_clowder_v1_collection_self_and_ancestors(
     endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
     response = requests.get(endpoint, headers=headers)
     self = response.json()
-    if "id" not in self:
-        print("HERE")
     if self["id"] not in self_and_ancestors:
         self_and_ancestors.append(self["id"])
     parents_entry = self["parent_collection_ids"]
     parents_entry = parents_entry.lstrip("List(")
     parents_entry = parents_entry.rstrip(")")
-    print(parents_entry)
     if parents_entry != "":
         parents = parents_entry.split(",")
         for parent in parents:
@@ -208,9 +203,6 @@ def get_clowder_v1_parent_collection_ids(current_collection_id, headers):
     response = requests.get(all_collections_v1_endpoint, headers=headers)
     all_collections = response.json()
     for collection in all_collections:
-        collection_name = collection["name"]
-        if collection_name == "ROOT C" or collection_name == "ROOT D":
-            print("C OR D")
         children_entry = collection["child_collection_ids"]
         children_entry = children_entry.lstrip("List(")
         children_entry = children_entry.rstrip(")")
