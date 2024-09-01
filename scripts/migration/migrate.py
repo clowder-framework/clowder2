@@ -674,11 +674,13 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
             }
             space_entries.append(space_entry)
         except Exception as e:
+            print(f"Error in getting space entry.")
             print(e)
         try:
             space_entry = {"id": space["id"], "name": space["name"]}
             space_entries.append(space_entry)
         except Exception as e:
+            print(f"Error in getting space entry")
             print(e)
     collection_data = []
     for collection in dataset_collections:
@@ -688,6 +690,7 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
         for child in collection_children:
             collection_data.append(child)
     metadata = {"spaces": space_entries, "collections": collection_data}
+    print(f"Got space and collection metadata from dataset {dataset_id}")
     return metadata
 
 
@@ -729,7 +732,6 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             if file_v2_id is not None:
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
         # posting the collection hierarchy as metadata
-        # TODO need to actually post this
         collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
             dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
         )
