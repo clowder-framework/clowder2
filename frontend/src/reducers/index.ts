@@ -12,10 +12,12 @@ import group from "./group";
 import visualization from "./visualization";
 import publicVisualization from "./public_visualization";
 import feeds from "./feeds";
+import project from "./project";
 
 const rootReducer = combineReducers({
 	file: file,
 	dataset: dataset,
+	project: project,
 	publicDataset: publicDataset,
 	publicFile: publicFile,
 	folder: folder,

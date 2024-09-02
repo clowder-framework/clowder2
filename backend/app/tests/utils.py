@@ -61,6 +61,8 @@ feed_example = {
     },
 }
 
+project_example = {"name": "test_project", "description": "This project is a test"}
+
 extractor_info_v1_example = {
     "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
     "name": "test.extractor_info_v1_example",
@@ -170,6 +172,18 @@ def create_dataset_with_custom_license(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/?license_id={license_id}",
         headers=headers,
         json=dataset_example,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    return response.json()
+
+
+def create_project(client: TestClient, headers: dict):
+    """Creates a test dataset and returns the JSON."""
+    response = client.post(
+        f"{settings.API_V2_STR}/projects",
+        headers=headers,
+        json=project_example,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

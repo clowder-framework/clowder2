@@ -2,10 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Member } from './Member';
+import type { app__models__groups__Member } from './app__models__groups__Member';
 
 export type GroupBase = {
     name: string;
     description?: string;
-    users?: Array<Member>;
+    users?: Array<app__models__groups__Member>;
 }

@@ -25,6 +25,7 @@ interface Config {
 	rawDataVisualizationThreshold: number;
 	defaultFolderFilePerPage: number;
 	defaultDatasetPerPage: number;
+	defaultProjectPerPage: number;
 	defaultGroupPerPage: number;
 	defaultUserPerPage: number;
 	defaultApikeyPerPage: number;
@@ -91,6 +92,7 @@ config["streamingBytes"] = 1024 * 10; // 10 MB?
 config["rawDataVisualizationThreshold"] = 1024 * 1024 * 10; // 10 MB
 
 config["defaultDatasetPerPage"] = 12;
+config["defaultProjectPerPage"] = 12;
 config["defaultFolderFilePerPage"] = 5;
 config["defaultGroupPerPage"] = 5;
 config["defaultUserPerPage"] = 5;
