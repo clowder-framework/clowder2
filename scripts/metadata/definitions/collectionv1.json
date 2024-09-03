@@ -1,0 +1,54 @@
+{
+    "name" : "Collection",
+    "description" : "Collection information from v1",
+    "required_for_items": {
+        "datasets": false,
+        "files": false
+    },
+    "context" : [
+        {
+            "collection_name" : "https://schema.org/colname",
+            "collection_id" : "https://schema.org/colid",
+            "parent_collection_name": "https://schema.org/parentcolname",
+            "parent_collection_id": "https://schema.org/parentcolid"
+        }
+    ],
+    "fields" : [
+        {
+            "name" : "collection_name",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "collection_id",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "parent_collection_name",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "parent_collection_id",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        }
+    ]
+}

@@ -117,6 +117,102 @@ def add_v1_space_members_to_v2_group(space, group_id, headers):
         )
 
 
+def get_clowder_v1_user_collections(headers, user_v1):
+    endpoint = f"{CLOWDER_V1}/api/collections"
+    response = requests.get(endpoint, headers=headers)
+    return [col for col in response.json() if col["authorId"] == user_v1["id"]]
+
+
+def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
+    matching_collections = []
+    endpoint = f"{CLOWDER_V1}/api/collections/allCollections"
+    response = requests.get(endpoint, headers=headers)
+    user_collections = response.json()
+    for collection in user_collections:
+        collection_id = collection["id"]
+        collection_dataset_endpoint = (
+            f"{CLOWDER_V1}/api/collections/{collection_id}/datasets"
+        )
+        try:
+            dataset_response = requests.get(
+                collection_dataset_endpoint, headers=headers
+            )
+            datasets = dataset_response.json()
+            for ds in datasets:
+                if ds["id"] == dataset_id:
+                    matching_collections.append(collection)
+        except Exception as e:
+            print("Exception", e)
+    return matching_collections
+
+
+def get_clowder_v1_collection(collection_id, headers):
+    endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
+    response = requests.get(endpoint, headers=headers)
+    return response.json()
+
+
+def get_clowder_v1_collections(collection_ids, headers):
+    collections = []
+    for collection_id in collection_ids:
+        endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
+        response = requests.get(endpoint, headers=headers)
+        collections.append(response.json())
+    return collections
+
+
+def get_clowder_v1_collection_self_and_ancestors(
+    collection_id, self_and_ancestors, headers
+):
+    endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
+    response = requests.get(endpoint, headers=headers)
+    self = response.json()
+    if self["id"] not in self_and_ancestors:
+        self_and_ancestors.append(self["id"])
+    parents_entry = self["parent_collection_ids"]
+    parents_entry = parents_entry.lstrip("List(")
+    parents_entry = parents_entry.rstrip(")")
+    if parents_entry != "":
+        parents = parents_entry.split(",")
+        for parent in parents:
+            # replace empty space
+            parent = parent.lstrip(" ")
+            parent = parent.rstrip(" ")
+            if parent not in self_and_ancestors:
+                self_and_ancestors.append(parent)
+        for parent in parents:
+            parent = parent.lstrip(" ")
+            parent = parent.rstrip(" ")
+            if parent != "" and parent is not None:
+                current_self_and_ancestors = (
+                    get_clowder_v1_collection_self_and_ancestors(
+                        parent, self_and_ancestors, headers=headers
+                    )
+                )
+                for col_id in current_self_and_ancestors:
+                    if col_id not in self_and_ancestors:
+                        self_and_ancestors.append(col_id)
+    return self_and_ancestors
+
+
+def get_clowder_v1_parent_collection_ids(current_collection_id, headers):
+    parents = []
+    all_collections_v1_endpoint = (
+        f"{CLOWDER_V1}/api/collections/allCollections?limit=0&showAll=true"
+    )
+    response = requests.get(all_collections_v1_endpoint, headers=headers)
+    all_collections = response.json()
+    for collection in all_collections:
+        children_entry = collection["child_collection_ids"]
+        children_entry = children_entry.lstrip("List(")
+        children_entry = children_entry.rstrip(")")
+        child_ids = children_entry.split(",")
+        for child in child_ids:
+            if child == current_collection_id:
+                parents.append(collection["id"])
+    return parents
+
+
 def create_local_user(user_v1):
     """Create a local user in Clowder v2 if they don't already exist, and generate an API key."""
     # Search for the user by email
@@ -169,10 +265,74 @@ def create_admin_user():
     return generate_user_api_key(admin_user, admin_user["password"])
 
 
+def add_dataset_license(v1_license, headers):
+    """Create appropriate license (standard/custom) based on v1 license details"""
+    license_id = "CC-BY"
+    # standard licenses
+    if v1_license["license_type"] == "license2":
+        if (
+            not v1_license["ccAllowCommercial"]
+            and not v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-NC-ND"
+        elif (
+            v1_license["ccAllowCommercial"]
+            and not v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-ND"
+        elif (
+            not v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-NC"
+        elif (
+            not v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-NC-SA"
+        elif (
+            v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY-SA"
+        elif (
+            v1_license["ccAllowCommercial"]
+            and v1_license["ccAllowDerivative"]
+            and not v1_license["ccRequireShareAlike"]
+        ):
+            license_id = "CC BY"
+    elif v1_license["license_type"] == "license3":
+        license_id = "CCO Public Domain Dedication"
+    else:
+        # custom license
+        license_body = {
+            "name": v1_license["license_text"],
+            "url": v1_license["license_url"],
+            "holders": v1_license["holders"],
+        }
+        if license_body["url"] == "":
+            license_body["url"] = "https://dbpedia.org/page/All_rights_reserved"
+        license_v2_endpoint = f"{CLOWDER_V2}/api/v2/licenses?"
+        response = requests.post(
+            license_v2_endpoint, headers=headers, json=license_body
+        )
+        print(response.json())
+        license_id = response.json()["id"]
+    return license_id
+
+
 def create_v2_dataset(dataset, headers):
     """Create a dataset in Clowder v2."""
     # TODO: GET correct license
-    dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id=CC BY"
+    print("Creating dataset license in Clowder v2.")
+    v2_license_id = add_dataset_license(dataset["license"], headers)
+
+    dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
     dataset_example = {
         "name": dataset["name"],
         "description": dataset["description"],
@@ -439,6 +599,101 @@ def register_migration_extractor():
         )
 
 
+def add_children(collection_hierarchy_json, remaining_collections):
+    new_json = []
+    new_remaining_collections = []
+    for collection in remaining_collections:
+        collection_parents = collection["parent_collection_ids"]
+        current_collection_parents = []
+        for entry in collection_hierarchy_json:
+            if entry["id"] in collection_parents:
+                current_collection_parents.append(entry)
+        print("We got the parents now")
+        if len(current_collection_parents) > 0:
+            current_collection_entry = {
+                "id": collection["id"],
+                "name": collection["name"],
+                "parents": current_collection_parents,
+            }
+            new_json.append(current_collection_entry)
+        else:
+            new_remaining_collections.append(collection)
+    return new_json, new_remaining_collections
+
+
+def build_collection_hierarchy(collection_id, headers):
+    self_and_ancestors = get_clowder_v1_collection_self_and_ancestors(
+        collection_id=collection_id, self_and_ancestors=[], headers=headers
+    )
+    self_and_ancestors_collections = get_clowder_v1_collections(
+        self_and_ancestors, headers=clowder_headers_v1
+    )
+    children = []
+    remaining_collections = []
+    for col in self_and_ancestors_collections:
+        parent_collection_ids = col["parent_collection_ids"]
+        parent_collection_ids = parent_collection_ids.lstrip("List(")
+        parent_collection_ids = parent_collection_ids.rstrip(")")
+        parent_collection_ids = parent_collection_ids.lstrip(" ")
+        parent_collection_ids = parent_collection_ids.rstrip(" ")
+        if parent_collection_ids == "":
+            root_col_entry = {"name": col["name"], "id": col["id"], "parents": []}
+            children.append(root_col_entry)
+        else:
+            remaining_collections.append(col)
+
+    while len(remaining_collections) > 0:
+        children, remaining_collections = add_children(children, remaining_collections)
+    print("Now we are done")
+    return children
+
+
+def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
+    dataset_collections = get_clowder_v1_dataset_collections(
+        headers=headers, user_v1=user_v1, dataset_id=dataset_id
+    )
+    return dataset_collections
+
+
+def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
+    dataset_id = dataset["id"]
+    dataset_collections = get_clowder_v1_dataset_collections(
+        headers=headers, user_v1=user_v1, dataset_id=dataset_id
+    )
+    dataset_spaces = dataset["spaces"]
+    space_entries = []
+    for space_id in dataset_spaces:
+        space_endpoint = f"{CLOWDER_V1}/api/spaces/{space_id}"
+        response = requests.get(space_endpoint, headers=headers)
+        space = response.json()
+        try:
+            space_entry = {
+                "id": space["id"],
+                "name": space["name"],
+                "creator": space["creator"],
+            }
+            space_entries.append(space_entry)
+        except Exception as e:
+            print(f"Error in getting space entry.")
+            print(e)
+        try:
+            space_entry = {"id": space["id"], "name": space["name"]}
+            space_entries.append(space_entry)
+        except Exception as e:
+            print(f"Error in getting space entry")
+            print(e)
+    collection_data = []
+    for collection in dataset_collections:
+        collection_children = build_collection_hierarchy(
+            collection_id=collection["id"], headers=headers
+        )
+        for child in collection_children:
+            collection_data.append(child)
+    metadata = {"spaces": space_entries, "collections": collection_data}
+    print(f"Got space and collection metadata from dataset {dataset_id}")
+    return metadata
+
+
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
@@ -474,6 +729,35 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             file_v2_id = download_and_upload_file(
                 file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
             )
+            if file_v2_id is not None:
+                add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
+        # posting the collection hierarchy as metadata
+        collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
+            dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+        )
+        migration_extractor_collection_metadata = {
+            "listener": {
+                "name": "migration",
+                "version": "1",
+                "description": "Migration of metadata from Clowder v1 to Clowder v2",
+            },
+            "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
+            "content": collection_space_metadata_dict,
+            "contents": collection_space_metadata_dict,
+        }
+        v2_metadata_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+        response = requests.post(
+            v2_metadata_endpoint,
+            json=migration_extractor_collection_metadata,
+            headers=clowder_headers_v2,
+        )
+        if response.status_code == 200:
+            print("Successfully added collection info as metadata in v2.")
+        else:
+            print(
+                f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
+            )
+
             if file_v2_id is not None:
                 add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
 
