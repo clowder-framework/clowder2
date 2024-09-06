@@ -65,6 +65,9 @@ export type { MetadataRequiredForItems } from './models/MetadataRequiredForItems
 export type { MongoDBRef } from './models/MongoDBRef';
 export type { Paged } from './models/Paged';
 export type { PageMetadata } from './models/PageMetadata';
+export type { ProjectIn } from './models/ProjectIn';
+export type { ProjectMember } from './models/ProjectMember';
+export type { ProjectOut } from './models/ProjectOut';
 export type { Repository } from './models/Repository';
 export { RoleType } from './models/RoleType';
 export type { SearchCriteria } from './models/SearchCriteria';
@@ -96,6 +99,7 @@ export { LicensesService } from './services/LicensesService';
 export { ListenersService } from './services/ListenersService';
 export { LoginService } from './services/LoginService';
 export { MetadataService } from './services/MetadataService';
+export { ProjectsService } from './services/ProjectsService';
 export { PublicDatasetsService } from './services/PublicDatasetsService';
 export { PublicElasticsearchService } from './services/PublicElasticsearchService';
 export { PublicFilesService } from './services/PublicFilesService';
