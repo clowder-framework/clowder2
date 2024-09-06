@@ -1,5 +1,5 @@
-import { V2 } from "./openapi";
-import { EventListenerJobStatus } from "./types/data";
+import {V2} from "./openapi";
+import {EventListenerJobStatus} from "./types/data";
 
 interface Config {
 	appVersion: string;
@@ -26,6 +26,7 @@ interface Config {
 	defaultFolderFilePerPage: number;
 	defaultDatasetPerPage: number;
 	defaultGroupPerPage: number;
+	defaultProjectPerPage: number;
 	defaultUserPerPage: number;
 	defaultApikeyPerPage: number;
 	defaultExtractors: number;
@@ -89,10 +90,11 @@ config["eventListenerJobStatus"]["resubmitted"] = "RESUBMITTED";
 
 config["streamingBytes"] = 1024 * 10; // 10 MB?
 config["rawDataVisualizationThreshold"] = 1024 * 1024 * 10; // 10 MB
-
+config["defaultProjectPerPage"] = 12;
 config["defaultDatasetPerPage"] = 12;
 config["defaultFolderFilePerPage"] = 5;
 config["defaultGroupPerPage"] = 5;
+
 config["defaultUserPerPage"] = 5;
 config["defaultApikeyPerPage"] = 5;
 config["defaultExtractors"] = 5;

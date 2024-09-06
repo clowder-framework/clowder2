@@ -1,9 +1,9 @@
 import * as React from "react";
-import { useEffect } from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import {useEffect} from "react";
+import {styled, useTheme} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
+import MuiAppBar, {AppBarProps as MuiAppBarProps} from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import IconButton from "@mui/material/IconButton";
@@ -15,39 +15,39 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Badge, Link, Menu, MenuItem, MenuList } from "@mui/material";
-import { Link as RouterLink, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../types/data";
-import { AddBox, Explore } from "@material-ui/icons";
+import {Badge, Link, Menu, MenuItem, MenuList} from "@mui/material";
+import {Link as RouterLink, useLocation} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../types/data";
+import {AddBox, Explore} from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { getCurrEmail } from "../utils/common";
+import {getCurrEmail} from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { EmbeddedSearch } from "./search/EmbeddedSearch";
+import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {
 	fetchUserProfile,
 	getAdminModeStatus as getAdminModeStatusAction,
 	toggleAdminMode as toggleAdminModeAction,
 } from "../actions/user";
-import { AdminPanelSettings, SavedSearch } from "@mui/icons-material";
+import {AdminPanelSettings, Collections, SavedSearch} from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import { Footer } from "./navigation/Footer";
+import {Footer} from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
 
 import config from "../app.config";
 
 const drawerWidth = 240;
 
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
+const Main = styled("main", {shouldForwardProp: (prop) => prop !== "open"})<{
 	open?: boolean;
-}>(({ theme, open }) => ({
+}>(({theme, open}) => ({
 	flexGrow: 1,
 	padding: theme.spacing(3),
 	transition: theme.transitions.create("margin", {
@@ -64,7 +64,7 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 	}),
 }));
 
-const SearchDiv = styled("div")(({ theme }) => ({
+const SearchDiv = styled("div")(({theme}) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px", // to compoensate the tags div
@@ -77,7 +77,7 @@ interface AppBarProps extends MuiAppBarProps {
 
 const AppBar = styled(MuiAppBar, {
 	shouldForwardProp: (prop) => prop !== "open",
-})<AppBarProps>(({ theme, open }) => ({
+})<AppBarProps>(({theme, open}) => ({
 	transition: theme.transitions.create(["margin", "width"], {
 		easing: theme.transitions.easing.sharp,
 		duration: theme.transitions.duration.leavingScreen,
@@ -92,7 +92,7 @@ const AppBar = styled(MuiAppBar, {
 	}),
 }));
 
-const DrawerHeader = styled("div")(({ theme }) => ({
+const DrawerHeader = styled("div")(({theme}) => ({
 	display: "flex",
 	alignItems: "center",
 	padding: theme.spacing(0, 1),
@@ -110,7 +110,7 @@ const link = {
 
 export default function PersistentDrawerLeft(props) {
 	const dispatch = useDispatch();
-	const { children } = props;
+	const {children} = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
@@ -173,26 +173,26 @@ export default function PersistentDrawerLeft(props) {
 						aria-label="open drawer"
 						onClick={handleDrawerOpen}
 						edge="start"
-						sx={{ mr: 2, ...(open && { display: "none" }) }}
+						sx={{mr: 2, ...(open && {display: "none"})}}
 					>
-						<MenuIcon />
+						<MenuIcon/>
 					</IconButton>
 					<Link href="/">
 						<Box
 							component="img"
 							src="../../public/blue-clowder-logo-sm.svg"
 							alt="clowder-logo-sm"
-							sx={{ verticalAlign: "middle" }}
+							sx={{verticalAlign: "middle"}}
 						/>
 					</Link>
 
 					{/*for searching*/}
 					<SearchDiv hidden={embeddedSearchHidden}>
 						{/*	<InputSearchBox />*/}
-						<EmbeddedSearch />
+						<EmbeddedSearch/>
 					</SearchDiv>
-					<Box sx={{ flexGrow: 1 }} />
-					<Box sx={{ marginLeft: "auto" }}>
+					<Box sx={{flexGrow: 1}}/>
+					<Box sx={{marginLeft: "auto"}}>
 						{loggedOut ? (
 							<>
 								<Link href="/auth/register" sx={link}>
@@ -214,11 +214,11 @@ export default function PersistentDrawerLeft(props) {
 								{getCurrEmail() !== undefined ? (
 									<Badge
 										overlap="circular"
-										anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+										anchorOrigin={{vertical: "bottom", horizontal: "right"}}
 										badgeContent={
 											adminMode ? (
 												<AdminPanelSettingsIcon
-													sx={{ color: theme.palette.primary.main }}
+													sx={{color: theme.palette.primary.main}}
 												/>
 											) : (
 												<></>
@@ -239,18 +239,18 @@ export default function PersistentDrawerLeft(props) {
 								) : (
 									<Badge
 										overlap="circular"
-										anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+										anchorOrigin={{vertical: "bottom", horizontal: "right"}}
 										badgeContent={
 											adminMode ? (
 												<AdminPanelSettingsIcon
-													sx={{ color: theme.palette.primary.main }}
+													sx={{color: theme.palette.primary.main}}
 												/>
 											) : (
 												<></>
 											)
 										}
 									>
-										<PersonIcon sx={{ verticalAlign: "middle" }} />
+										<PersonIcon sx={{verticalAlign: "middle"}}/>
 									</Badge>
 								)}
 							</IconButton>
@@ -262,16 +262,16 @@ export default function PersistentDrawerLeft(props) {
 			<MenuList>
 				<Menu
 					anchorEl={anchorEl}
-					anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+					anchorOrigin={{vertical: "bottom", horizontal: "left"}}
 					id={"primary-search-account-menu"}
 					keepMounted
-					transformOrigin={{ vertical: "top", horizontal: "center" }}
+					transformOrigin={{vertical: "top", horizontal: "center"}}
 					open={isMenuOpen}
 					onClose={handleProfileMenuClose}
 				>
 					<MenuItem component={RouterLink} to="/profile">
 						<ListItemIcon>
-							<PersonIcon fontSize="small" />
+							<PersonIcon fontSize="small"/>
 						</ListItemIcon>
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
@@ -281,14 +281,14 @@ export default function PersistentDrawerLeft(props) {
 								{adminMode ? (
 									<>
 										<ListItemIcon>
-											<AdminPanelSettings fontSize="small" />
+											<AdminPanelSettings fontSize="small"/>
 										</ListItemIcon>
 										<ListItemText>Drop Admin Mode</ListItemText>
 									</>
 								) : (
 									<>
 										<ListItemIcon>
-											<AdminPanelSettings fontSize="small" />
+											<AdminPanelSettings fontSize="small"/>
 										</ListItemIcon>
 										<ListItemText>Enable Admin Mode</ListItemText>
 									</>
@@ -301,13 +301,13 @@ export default function PersistentDrawerLeft(props) {
 
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
-							<VpnKeyIcon fontSize="small" />
+							<VpnKeyIcon fontSize="small"/>
 						</ListItemIcon>
 						<ListItemText>API Key</ListItemText>
 					</MenuItem>
 					<MenuItem component={RouterLink} to="/auth/logout">
 						<ListItemIcon>
-							<LogoutIcon fontSize="small" />
+							<LogoutIcon fontSize="small"/>
 						</ListItemIcon>
 						<ListItemText>Log Out</ListItemText>
 					</MenuItem>
@@ -330,9 +330,9 @@ export default function PersistentDrawerLeft(props) {
 				<DrawerHeader>
 					<IconButton onClick={handleDrawerClose}>
 						{theme.direction === "ltr" ? (
-							<ChevronLeftIcon />
+							<ChevronLeftIcon/>
 						) : (
-							<ChevronRightIcon />
+							<ChevronRightIcon/>
 						)}
 					</IconButton>
 				</DrawerHeader>
@@ -340,9 +340,19 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"explore"} disablePadding>
 						<ListItemButton component={RouterLink} to="/">
 							<ListItemIcon>
-								<Explore />
+								<Explore/>
 							</ListItemIcon>
-							<ListItemText primary={"Explore"} />
+							<ListItemText primary={"Explore"}/>
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<List>
+					<ListItem key={"projects"} disablePadding>
+						<ListItemButton component={RouterLink} to="/projects">
+							<ListItemIcon>
+								<Collections/>
+							</ListItemIcon>
+							<ListItemText primary={"Projects"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
@@ -350,9 +360,9 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"search"} disablePadding>
 						<ListItemButton component={RouterLink} to="/search">
 							<ListItemIcon>
-								<SearchDatasetIcon />
+								<SearchDatasetIcon/>
 							</ListItemIcon>
-							<ListItemText primary={"Search"} />
+							<ListItemText primary={"Search"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
@@ -361,9 +371,9 @@ export default function PersistentDrawerLeft(props) {
 						<ListItem key={"manage-user"} disablePadding>
 							<ListItemButton component={RouterLink} to="/manage-users">
 								<ListItemIcon>
-									<ManageAccountsIcon />
+									<ManageAccountsIcon/>
 								</ListItemIcon>
-								<ListItemText primary={"Manage Users"} />
+								<ListItemText primary={"Manage Users"}/>
 							</ListItemButton>
 						</ListItem>
 					</List>
@@ -374,9 +384,9 @@ export default function PersistentDrawerLeft(props) {
 						<ListItem key={"groups"} disablePadding>
 							<ListItemButton component={RouterLink} to="/groups">
 								<ListItemIcon>
-									<GroupIcon />
+									<GroupIcon/>
 								</ListItemIcon>
-								<ListItemText primary={"Groups"} />
+								<ListItemText primary={"Groups"}/>
 							</ListItemButton>
 						</ListItem>
 					</List>
@@ -388,9 +398,9 @@ export default function PersistentDrawerLeft(props) {
 						<ListItem key={"newdataset"} disablePadding>
 							<ListItemButton component={RouterLink} to="/create-dataset">
 								<ListItemIcon>
-									<AddBox />
+									<AddBox/>
 								</ListItemIcon>
-								<ListItemText primary={"New Dataset"} />
+								<ListItemText primary={"New Dataset"}/>
 							</ListItemButton>
 						</ListItem>
 					</List>
@@ -399,9 +409,9 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"metadataDefinition"} disablePadding>
 						<ListItemButton component={RouterLink} to="/metadata-definitions">
 							<ListItemIcon>
-								<InfoOutlinedIcon />
+								<InfoOutlinedIcon/>
 							</ListItemIcon>
-							<ListItemText primary={"Metadata Definitions"} />
+							<ListItemText primary={"Metadata Definitions"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
@@ -409,9 +419,9 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"extractions"} disablePadding>
 						<ListItemButton component={RouterLink} to="/extractions">
 							<ListItemIcon>
-								<HistoryIcon />
+								<HistoryIcon/>
 							</ListItemIcon>
-							<ListItemText primary={"Extraction History"} />
+							<ListItemText primary={"Extraction History"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
@@ -419,9 +429,9 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"listeners"} disablePadding>
 						<ListItemButton component={RouterLink} to="/listeners">
 							<ListItemIcon>
-								<BuildIcon />
+								<BuildIcon/>
 							</ListItemIcon>
-							<ListItemText primary={"Extractors"} />
+							<ListItemText primary={"Extractors"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
@@ -435,9 +445,9 @@ export default function PersistentDrawerLeft(props) {
 							rel="noopener noreferrer"
 						>
 							<ListItemIcon>
-								<MenuBookIcon />
+								<MenuBookIcon/>
 							</ListItemIcon>
-							<ListItemText primary={"Jupyter Notebook"} />
+							<ListItemText primary={"Jupyter Notebook"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
@@ -445,15 +455,15 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"feeds"} disablePadding>
 						<ListItemButton component={RouterLink} to="/feeds">
 							<ListItemIcon>
-								<SavedSearch />
+								<SavedSearch/>
 							</ListItemIcon>
-							<ListItemText primary={"Feeds"} />
+							<ListItemText primary={"Feeds"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
 			</Drawer>
 			<Main open={open}>
-				<DrawerHeader />
+				<DrawerHeader/>
 				{children}
 			</Main>
 			<Box
@@ -472,7 +482,7 @@ export default function PersistentDrawerLeft(props) {
 					}),
 				}}
 			>
-				<Footer />
+				<Footer/>
 			</Box>
 		</Box>
 	);

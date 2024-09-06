@@ -1,54 +1,44 @@
-import React, { useEffect } from "react";
-import {
-	BrowserRouter,
-	Navigate,
-	Route,
-	Routes,
-	useNavigate,
-	useParams,
-} from "react-router-dom";
-import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
-import { PublicDataset as PublicDatasetComponent } from "./components/datasets/PublicDataset";
-import { File as FileComponent } from "./components/files/File";
-import { PublicFile as PublicFileComponent } from "./components/files/PublicFile";
-import { CreateDataset } from "./components/datasets/CreateDataset";
-import { Groups as GroupListComponent } from "./components/groups/Groups";
-import { Group as GroupComponent } from "./components/groups/Group";
+import React, {useEffect} from "react";
+import {BrowserRouter, Navigate, Route, Routes, useNavigate, useParams,} from "react-router-dom";
+import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
+import {PublicDataset as PublicDatasetComponent} from "./components/datasets/PublicDataset";
+import {File as FileComponent} from "./components/files/File";
+import {PublicFile as PublicFileComponent} from "./components/files/PublicFile";
+import {CreateDataset} from "./components/datasets/CreateDataset";
+import {Groups as GroupListComponent} from "./components/groups/Groups";
+import {Group as GroupComponent} from "./components/groups/Group";
+import {Projects} from "./components/projects/Projects";
+import {Project} from "./components/projects/Project";
 
-import { RedirectRegister as RedirectRegisterComponent } from "./components/auth/RedirectRegister";
-import { Auth as AuthComponent } from "./components/auth/Auth";
-import { RedirectLogin as RedirectLoginComponent } from "./components/auth/RedirectLogin";
-import { RedirectLogout as RedirectLogoutComponent } from "./components/auth/RedirectLogout";
-import { Search } from "./components/search/Search";
-import { PublicSearch } from "./components/search/PublicSearch";
-import { isAuthorized } from "./utils/common";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./types/data";
-import {
-	refreshToken,
-	resetFailedReason,
-	resetFailedReasonInline,
-	resetLogout,
-} from "./actions/common";
-import { Explore } from "./components/Explore";
-import { Public } from "./components/Public";
-import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
-import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
-import { PageNotFound } from "./components/errors/PageNotFound";
-import { Forbidden } from "./components/errors/Forbidden";
-import { ApiKeys } from "./components/apikeys/ApiKey";
-import { Profile } from "./components/users/Profile";
-import { ManageUsers } from "./components/users/ManageUsers";
+import {RedirectRegister as RedirectRegisterComponent} from "./components/auth/RedirectRegister";
+import {Auth as AuthComponent} from "./components/auth/Auth";
+import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin";
+import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
+import {Search} from "./components/search/Search";
+import {PublicSearch} from "./components/search/PublicSearch";
+import {isAuthorized} from "./utils/common";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "./types/data";
+import {refreshToken, resetFailedReason, resetFailedReasonInline, resetLogout,} from "./actions/common";
+import {Explore} from "./components/Explore";
+import {Public} from "./components/Public";
+import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
+import {fetchDatasetRole, fetchFileRole} from "./actions/authorization";
+import {PageNotFound} from "./components/errors/PageNotFound";
+import {Forbidden} from "./components/errors/Forbidden";
+import {ApiKeys} from "./components/apikeys/ApiKey";
+import {Profile} from "./components/users/Profile";
+import {ManageUsers} from "./components/users/ManageUsers";
 import config from "./app.config";
-import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
-import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
-import { Feeds } from "./components/listeners/Feeds";
-import { AllListeners } from "./components/listeners/AllListeners";
-import { FeedEntry } from "./components/listeners/FeedEntry";
+import {MetadataDefinitions} from "./components/metadata/MetadataDefinitions";
+import {MetadataDefinitionEntry} from "./components/metadata/MetadataDefinitionEntry";
+import {Feeds} from "./components/listeners/Feeds";
+import {AllListeners} from "./components/listeners/AllListeners";
+import {FeedEntry} from "./components/listeners/FeedEntry";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
-	const { children } = props;
+	const {children} = props;
 
 	const history = useNavigate();
 
@@ -62,8 +52,8 @@ const PrivateRoute = (props): JSX.Element => {
 		dispatch(fetchDatasetRole(datasetId));
 	const listFileRole = (fileId: string | undefined) =>
 		dispatch(fetchFileRole(fileId));
-	const { datasetId } = useParams<{ datasetId?: string }>();
-	const { fileId } = useParams<{ fileId?: string }>();
+	const {datasetId} = useParams<{ datasetId?: string }>();
+	const {fileId} = useParams<{ fileId?: string }>();
 
 	// periodically call login endpoint once logged in
 	useEffect(() => {
@@ -110,31 +100,47 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 
-	return <>{isAuthorized() ? children : <Navigate to="/public" />}</>;
+	return <>{isAuthorized() ? children : <Navigate to="/public"/>}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/public" element={<Public />} />
+				<Route path="/public" element={<Public/>}/>
 				{isAuthorized() ? (
 					<Route
 						path="/"
 						element={
 							<PrivateRoute>
-								<Explore />
+								<Explore/>
 							</PrivateRoute>
 						}
 					/>
 				) : (
-					<Route path="/public" element={<Public />} />
+					<Route path="/public" element={<Public/>}/>
 				)}
+				<Route
+					path="/projects"
+					element={
+						<PrivateRoute>
+							<Projects/>
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/projects/:projectId"
+					element={
+						<PrivateRoute>
+							<Project/>
+						</PrivateRoute>
+					}
+				/>
 				<Route
 					path="/profile"
 					element={
 						<PrivateRoute>
-							<Profile />
+							<Profile/>
 						</PrivateRoute>
 					}
 				/>
@@ -142,7 +148,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/manage-users"
 					element={
 						<PrivateRoute>
-							<ManageUsers />
+							<ManageUsers/>
 						</PrivateRoute>
 					}
 				/>
@@ -150,7 +156,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/apikeys"
 					element={
 						<PrivateRoute>
-							<ApiKeys />
+							<ApiKeys/>
 						</PrivateRoute>
 					}
 				/>
@@ -158,7 +164,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/metadata-definitions"
 					element={
 						<PrivateRoute>
-							<MetadataDefinitions />
+							<MetadataDefinitions/>
 						</PrivateRoute>
 					}
 				/>
@@ -166,7 +172,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/metadata-definitions/:metadataDefinitionId"
 					element={
 						<PrivateRoute>
-							<MetadataDefinitionEntry />
+							<MetadataDefinitionEntry/>
 						</PrivateRoute>
 					}
 				/>
@@ -174,7 +180,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/create-dataset/"
 					element={
 						<PrivateRoute>
-							<CreateDataset />
+							<CreateDataset/>
 						</PrivateRoute>
 					}
 				/>
@@ -182,31 +188,31 @@ export const AppRoutes = (): JSX.Element => {
 					path="/datasets/:datasetId"
 					element={
 						<PrivateRoute>
-							<DatasetComponent />
+							<DatasetComponent/>
 						</PrivateRoute>
 					}
 				/>
 				<Route
 					path="/public_datasets/:datasetId"
-					element={<PublicDatasetComponent />}
+					element={<PublicDatasetComponent/>}
 				/>
 				<Route
 					path="/files/:fileId"
 					element={
 						<PrivateRoute>
-							<FileComponent />
+							<FileComponent/>
 						</PrivateRoute>
 					}
 				/>
-				<Route path="/public_files/:fileId" element={<PublicFileComponent />} />
-				<Route path="/auth/register" element={<RedirectRegisterComponent />} />
-				<Route path="/auth/login" element={<RedirectLoginComponent />} />
-				<Route path="/auth/logout" element={<RedirectLogoutComponent />} />
+				<Route path="/public_files/:fileId" element={<PublicFileComponent/>}/>
+				<Route path="/auth/register" element={<RedirectRegisterComponent/>}/>
+				<Route path="/auth/login" element={<RedirectLoginComponent/>}/>
+				<Route path="/auth/logout" element={<RedirectLogoutComponent/>}/>
 				<Route
 					path="/groups"
 					element={
 						<PrivateRoute>
-							<GroupListComponent />
+							<GroupListComponent/>
 						</PrivateRoute>
 					}
 				/>
@@ -214,25 +220,25 @@ export const AppRoutes = (): JSX.Element => {
 					path="/groups/:groupId"
 					element={
 						<PrivateRoute>
-							<GroupComponent />
+							<GroupComponent/>
 						</PrivateRoute>
 					}
 				/>
-				<Route path="/auth" element={<AuthComponent />} />
+				<Route path="/auth" element={<AuthComponent/>}/>
 				<Route
 					path="/search"
 					element={
 						<PrivateRoute>
-							<Search />
+							<Search/>
 						</PrivateRoute>
 					}
 				/>
-				<Route path="/public_search" element={<PublicSearch />} />
+				<Route path="/public_search" element={<PublicSearch/>}/>
 				<Route
 					path="/extractions"
 					element={
 						<PrivateRoute>
-							<ExtractionHistory />
+							<ExtractionHistory/>
 						</PrivateRoute>
 					}
 				/>
@@ -240,7 +246,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/feeds"
 					element={
 						<PrivateRoute>
-							<Feeds />
+							<Feeds/>
 						</PrivateRoute>
 					}
 				/>
@@ -248,7 +254,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/feeds/:feedId"
 					element={
 						<PrivateRoute>
-							<FeedEntry />
+							<FeedEntry/>
 						</PrivateRoute>
 					}
 				/>
@@ -256,7 +262,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/listeners"
 					element={
 						<PrivateRoute>
-							<AllListeners />
+							<AllListeners/>
 						</PrivateRoute>
 					}
 				/>
@@ -264,7 +270,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="/forbidden"
 					element={
 						<PrivateRoute>
-							<Forbidden />
+							<Forbidden/>
 						</PrivateRoute>
 					}
 				/>
@@ -272,7 +278,7 @@ export const AppRoutes = (): JSX.Element => {
 					path="*"
 					element={
 						<PrivateRoute>
-							<PageNotFound />
+							<PageNotFound/>
 						</PrivateRoute>
 					}
 				/>

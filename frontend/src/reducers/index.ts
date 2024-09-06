@@ -1,4 +1,4 @@
-import { combineReducers } from "redux";
+import {combineReducers} from "redux";
 import file from "./file";
 import dataset from "./dataset";
 import publicDataset from "./public_dataset";
@@ -9,6 +9,7 @@ import error from "./error";
 import metadata from "./metadata";
 import listeners from "./listeners";
 import group from "./group";
+import project from "./project";
 import visualization from "./visualization";
 import publicVisualization from "./public_visualization";
 import feeds from "./feeds";
@@ -16,6 +17,7 @@ import feeds from "./feeds";
 const rootReducer = combineReducers({
 	file: file,
 	dataset: dataset,
+	project: project,
 	publicDataset: publicDataset,
 	publicFile: publicFile,
 	folder: folder,
