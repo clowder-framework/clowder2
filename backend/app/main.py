@@ -1,6 +1,12 @@
 import logging
 
 import uvicorn
+from beanie import init_beanie
+from fastapi import APIRouter, Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseConfig
+
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
@@ -26,6 +32,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
     MetadataFreezeDB,
 )
+from app.models.projects import ProjectDB
 from app.models.thumbnails import ThumbnailDB, ThumbnailDBViewList, ThumbnailFreezeDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
@@ -48,6 +55,7 @@ from app.routers import (
     files,
     folders,
     groups,
+    projects,
     jobs,
     keycloak,
     licenses,
@@ -67,16 +75,10 @@ from app.routers import (
     users,
     visualization,
 )
-
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
-from beanie import init_beanie
-from fastapi import APIRouter, Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseConfig
 
 logger = logging.getLogger(__name__)
 
@@ -84,8 +86,8 @@ app = FastAPI(
     title=settings.APP_NAME,
     openapi_url=f"{settings.API_V2_STR}/openapi.json",
     description="A cloud native data management framework to support any research domain. Clowder was "
-    "developed to help researchers and scientists in data intensive domains manage raw data, complex "
-    "metadata, and automatic data pipelines. ",
+                "developed to help researchers and scientists in data intensive domains manage raw data, complex "
+                "metadata, and automatic data pipelines. ",
     version="2.0.0-beta.2",
     contact={"name": "Clowder", "url": "https://clowderframework.org/"},
     license_info={
@@ -229,6 +231,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    projects.router,
+    prefix="/projects",
+    tags=["projects"],
+)
+api_router.include_router(
     visualization.router,
     prefix="/visualizations",
     tags=["visualizations"],
@@ -303,6 +310,7 @@ async def startup_beanie():
             UserAPIKeyDB,
             ListenerAPIKeyDB,
             GroupDB,
+            ProjectDB,
             TokenDB,
             ErrorDB,
             VisualizationConfigDB,

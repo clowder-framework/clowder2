@@ -1,11 +1,12 @@
 import os
 import struct
 
-from app.config import settings
-from app.keycloak_auth import delete_user
 from elasticsearch import Elasticsearch
 from fastapi.testclient import TestClient
 from pymongo import MongoClient
+
+from app.config import settings
+from app.keycloak_auth import delete_user
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {
@@ -30,6 +31,12 @@ group_example = {
 dataset_example = {
     "name": "test dataset",
     "description": "a dataset is a container of files and metadata",
+}
+
+project_example = {
+    "name": "test_project",
+    "description": "This project is a test",
+    "creator": user_example,
 }
 
 license_example = {
@@ -99,7 +106,7 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
     u["email"] = email
     response = client.post(f"{settings.API_V2_STR}/users", json=u)
     assert (
-        response.status_code == 200 or response.status_code == 409
+            response.status_code == 200 or response.status_code == 409
     )  # 409 = user already exists
     return response.json()
 
@@ -176,12 +183,24 @@ def create_dataset_with_custom_license(client: TestClient, headers: dict):
     return response.json()
 
 
+def create_project(client: TestClient, headers: dict):
+    """Creates a test dataset and returns the JSON."""
+    response = client.post(
+        f"{settings.API_V2_STR}/projects",
+        headers=headers,
+        json=project_example,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    return response.json()
+
+
 def upload_file(
-    client: TestClient,
-    headers: dict,
-    dataset_id: str,
-    filename=filename_example_1,
-    content=file_content_example_1,
+        client: TestClient,
+        headers: dict,
+        dataset_id: str,
+        filename=filename_example_1,
+        content=file_content_example_1,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "w") as tempf:
@@ -199,11 +218,11 @@ def upload_file(
 
 
 def upload_files(
-    client: TestClient,
-    headers: dict,
-    dataset_id: str,
-    filenames=[filename_example_1, filename_example_2],
-    file_contents=[file_content_example_1, file_content_example_2],
+        client: TestClient,
+        headers: dict,
+        dataset_id: str,
+        filenames=[filename_example_1, filename_example_2],
+        file_contents=[file_content_example_1, file_content_example_2],
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     upload_files = []
@@ -229,11 +248,11 @@ def upload_files(
 
 
 def create_folder(
-    client: TestClient,
-    headers: dict,
-    dataset_id: str,
-    name="test folder",
-    parent_folder=None,
+        client: TestClient,
+        headers: dict,
+        dataset_id: str,
+        name="test folder",
+        parent_folder=None,
 ):
     """Creates a folder (optionally under an existing folder) in a dataset and returns the JSON."""
     folder_data = {"name": name}
