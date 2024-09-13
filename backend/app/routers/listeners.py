@@ -265,7 +265,7 @@ async def search_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    In(EventListenerDB.access.users, user_id),
+                    EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
                 )
             )
@@ -274,7 +274,7 @@ async def search_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    In(EventListenerDB.access.users, user_id),
+                    EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
                     EventListenerDB.access.datasets == PydanticObjectId(dataset_id),
                 )
@@ -422,7 +422,7 @@ async def get_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    In(EventListenerDB.access.users, user_id),
+                    EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
                 )
             )
@@ -431,7 +431,7 @@ async def get_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    In(EventListenerDB.access.users, user_id),
+                    EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
                     EventListenerDB.access.datasets == PydanticObjectId(dataset_id),
                 )
