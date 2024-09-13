@@ -4,11 +4,6 @@ import random
 import string
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx, In, NE
-from fastapi import APIRouter, Depends, HTTPException
-from packaging import version
-
 from app.config import settings
 from app.deps.authorization_deps import ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username, get_user
@@ -27,6 +22,10 @@ from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.authentication import get_admin, get_admin_mode
 from app.routers.feeds import disassociate_listener_db
+from beanie import PydanticObjectId
+from beanie.operators import In, Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
+from packaging import version
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
@@ -266,7 +265,7 @@ async def search_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.users, user_id),
                     In(EventListenerDB.access.groups, user_groups),
                 )
             )
@@ -275,7 +274,7 @@ async def search_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.users, user_id),
                     In(EventListenerDB.access.groups, user_groups),
                     EventListenerDB.access.datasets == PydanticObjectId(dataset_id),
                 )
@@ -423,7 +422,7 @@ async def get_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.users, user_id),
                     In(EventListenerDB.access.groups, user_groups),
                 )
             )
@@ -432,7 +431,7 @@ async def get_listeners(
                 Or(
                     EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
-                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.users, user_id),
                     In(EventListenerDB.access.groups, user_groups),
                     EventListenerDB.access.datasets == PydanticObjectId(dataset_id),
                 )
