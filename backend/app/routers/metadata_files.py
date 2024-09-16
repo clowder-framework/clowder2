@@ -1,5 +1,11 @@
 from typing import List, Optional
 
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
+
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
@@ -22,11 +28,6 @@ from app.models.metadata import (
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
-from beanie import PydanticObjectId
-from beanie.operators import Or
-from bson import ObjectId
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, Form, HTTPException
 
 router = APIRouter()
 
@@ -167,14 +168,14 @@ async def replace_file_metadata(
     """
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # First, make sure the metadata we are replacing actually exists.
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
 
         version = metadata_in.file_version
         if version is not None:
             if (
                 await FileVersionDB.find_one(
                     Or(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
                         FileVersionDB.file_id == file.origin_id,
                     ),
                     FileVersionDB.version_num == version,
@@ -246,7 +247,7 @@ async def update_file_metadata(
     # check if metadata with file version exists, replace metadata if none exists
     if (
         await MetadataDB.find_one(
-            MetadataDB.resource.resource_id == ObjectId(file_id),
+            MetadataDB.resource.resource_id == PydanticObjectId(file_id),
             MetadataDB.resource.version == metadata_in.file_version,
         )
     ) is None:
@@ -254,14 +255,14 @@ async def update_file_metadata(
         return result
 
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
             if (
                 existing_md := await MetadataDB.find_one(
-                    MetadataDB.id == ObjectId(metadata_in.metadata_id)
+                    MetadataDB.id == PydanticObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
                 content = await validate_context(
@@ -282,7 +283,7 @@ async def update_file_metadata(
             if (
                 await FileVersionDB.find_one(
                     Or(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
                         FileVersionDB.file_id == file.origin_id,
                     ),
                     FileVersionDB.version_num == metadata_in.file_version,
@@ -345,7 +346,7 @@ async def get_file_metadata(
             FileDBViewList.id == PydanticObjectId(file_id)
         )
     ) is not None:
-        query = [MetadataDBViewList.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDBViewList.resource.resource_id == PydanticObjectId(file_id)]
 
         # Validate specified version, or use latest by default
         if not all_versions:
@@ -353,7 +354,7 @@ async def get_file_metadata(
                 if (
                     await FileVersionDB.find_one(
                         Or(
-                            FileVersionDB.file_id == ObjectId(file_id),
+                            FileVersionDB.file_id == PydanticObjectId(file_id),
                             FileVersionDB.file_id == file.origin_id,
                         ),
                         FileVersionDB.version_num == version,
@@ -403,13 +404,13 @@ async def delete_file_metadata(
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (await FileDB.get(PydanticObjectId(file_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
 
         # # Validate specified version, or use latest by default
         # if version is not None:
         #     if (
         #         version_q := await FileVersionDB.find_one(
-        #             FileVersionDB.file_id == ObjectId(file_id),
+        #             FileVersionDB.file_id == PydanticObjectId(file_id),
         #             FileVersionDB.version_num == version,
         #         )
         #     ) is None:
@@ -427,7 +428,7 @@ async def delete_file_metadata(
             # If a specific metadata_id is provided, delete the matching entry
             if (
                 await MetadataDB.find_one(
-                    MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
+                    MetadataDB.metadata_id == PydanticObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
                 query.append(MetadataDB.metadata_id == metadata_in.metadata_id)

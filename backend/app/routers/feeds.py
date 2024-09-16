@@ -1,19 +1,21 @@
 from typing import Optional
 
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
+from pika.adapters.blocking_connection import BlockingChannel
+
 from app.deps.authorization_deps import FeedAuthorization, ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
+from app.models.groups import GroupDB
 from app.models.listeners import EventListenerDB, FeedListener
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
 from app.routers.authentication import get_admin, get_admin_mode
 from app.search.connect import check_search_result
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from fastapi import APIRouter, Depends, HTTPException
-from pika.adapters.blocking_connection import BlockingChannel
 
 router = APIRouter()
 
@@ -54,6 +56,26 @@ async def check_feed_listeners(
         if (
             listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))
         ) is not None:
+            if (
+                listener_info.access is not None
+                and not user.admin
+                and not user.admin_mode
+            ):
+                dataset_id = file_out.dataset_id
+                user_id = user.email
+                group_q = await GroupDB.find(
+                    Or(GroupDB.creator == user_id, GroupDB.users.email == user_id),
+                ).to_list()
+                user_groups = [g.id for g in group_q]
+
+                valid_submission = (
+                    (listener_info.access.owner == user_id)
+                    or (user.email in listener_info.access.users)
+                    or (dataset_id in listener_info.access.datasets)
+                    or (not set(user_groups).isdisjoint(listener_info.access.groups))
+                )
+                if not valid_submission:
+                    continue
             await submit_file_job(
                 file_out,
                 listener_info.name,  # routing_key
@@ -184,7 +206,7 @@ async def delete_feed(
 async def associate_listener(
     feed_id: str,
     listener: FeedListener,
-    user=Depends(get_current_user),
+    username=Depends(get_current_username),
     admin=Depends(get_admin),
     enable_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
@@ -196,37 +218,32 @@ async def associate_listener(
         feed_id: Feed that should have new Event Listener associated
         listener: JSON object with "listener_id" field and "automatic" bool field (whether to auto-trigger on new data)
     """
+    # Because we have FeedListener rather than listener_id here, we can't use injection for this
+    allow = ListenerAuthorization().__call__(
+        listener.listener_id, username, admin_mode, admin
+    )
+    if not allow:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User `{username} does not have permission on listener `{listener.listener_id}`",
+        )
+
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
-            listener_db := await EventListenerDB.get(
-                PydanticObjectId(listener.listener_id)
-            )
+            await EventListenerDB.get(PydanticObjectId(listener.listener_id))
         ) is not None:
-            if (
-                (admin and admin_mode)
-                or (listener_db.creator and listener_db.creator.email == user.email)
-                or listener_db.active
-            ):
-                feed.listeners.append(listener)
-                await feed.save()
-                return feed.dict()
-            else:
-                raise HTTPException(
-                    status_code=403,
-                    detail=f"User {user} doesn't have permission to submit job to listener {listener.listener_id}",
-                )
+            feed.listeners.append(listener)
+            await feed.save()
+            return feed.dict()
         raise HTTPException(
-            status_code=404, detail=f"listener {listener.listener_id} not found"
+            status_code=404, detail=f"Listener {listener.listener_id} not found"
         )
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
 
 
 @router.delete("/{feed_id}/listeners/{listener_id}")
 async def disassociate_listener(
-    feed_id: str,
-    listener_id: str,
-    user=Depends(get_current_user),
-    allow: bool = Depends(ListenerAuthorization()),
+    feed_id: str, listener_id: str, allow: bool = Depends(ListenerAuthorization())
 ):
     """Disassociate an Event Listener from a Feed.
 
@@ -235,6 +252,8 @@ async def disassociate_listener(
         listener_id: UUID of Event Listener that should be disassociated
     """
     if (await FeedDB.get(PydanticObjectId(feed_id))) is not None:
-        await disassociate_listener_db(feed_id, listener_id)
-        return {"disassociated": listener_id}
-    raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
+        if (await EventListenerDB.get(PydanticObjectId(listener_id))) is not None:
+            await disassociate_listener_db(feed_id, listener_id)
+            return {"disassociated": listener_id}
+        raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
+    raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")

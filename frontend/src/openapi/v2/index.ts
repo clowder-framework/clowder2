@@ -5,6 +5,7 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 
+export type { AccessList } from './models/AccessList';
 export type { AuthorizationBase } from './models/AuthorizationBase';
 export type { AuthorizationMetadata } from './models/AuthorizationMetadata';
 export type { AuthorizationOut } from './models/AuthorizationOut';

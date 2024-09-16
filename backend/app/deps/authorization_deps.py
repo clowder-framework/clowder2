@@ -423,8 +423,8 @@ class ListenerAuthorization:
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/.
     Regular users are not allowed to run non-active listeners"""
 
-    # def __init__(self, optional_arg: str = None):
-    #         self.optional_arg = optional_arg
+    # def __init__(self, role: str = "viewer"):
+    #     self.role = role
 
     async def __call__(
         self,
@@ -438,10 +438,32 @@ class ListenerAuthorization:
         if admin and admin_mode:
             return True
 
-        # Else check if listener is active or current user is the creator of the extractor
         if (
             listener := await EventListenerDB.get(PydanticObjectId(listener_id))
         ) is not None:
+            # If listener has access restrictions, evaluate them against requesting user
+            if listener.access is not None:
+                group_q = await GroupDB.find(
+                    Or(
+                        GroupDB.creator == current_user,
+                        GroupDB.users.email == current_user,
+                    ),
+                ).to_list()
+                user_groups = [g.id for g in group_q]
+
+                valid_modificaiton = (
+                    (admin and admin_mode)
+                    or (listener.creator and listener.creator.email == current_user)
+                    or (listener.access.owner == current_user)
+                    or (current_user in listener.access.users)
+                    or (not set(user_groups).isdisjoint(listener.access.groups))
+                )
+                if not valid_modificaiton:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have permission on listener `{listener_id}`",
+                    )
+
             if listener.active is True or (
                 listener.creator and listener.creator.email == current_user
             ):

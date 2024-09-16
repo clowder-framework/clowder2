@@ -68,12 +68,14 @@ async def get_all_job_summary(
     if file_id is not None:
         filters.append(EventListenerJobViewList.resource_ref.collection == "files")
         filters.append(
-            EventListenerJobViewList.resource_ref.resource_id == ObjectId(file_id)
+            EventListenerJobViewList.resource_ref.resource_id
+            == PydanticObjectId(file_id)
         )
     if dataset_id is not None:
         filters.append(EventListenerJobViewList.resource_ref.collection == "datasets")
         filters.append(
-            EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
+            EventListenerJobViewList.resource_ref.resource_id
+            == PydanticObjectId(dataset_id)
         )
 
     jobs_and_count = (
