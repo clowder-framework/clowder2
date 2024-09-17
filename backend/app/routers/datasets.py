@@ -323,18 +323,18 @@ async def get_dataset_files(
     ) is not None:
         if authenticated or public or (admin and admin_mode):
             query = [
-                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                FileDBViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
         else:
             query = [
-                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                FileDBViewList.dataset_id == PydanticObjectId(dataset_id),
                 Or(
                     FileDBViewList.creator.email == user_id,
                     FileDBViewList.auth.user_ids == user_id,
                 ),
             ]
         if folder_id is not None:
-            query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+            query.append(FileDBViewList.folder_id == PydanticObjectId(folder_id))
 
         files_and_count = (
             await FileDBViewList.find(*query)
@@ -404,7 +404,7 @@ async def patch_dataset(
 
         if dataset_info.status is not None:
             query = [
-                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                FileDBViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
             files_views = await FileDBViewList.find(*query).to_list()
             for file_view in files_views:
@@ -710,18 +710,20 @@ async def get_dataset_folders(
     ) is not None:
         if authenticated or public:
             query = [
-                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                FolderDBViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
         else:
             query = [
-                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                FolderDBViewList.dataset_id == PydanticObjectId(dataset_id),
                 Or(
                     FolderDBViewList.creator.email == user_id,
                     FolderDBViewList.auth.user_ids == user_id,
                 ),
             ]
         if parent_folder is not None:
-            query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+            query.append(
+                FolderDBViewList.parent_folder == PydanticObjectId(parent_folder)
+            )
         else:
             query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
 
@@ -769,11 +771,11 @@ async def get_dataset_folders_and_files(
     ) is not None:
         if authenticated or public or (admin and admin_mode):
             query = [
-                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
         else:
             query = [
-                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
                 Or(
                     FolderFileViewList.creator.email == user_id,
                     FolderFileViewList.auth.user_ids == user_id,
@@ -791,8 +793,8 @@ async def get_dataset_folders_and_files(
         else:
             query.append(
                 Or(
-                    FolderFileViewList.folder_id == ObjectId(folder_id),
-                    FolderFileViewList.parent_folder == ObjectId(folder_id),
+                    FolderFileViewList.folder_id == PydanticObjectId(folder_id),
+                    FolderFileViewList.parent_folder == PydanticObjectId(folder_id),
                 )
             )
 
@@ -839,15 +841,17 @@ async def delete_folder(
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             # delete current folder and files
-            async for file in FileDB.find(FileDB.folder_id == ObjectId(folder_id)):
+            async for file in FileDB.find(
+                FileDB.folder_id == PydanticObjectId(folder_id)
+            ):
                 await remove_file_entry(file.id, fs, es)
 
             # recursively delete child folder and files
             async def _delete_nested_folders(parent_folder_id):
                 while (
                     await FolderDB.find_one(
-                        FolderDB.dataset_id == ObjectId(dataset_id),
-                        FolderDB.parent_folder == ObjectId(parent_folder_id),
+                        FolderDB.dataset_id == PydanticObjectId(dataset_id),
+                        FolderDB.parent_folder == PydanticObjectId(parent_folder_id),
                     )
                 ) is not None:
                     async for subfolder in FolderDB.find(
@@ -1212,7 +1216,7 @@ async def download_dataset(
 
         # Write dataset metadata if found
         metadata = await MetadataDB.find(
-            MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
         ).to_list()
         if len(metadata) > 0:
             datasetmetadata_path = os.path.join(
@@ -1235,7 +1239,7 @@ async def download_dataset(
         file_count = 0
 
         async for file in FileDBViewList.find(
-            FileDBViewList.dataset_id == ObjectId(dataset_id)
+            FileDBViewList.dataset_id == PydanticObjectId(dataset_id)
         ):
             # find the bytes id
             # if it's working draft file_id == origin_id
@@ -1273,7 +1277,7 @@ async def download_dataset(
             bag_size += current_file_size
 
             metadata = await MetadataDB.find(
-                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+                MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
             ).to_list()
             if len(metadata) > 0:
                 metadata_filename = file_name + "_metadata.json"

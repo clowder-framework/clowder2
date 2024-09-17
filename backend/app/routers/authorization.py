@@ -437,7 +437,7 @@ async def get_dataset_roles(
         roles = DatasetRoles(dataset_id=str(dataset.id))
 
         async for auth in AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             # First, fetch all groups that have a role on the dataset
             group_user_counts = {}

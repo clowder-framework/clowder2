@@ -130,7 +130,7 @@ async def replace_dataset_metadata(
         Metadata document that was updated
     """
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)]
 
         # Filter by MetadataAgent
         if metadata_in.listener is not None:
@@ -184,7 +184,7 @@ async def update_dataset_metadata(
         Metadata document that was updated
     """
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)]
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
@@ -252,7 +252,9 @@ async def get_dataset_metadata(
             DatasetDBViewList.id == PydanticObjectId(dataset_id)
         )
     ) is not None:
-        query = [MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)]
+        query = [
+            MetadataDBViewList.resource.resource_id == PydanticObjectId(dataset_id)
+        ]
 
         if listener_name is not None:
             query.append(MetadataDBViewList.agent.listener.name == listener_name)
@@ -284,12 +286,12 @@ async def delete_dataset_metadata(
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # filter by metadata_id or definition
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)]
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
                 await MetadataDB.find_one(
-                    MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
+                    MetadataDB.metadata_id == PydanticObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
                 query.append(MetadataDB.metadata_id == metadata_in.metadata_id)

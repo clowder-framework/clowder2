@@ -65,7 +65,7 @@ async def get_file_version_details(
             if dataset.status == DatasetStatus.PUBLIC.name:
                 file_vers = await FileVersionDB.find_one(
                     Or(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
                         FileVersionDB.file_id == file.origin_id,
                     ),
                     FileVersionDB.version_num == version_num,
@@ -96,7 +96,9 @@ async def get_file_versions(
             if dataset.status == DatasetStatus.PUBLIC.name:
                 mongo_versions = []
                 async for ver in (
-                    FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                    FileVersionDB.find(
+                        FileVersionDB.file_id == PydanticObjectId(file_id)
+                    )
                     .sort(-FileVersionDB.created)
                     .skip(skip)
                     .limit(limit)
@@ -134,7 +136,7 @@ async def download_file(
                     # Version is specified, so get the minio ID from versions table if possible
                     file_vers = await FileVersionDB.find_one(
                         Or(
-                            FileVersionDB.file_id == ObjectId(file_id),
+                            FileVersionDB.file_id == PydanticObjectId(file_id),
                             FileVersionDB.file_id == file.origin_id,
                         ),
                         FileVersionDB.version_num == version,
@@ -232,7 +234,9 @@ async def get_file_metadata(
             )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
-                query = [MetadataDBViewList.resource.resource_id == ObjectId(file_id)]
+                query = [
+                    MetadataDBViewList.resource.resource_id == PydanticObjectId(file_id)
+                ]
 
                 # Validate specified version, or use latest by default
                 if not all_versions:
@@ -240,7 +244,7 @@ async def get_file_metadata(
                         if (
                             await FileVersionDB.find_one(
                                 Or(
-                                    FileVersionDB.file_id == ObjectId(file_id),
+                                    FileVersionDB.file_id == PydanticObjectId(file_id),
                                     FileVersionDB.file_id == file.origin_id,
                                 ),
                                 FileVersionDB.version_num == version,
