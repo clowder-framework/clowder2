@@ -14,12 +14,13 @@ async def get_fs() -> Generator:
         settings.MINIO_SERVER_URL,
         access_key=settings.MINIO_ACCESS_KEY,
         secret_key=settings.MINIO_SECRET_KEY,
-        secure=False,
+        secure=settings.MINIO_SECURE.lower() == "true",
     )
     clowder_bucket = settings.MINIO_BUCKET_NAME
     if not file_system.bucket_exists(clowder_bucket):
         file_system.make_bucket(clowder_bucket)
-    file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
+    if settings.MINIO_VERSIONING_ENABLED.lower() == "true":
+        file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
     yield file_system
 
 
@@ -29,12 +30,13 @@ async def get_external_fs() -> Generator:
         settings.MINIO_EXTERNAL_SERVER_URL,
         access_key=settings.MINIO_ACCESS_KEY,
         secret_key=settings.MINIO_SECRET_KEY,
-        secure=settings.MINIO_SECURE.lower() == "true",
+        secure=settings.MINIO_EXTERNAL_SECURE.lower() == "true",
     )
     clowder_bucket = settings.MINIO_BUCKET_NAME
     if not file_system.bucket_exists(clowder_bucket):
         file_system.make_bucket(clowder_bucket)
-    file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
+    if settings.MINIO_VERSIONING_ENABLED.lower() == "true":
+        file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
     yield file_system
 
 

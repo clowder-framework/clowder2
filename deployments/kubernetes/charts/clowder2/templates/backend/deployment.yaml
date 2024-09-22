@@ -39,14 +39,18 @@ spec:
             - name: WEB_CONCURRENCY
               value: "1"
             - name: MINIO_SERVER_URL
-              value: {{ include "clowder2.name" . }}-minio:9000
+              value: {{ (empty .Values.minio.serverUrl) | ternary (printf "%s-minio:9000" (include "clowder2.name" .)) .Values.minio.serverUrl }}
 #              value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MINIO_EXTERNAL_SERVER_URL
-              value: minio-api.{{ .Values.hostname }}
-            - name: MINIO_SECURE
+              value: {{ (empty .Values.minio.serverUrl) | ternary (printf "minio-api.%s" .Values.hostname) .Values.minio.serverUrl }}
+            - name: MINIO_EXTERNAL_SECURE
               value: "true"
+            - name: MINIO_SECURE
+              value: "{{ .Values.minio.auth.secure }}"
             - name: MINIO_BUCKET_NAME
               value: clowder
+            - name: MINIO_VERSIONING_ENABLED
+              value: "{{ .Values.minio.enableVersioning }}"
             - name: MINIO_ACCESS_KEY
               value: {{ .Values.minio.auth.rootUser }}
             - name: MINIO_SECRET_KEY
