@@ -1,3 +1,8 @@
+from app.models.project import ProjectDB
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from fastapi import Depends, HTTPException
+
 from app.keycloak_auth import get_current_username, get_read_only_user
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDBViewList, DatasetStatus
@@ -7,46 +12,43 @@ from app.models.groups import GroupDB
 from app.models.listeners import EventListenerDB
 from app.models.metadata import MetadataDB
 from app.routers.authentication import get_admin, get_admin_mode
-from beanie import PydanticObjectId
-from beanie.operators import Or
-from fastapi import Depends, HTTPException
 
 
 async def check_public_access(
-    resource_id: str,
-    resource_type: str,
-    role: RoleType,
-    current_user=Depends(get_current_username),
+        resource_id: str,
+        resource_type: str,
+        role: RoleType,
+        current_user=Depends(get_current_username),
 ) -> bool:
     has_public_access = False
     if role == RoleType.VIEWER:
         if resource_type == "dataset":
             if (
-                dataset := await DatasetDBViewList.find_one(
-                    DatasetDBViewList.id == PydanticObjectId(resource_id)
-                )
+                    dataset := await DatasetDBViewList.find_one(
+                        DatasetDBViewList.id == PydanticObjectId(resource_id)
+                    )
             ) is not None:
                 if (
-                    dataset.status == DatasetStatus.PUBLIC.name
-                    or dataset.status == DatasetStatus.AUTHENTICATED.name
+                        dataset.status == DatasetStatus.PUBLIC.name
+                        or dataset.status == DatasetStatus.AUTHENTICATED.name
                 ):
                     has_public_access = True
         elif resource_type == "file":
             if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
                 if (
-                    file.status == FileStatus.PUBLIC.name
-                    or file.status == FileStatus.AUTHENTICATED.name
+                        file.status == FileStatus.PUBLIC.name
+                        or file.status == FileStatus.AUTHENTICATED.name
                 ):
                     has_public_access = True
     return has_public_access
 
 
 async def get_role(
-    dataset_id: str,
-    current_user=Depends(get_current_username),
-    enable_admin: bool = False,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+        dataset_id: str,
+        current_user=Depends(get_current_username),
+        enable_admin: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin=Depends(get_admin),
 ) -> RoleType:
     """Returns the role a specific user has on a dataset. If the user is a creator (owner), they are not listed in
     the user_ids list."""
@@ -69,11 +71,11 @@ async def get_role(
 
 
 async def get_role_by_file(
-    file_id: str,
-    current_user=Depends(get_current_username),
-    enable_admin: bool = False,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+        file_id: str,
+        current_user=Depends(get_current_username),
+        enable_admin: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin=Depends(get_admin),
 ) -> RoleType:
     if admin and admin_mode:
         return RoleType.OWNER
@@ -88,13 +90,13 @@ async def get_role_by_file(
         )
         if authorization is None:
             if (
-                dataset := await DatasetDBViewList.find_one(
-                    DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
-                )
+                    dataset := await DatasetDBViewList.find_one(
+                        DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+                    )
             ) is not None:
                 if (
-                    dataset.status == DatasetStatus.AUTHENTICATED.name
-                    or dataset.status == DatasetStatus.PUBLIC.name
+                        dataset.status == DatasetStatus.AUTHENTICATED.name
+                        or dataset.status == DatasetStatus.PUBLIC.name
                 ):
                     return RoleType.VIEWER
                 else:
@@ -107,11 +109,11 @@ async def get_role_by_file(
 
 
 async def get_role_by_metadata(
-    metadata_id: str,
-    current_user=Depends(get_current_username),
-    enable_admin: bool = False,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+        metadata_id: str,
+        current_user=Depends(get_current_username),
+        enable_admin: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin=Depends(get_admin),
 ) -> RoleType:
     if admin and admin_mode:
         return RoleType.OWNER
@@ -131,9 +133,9 @@ async def get_role_by_metadata(
                 return authorization.role
         elif resource_type == "datasets":
             if (
-                dataset := await DatasetDBViewList.find_one(
-                    DatasetDBViewList.id == PydanticObjectId(resource_id)
-                )
+                    dataset := await DatasetDBViewList.find_one(
+                        DatasetDBViewList.id == PydanticObjectId(resource_id)
+                    )
             ) is not None:
                 authorization = await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == dataset.id,
@@ -146,11 +148,11 @@ async def get_role_by_metadata(
 
 
 async def get_role_by_group(
-    group_id: str,
-    current_user=Depends(get_current_username),
-    enable_admin: bool = False,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+        group_id: str,
+        current_user=Depends(get_current_username),
+        enable_admin: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin=Depends(get_admin),
 ) -> RoleType:
     if admin and admin_mode:
         return RoleType.OWNER
@@ -173,13 +175,13 @@ async def get_role_by_group(
 
 
 async def is_public_dataset(
-    dataset_id: str,
+        dataset_id: str,
 ) -> bool:
     """Checks if a dataset is public."""
     if (
-        dataset_out := await DatasetDBViewList.find_one(
-            DatasetDBViewList.id == PydanticObjectId(dataset_id)
-        )
+            dataset_out := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
     ) is not None:
         if dataset_out.status == DatasetStatus.PUBLIC:
             return True
@@ -188,13 +190,13 @@ async def is_public_dataset(
 
 
 async def is_authenticated_dataset(
-    dataset_id: str,
+        dataset_id: str,
 ) -> bool:
     """Checks if a dataset is authenticated."""
     if (
-        dataset_out := await DatasetDBViewList.find_one(
-            DatasetDBViewList.id == PydanticObjectId(dataset_id)
-        )
+            dataset_out := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
     ) is not None:
         if dataset_out.status == DatasetStatus.AUTHENTICATED:
             return True
@@ -210,13 +212,13 @@ class Authorization:
         self.role = role
 
     async def __call__(
-        self,
-        dataset_id: str,
-        current_user: str = Depends(get_current_username),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin),
-        readonly: bool = Depends(get_read_only_user),
+            self,
+            dataset_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
+            readonly: bool = Depends(get_read_only_user),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
@@ -242,14 +244,14 @@ class Authorization:
                 )
         else:
             if (
-                current_dataset := await DatasetDBViewList.find_one(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id)
-                )
+                    current_dataset := await DatasetDBViewList.find_one(
+                        DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                    )
             ) is not None:
                 if (
-                    current_dataset.status == DatasetStatus.AUTHENTICATED.name
-                    or current_dataset.status == DatasetStatus.PUBLIC.name
-                    and self.role == "viewer"
+                        current_dataset.status == DatasetStatus.AUTHENTICATED.name
+                        or current_dataset.status == DatasetStatus.PUBLIC.name
+                        and self.role == "viewer"
                 ):
                     return True
                 else:
@@ -272,12 +274,12 @@ class FileAuthorization:
         self.role = role
 
     async def __call__(
-        self,
-        file_id: str,
-        current_user: str = Depends(get_current_username),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin),
+            self,
+            file_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
     ):
         # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
         if admin and admin_mode:
@@ -301,8 +303,8 @@ class FileAuthorization:
                 )
             else:
                 if (
-                    file.status == FileStatus.PUBLIC.name
-                    or file.status == FileStatus.AUTHENTICATED.name
+                        file.status == FileStatus.PUBLIC.name
+                        or file.status == FileStatus.AUTHENTICATED.name
                 ) and self.role == RoleType.VIEWER:
                     return True
                 else:
@@ -319,12 +321,12 @@ class MetadataAuthorization:
         self.role = role
 
     async def __call__(
-        self,
-        metadata_id: str,
-        current_user: str = Depends(get_current_username),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin),
+            self,
+            metadata_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
     ):
         # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
         if admin and admin_mode:
@@ -336,7 +338,7 @@ class MetadataAuthorization:
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
                 if (
-                    file := await FileDB.get(PydanticObjectId(resource_id))
+                        file := await FileDB.get(PydanticObjectId(resource_id))
                 ) is not None:
                     authorization = await AuthorizationDB.find_one(
                         AuthorizationDB.dataset_id == file.dataset_id,
@@ -358,9 +360,9 @@ class MetadataAuthorization:
                         )
             elif resource_type == "datasets":
                 if (
-                    dataset := await DatasetDBViewList.find_one(
-                        DatasetDBViewList.id == PydanticObjectId(resource_id)
-                    )
+                        dataset := await DatasetDBViewList.find_one(
+                            DatasetDBViewList.id == PydanticObjectId(resource_id)
+                        )
                 ) is not None:
                     authorization = await AuthorizationDB.find_one(
                         AuthorizationDB.dataset_id == dataset.id,
@@ -389,12 +391,12 @@ class GroupAuthorization:
         self.role = role
 
     async def __call__(
-        self,
-        group_id: str,
-        current_user: str = Depends(get_current_username),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin),
+            self,
+            group_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
     ):
         # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
         if admin and admin_mode:
@@ -418,6 +420,44 @@ class GroupAuthorization:
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
+class ProjectAuthorization:
+
+    def __init__(self, role: str):
+        self.role = role
+
+    async def __call__(
+            self,
+            project_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
+    ):
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
+            return True
+
+        # Else check role assigned to the user
+        if (project := await ProjectDB.get(project_id)) is not None:
+            if project.creator == current_user:
+                # Creator can do everything
+                return True
+            for gid in project.group_ids:
+                if (group := await GroupDB.get(gid)) is not None:
+                    for u in group.users:
+                        if u.user.email == current_user:
+                            if group.project_id == project.id and u.editor and self.role == RoleType.EDITOR:
+                                # Editors of the
+                                return True
+                            elif self.role == RoleType.VIEWER:
+                                return True
+            raise HTTPException(
+                status_code=403,
+                detail=f"User `{current_user} does not have `{self.role}` permission on group {group_id}",
+            )
+        raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+
+
 class ListenerAuthorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/.
@@ -427,12 +467,12 @@ class ListenerAuthorization:
     #         self.optional_arg = optional_arg
 
     async def __call__(
-        self,
-        listener_id: str,
-        current_user: str = Depends(get_current_username),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin),
+            self,
+            listener_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
     ):
         # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
         if admin and admin_mode:
@@ -440,10 +480,10 @@ class ListenerAuthorization:
 
         # Else check if listener is active or current user is the creator of the extractor
         if (
-            listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+                listener := await EventListenerDB.get(PydanticObjectId(listener_id))
         ) is not None:
             if listener.active is True or (
-                listener.creator and listener.creator.email == current_user
+                    listener.creator and listener.creator.email == current_user
             ):
                 return True
             else:
@@ -463,12 +503,12 @@ class FeedAuthorization:
     #         self.optional_arg = optional_arg
 
     async def __call__(
-        self,
-        feed_id: str,
-        current_user: str = Depends(get_current_username),
-        enable_admin: bool = False,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin),
+            self,
+            feed_id: str,
+            current_user: str = Depends(get_current_username),
+            enable_admin: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
+            admin: bool = Depends(get_admin),
     ):
         # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
         if admin and admin_mode:
@@ -494,13 +534,13 @@ class CheckStatus:
         self.status = status
 
     async def __call__(
-        self,
-        dataset_id: str,
+            self,
+            dataset_id: str,
     ):
         if (
-            dataset := await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
-            )
+                dataset := await DatasetDBViewList.find_one(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                )
         ) is not None:
             if dataset.status == self.status:
                 return True
@@ -518,15 +558,15 @@ class CheckFileStatus:
         self.status = status
 
     async def __call__(
-        self,
-        file_id: str,
+            self,
+            file_id: str,
     ):
         if (file_out := await FileDB.get(PydanticObjectId(file_id))) is not None:
             dataset_id = file_out.dataset_id
             if (
-                dataset := await DatasetDBViewList.find_one(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id)
-                )
+                    dataset := await DatasetDBViewList.find_one(
+                        DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                    )
             ) is not None:
                 if dataset.status == self.status:
                     return True
@@ -539,12 +579,12 @@ class CheckFileStatus:
 
 
 def access(
-    user_role: RoleType,
-    role_required: RoleType,
-    enable_admin: bool = False,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin: bool = Depends(get_admin),
-    read_only_user: bool = Depends(get_read_only_user),
+        user_role: RoleType,
+        role_required: RoleType,
+        enable_admin: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin: bool = Depends(get_admin),
+        read_only_user: bool = Depends(get_read_only_user),
 ) -> bool:
     # check for read only user first
     if read_only_user and role_required == RoleType.VIEWER:
@@ -553,24 +593,24 @@ def access(
     if user_role == RoleType.OWNER or (admin and admin_mode):
         return True
     elif (
-        user_role == RoleType.EDITOR
-        and role_required
-        in [
-            RoleType.EDITOR,
-            RoleType.UPLOADER,
-            RoleType.VIEWER,
-        ]
-        and not read_only_user
+            user_role == RoleType.EDITOR
+            and role_required
+            in [
+                RoleType.EDITOR,
+                RoleType.UPLOADER,
+                RoleType.VIEWER,
+            ]
+            and not read_only_user
     ):
         return True
     elif (
-        user_role == RoleType.UPLOADER
-        and role_required
-        in [
-            RoleType.UPLOADER,
-            RoleType.VIEWER,
-        ]
-        and not read_only_user
+            user_role == RoleType.UPLOADER
+            and role_required
+            in [
+                RoleType.UPLOADER,
+                RoleType.VIEWER,
+            ]
+            and not read_only_user
     ):
         return True
     elif user_role == RoleType.VIEWER and role_required == RoleType.VIEWER:

@@ -3,15 +3,15 @@ from typing import Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or
-from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 
-from app import dependencies
+from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.folders import FolderDB
+from app.models.groups import GroupDB
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.projects import ProjectMember, ProjectDB, ProjectIn, ProjectOut
 from app.models.users import UserDB, UserOut
@@ -26,12 +26,24 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 async def save_project(
         project_in: ProjectIn,
         user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     project = ProjectDB(**project_in.dict())
     await project.insert()
 
-    # TODO Add new entry to elasticsearch
+    # Automatically create a group to go with this project
+    group = GroupDB({
+        "name": project.name,
+        "description": f"Automatically created for members of {project.name} project.",
+        "users": [
+            {"user": user, "editor": True}
+        ],
+        "project_id": project.id
+    }, creator=user.email)
+    await group.insert()
+
+    project.group_id = group.id
+    await project.save()
+
     return project.dict()
 
 
@@ -39,21 +51,11 @@ async def save_project(
 async def add_dataset(
         project_id: str,
         dataset_id: str,
+        # allow_proj: bool = Depends(ProjectAuthorization("editor")),
+        allow_ds: bool = Depends(Authorization("editor")),
 ):
-    if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
-            )
-    ) is not None:
-        if (
-                dataset := await DatasetDB.find_one(
-                    Or(
-                        DatasetDB.id == PydanticObjectId(dataset_id),
-                    )
-                )
-        ) is not None:
+    if (project := await ProjectDB.get(PydanticObjectId(project_id))) is not None:
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
             if dataset_id not in project.dataset_ids:
                 project.dataset_ids.append(PydanticObjectId(dataset_id))
                 await project.replace()

@@ -1,9 +1,10 @@
 from typing import List, Optional
 
-from app.models.authorization import Provenance
-from app.models.users import UserOut
 from beanie import Document
 from pydantic import BaseModel
+
+from app.models.authorization import Provenance
+from app.models.users import UserOut
 
 
 class Member(BaseModel):
@@ -15,6 +16,7 @@ class GroupBase(BaseModel):
     name: str
     description: Optional[str]
     users: List[Member] = []
+    project_id: Optional[str] = None
 
 
 class GroupIn(GroupBase):
