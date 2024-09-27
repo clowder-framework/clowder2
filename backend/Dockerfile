@@ -22,4 +22,5 @@ ENV PATH="/code/.venv/bin:$PATH"
 COPY ./app /code/app
 
 # launch app using uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+# Number of recommended workers is 2 x number_of_cores +1
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "17"]
