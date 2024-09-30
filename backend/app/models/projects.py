@@ -24,7 +24,9 @@ class ProjectBase(BaseModel):
     created: datetime = Field(default_factory=datetime.utcnow)
     name: str
     description: Optional[str] = None
-    # Individual users are added to the project's primary group
+    # Individual users are added to one of the project's hidden groups (viewers or editors)
+    viewers_group_id: Optional[str] = None
+    editors_group_id: Optional[str] = None
     groups: List[ProjectMember] = []
     dataset_ids: List[PydanticObjectId] = []
 

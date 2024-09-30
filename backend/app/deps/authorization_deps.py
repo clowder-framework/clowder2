@@ -1,4 +1,3 @@
-from app.models.project import ProjectDB
 from beanie import PydanticObjectId
 from beanie.operators import Or
 from fastapi import Depends, HTTPException
@@ -11,6 +10,7 @@ from app.models.files import FileDB, FileStatus
 from app.models.groups import GroupDB
 from app.models.listeners import EventListenerDB
 from app.models.metadata import MetadataDB
+from app.models.projects import ProjectDB
 from app.routers.authentication import get_admin, get_admin_mode
 
 
@@ -447,15 +447,14 @@ class ProjectAuthorization:
                     for u in group.users:
                         if u.user.email == current_user:
                             if group.project_id == project.id and u.editor and self.role == RoleType.EDITOR:
-                                # Editors of the
                                 return True
                             elif self.role == RoleType.VIEWER:
                                 return True
             raise HTTPException(
                 status_code=403,
-                detail=f"User `{current_user} does not have `{self.role}` permission on group {group_id}",
+                detail=f"User `{current_user} does not have `{self.role}` permission on project {project_id}",
             )
-        raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+        raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
 
 class ListenerAuthorization:

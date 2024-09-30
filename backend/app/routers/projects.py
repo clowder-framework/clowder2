@@ -6,14 +6,12 @@ from beanie.operators import Or
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, ProjectAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.datasets import DatasetDB
-from app.models.files import FileDB
-from app.models.folders import FolderDB
-from app.models.groups import GroupDB
+from app.models.groups import GroupDB, Member, GroupType
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
-from app.models.projects import ProjectMember, ProjectDB, ProjectIn, ProjectOut
+from app.models.projects import ProjectDB, ProjectIn, ProjectOut
 from app.models.users import UserDB, UserOut
 
 router = APIRouter()
@@ -30,18 +28,29 @@ async def save_project(
     project = ProjectDB(**project_in.dict())
     await project.insert()
 
-    # Automatically create a group to go with this project
-    group = GroupDB({
-        "name": project.name,
-        "description": f"Automatically created for members of {project.name} project.",
+    # Automatically create viewer and editor groups to go with this project
+    viewer_group = GroupDB({
+        "name": project.name + " (Viewers)",
+        "description": f"Automatically created for viewers of {project.name} project.",
+        "users": [],
+        "project_id": project.id,
+        "type": GroupType.PROJECT
+    }, creator=user.email)
+    await viewer_group.insert()
+
+    editor_group = GroupDB({
+        "name": project.name + " (Editors)",
+        "description": f"Automatically created for editors of {project.name} project.",
         "users": [
             {"user": user, "editor": True}
         ],
-        "project_id": project.id
+        "project_id": project.id,
+        "type": GroupType.PROJECT
     }, creator=user.email)
-    await group.insert()
+    await editor_group.insert()
 
-    project.group_id = group.id
+    project.viewers_group = viewer_group.id
+    project.editors_group = editor_group.id
     await project.save()
 
     return project.dict()
@@ -51,8 +60,8 @@ async def save_project(
 async def add_dataset(
         project_id: str,
         dataset_id: str,
-        # allow_proj: bool = Depends(ProjectAuthorization("editor")),
-        allow_ds: bool = Depends(Authorization("editor")),
+        allow_proj: bool = Depends(ProjectAuthorization("editor")),
+        allow_ds: bool = Depends(Authorization("viewer")),
 ):
     if (project := await ProjectDB.get(PydanticObjectId(project_id))) is not None:
         if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -90,118 +99,6 @@ async def remove_dataset(
             else:
                 return project.dict()
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
-
-
-@router.post("/{project_id}/add_folder/{folder_id}", response_model=ProjectOut)
-async def add_folder(
-        project_id: str,
-        folder_id: str,
-):
-    if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
-            )
-    ) is not None:
-        if (
-                folder := await FolderDB.find_one(
-                    Or(
-                        FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
-                    )
-                )
-        ) is not None:
-            if folder_id not in project.folder_ids:
-                project.folder_ids.append(PydanticObjectId(folder_id))
-                await project.replace()
-            return project.dict()
-        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
-    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
-
-
-@router.post("/{project_id}/remove_folder/{folder_id}", response_model=ProjectOut)
-async def remove_folder(
-        project_id: str,
-        folder_id: str,
-):
-    if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
-            )
-    ) is not None:
-        if (
-                folder := await FolderDB.find_one(
-                    Or(
-                        FolderDB.id == FolderDB(PydanticObjectId(folder_id)),
-                    )
-                )
-        ) is not None:
-            if folder_id in project.folder_ids:
-                project.folder_ids.remove(PydanticObjectId(folder_id))
-                await project.replace()
-                return project.dict()
-            else:
-                return project.dict()
-        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
-    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
-
-
-@router.post("/{project_id}/add_file/{file_id}", response_model=ProjectOut)
-async def add_file(
-        project_id: str,
-        file_id: str,
-):
-    if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
-            )
-    ) is not None:
-        if (
-                file := await FolderDB.find_one(
-                    Or(
-                        FileDB.id == FileDB(PydanticObjectId(file_id)),
-                    )
-                )
-        ) is not None:
-            if file_id not in project.file_ids:
-                project.file_ids.append(PydanticObjectId(file_id))
-                await project.replace()
-            return project.dict()
-        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
-    raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
-
-
-@router.post("/{project_id}/remove_file/{file_id}", response_model=ProjectOut)
-async def remove_file(
-        project_id: str,
-        file_id: str,
-):
-    if (
-            project := await ProjectDB.find_one(
-                Or(
-                    ProjectDB.id == PydanticObjectId(project_id),
-                )
-            )
-    ) is not None:
-        if (
-                file := await FolderDB.find_one(
-                    Or(
-                        FileDB.id == FileDB(PydanticObjectId(file_id)),
-                    )
-                )
-        ) is not None:
-            if file_id in project.file_ids:
-                project.file_ids.remove(PydanticObjectId(file_id))
-                await project.replace()
-                return project.dict()
-            else:
-                return project.dict()
-        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 
 
@@ -263,22 +160,59 @@ async def delete_project(
 async def add_member(
         project_id: str,
         username: str,
-        role: Optional[str] = None,
+        role: Optional[str] = "viewer",
+        allow: bool = Depends(ProjectAuthorization("editor")),
 ):
-    """Add a new user to a group."""
+    """Add a new user to the project individually - this is routed to one of the project's hidden groups."""
     if (user := await UserDB.find_one(UserDB.email == username)) is not None:
-        new_member = ProjectMember(user=UserOut(**user.dict()))
+        # Add to viewers group if role is none, otherwise add to appropriate group
+        new_member = Member(user=UserOut(**user.dict()), editor=(role == "editor"))
         if (project := await ProjectDB.get(PydanticObjectId(project_id))) is not None:
-            found_already = False
-            for u in project.users:
-                if u.user.email == username:
-                    found_already = True
-                    break
-            if not found_already:
-                # If user is already in the group, skip directly to returning the group
-                # else add role and attach this member
-                project.users.append(new_member)
-                await project.replace()
+            viewers_group = await GroupDB.get(PydanticObjectId(project.viewers_group_id))
+            editors_group = await GroupDB.get(PydanticObjectId(project.editors_group_id))
+
+            if role == "viewer":
+                found_in_viewers = False
+                for u in viewers_group.users:
+                    if u.user.email == username:
+                        found_in_viewers = True
+                        break
+                if not found_in_viewers:
+                    viewers_group.users.append(new_member)
+                    await viewers_group.save()
+
+                found_in_editors = False
+                clean_users = []
+                for u in editors_group.users:
+                    if u.user.email == username:
+                        found_in_editors = True
+                    else:
+                        clean_users.append(u)
+                if found_in_editors:
+                    editors_group.users = clean_users
+                    await editors_group.save()
+
+            elif role == "editor":
+                found_in_editors = False
+                for u in editors_group.users:
+                    if u.user.email == username:
+                        found_in_editors = True
+                        break
+                if not found_in_editors:
+                    editors_group.users.append(new_member)
+                    await editors_group.save()
+
+                found_in_viewers = False
+                clean_users = []
+                for u in viewers_group.users:
+                    if u.user.email == username:
+                        found_in_viewers = True
+                    else:
+                        clean_users.append(u)
+                if found_in_viewers:
+                    viewers_group.users = clean_users
+                    await viewers_group.save()
+
             return project.dict()
         raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -288,20 +222,35 @@ async def add_member(
 async def remove_member(
         project_id: str,
         username: str,
+        allow: bool = Depends(ProjectAuthorization("editor")),
 ):
     """Remove a user from a group."""
 
     if (project := await ProjectDB.get(PydanticObjectId(project_id))) is not None:
-        # Is the user actually in the group already?
-        found_user = None
-        for u in project.users:
+        viewers_group = await GroupDB.get(PydanticObjectId(project.viewers_group_id))
+        editors_group = await GroupDB.get(PydanticObjectId(project.editors_group_id))
+
+        found_in_editors = False
+        clean_users = []
+        for u in editors_group.users:
             if u.user.email == username:
-                found_user = u
-        if not found_user:
-            # TODO: User wasn't in group, should this throw an error instead? Either way, the user is removed...
-            return project
-        # Update group itself
-        project.users.remove(found_user)
-        await project.replace()
+                found_in_editors = True
+            else:
+                clean_users.append(u)
+        if found_in_editors:
+            editors_group.users = clean_users
+            await editors_group.save()
+
+        found_in_viewers = False
+        clean_users = []
+        for u in viewers_group.users:
+            if u.user.email == username:
+                found_in_viewers = True
+            else:
+                clean_users.append(u)
+        if found_in_viewers:
+            viewers_group.users = clean_users
+            await viewers_group.save()
+
         return project.dict()
     raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
