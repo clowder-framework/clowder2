@@ -143,6 +143,8 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 			setSelectedStatus={setSelectedStatus}
 			setSelectedCreatedTime={setSelectedCreatedTime}
 			handleRefresh={handleRefresh}
+			fileId={fileId}
+			datasetId={datasetId}
 		/>
 	);
 };

@@ -151,6 +151,8 @@ export const ExtractionJobs = (props) => {
 		setSelectedStatus,
 		setSelectedCreatedTime,
 		selectedExtractor,
+		fileId,
+		datasetId,
 	} = props;
 
 	const dispatch = useDispatch();
@@ -225,8 +227,8 @@ export const ExtractionJobs = (props) => {
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
 			limit
