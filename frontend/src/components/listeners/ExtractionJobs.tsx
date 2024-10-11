@@ -371,26 +371,24 @@ export const ExtractionJobs = (props) => {
 												<SkipNextIcon />
 											) : null}
 										</TableCell>
-										{Object.keys(row).map((key) => {
-											if (key == "jobId") {
-												return (
-													<TableCell align="left">
-														<Link
-															component="button"
-															variant="body2"
-															onClick={() => {
-																setJobId(row[key]);
-																handleExtractionSummary();
-															}}
-														>
-															{row[key]}
-														</Link>
-													</TableCell>
-												);
-											}
-											if (key !== "status")
-												return <TableCell align="left">{row[key]}</TableCell>;
-										})}
+										<TableCell align="left">
+											<Link
+												component="button"
+												variant="body2"
+												onClick={() => {
+													setJobId(row.jobId);
+													handleExtractionSummary();
+												}}
+											>
+												{row.jobId}
+											</Link>
+										</TableCell>
+										<TableCell align="left">{row.listenerName}</TableCell>
+										<TableCell align="left">{row.created}</TableCell>
+										<TableCell align="left">{row.creator}</TableCell>
+										<TableCell align="left">{row.duration}</TableCell>
+										<TableCell align="left">{row.resourceType}</TableCell>
+										<TableCell align="left">{row.resourceId}</TableCell>
 									</TableRow>
 								);
 							})}
