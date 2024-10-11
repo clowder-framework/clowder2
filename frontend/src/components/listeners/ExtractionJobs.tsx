@@ -60,7 +60,7 @@ const headCells = [
 	},
 	{
 		id: "created",
-		label: "Submitted At",
+		label: "Submitted On",
 	},
 	{
 		id: "creator",
