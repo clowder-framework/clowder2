@@ -33,7 +33,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { format } from "date-fns";
 import { parseDate } from "../../utils/common";
-import { EventListenerJobOut } from "../../openapi/v2";
 
 export interface Data {
 	status: string;
@@ -80,28 +79,6 @@ const headCells = [
 		label: "Resource Id",
 	},
 ];
-
-const createData = (
-	status: string,
-	jobId: string,
-	listenerName: string,
-	created: string,
-	creator: string,
-	duration: number,
-	resourceType: string,
-	resourceId: string
-) => {
-	return {
-		status,
-		jobId,
-		listenerName,
-		created,
-		creator,
-		duration,
-		resourceType,
-		resourceId,
-	};
-};
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 	if (b[orderBy] < a[orderBy]) {
@@ -215,27 +192,6 @@ export const ExtractionJobs = (props) => {
 		dispatch,
 	]);
 
-	useEffect(() => {
-		const rows = [];
-		if (jobs && jobs.length > 0) {
-			jobs.map((job: EventListenerJobOut) => {
-				rows.push(
-					createData(
-						job["status"],
-						job["id"],
-						job["listener_id"],
-						parseDate(job["created"]),
-						job["creator"]["email"],
-						`${job["duration"]} sec`,
-						job["resource_ref"]["collection"],
-						job["resource_ref"]["resource_id"]
-					)
-				);
-			});
-		}
-		setRows(rows);
-	}, [jobs]);
-
 	const handleRefresh = () => {
 		listListenerJobs(
 			selectedExtractor ? selectedExtractor["name"] : null,
@@ -339,35 +295,35 @@ export const ExtractionJobs = (props) => {
 							headCells={headCells}
 						/>
 						<TableBody>
-							{stableSort(rows, getComparator(order, orderBy)).map((row) => {
+							{stableSort(jobs, getComparator(order, orderBy)).map((job) => {
 								return (
-									<TableRow key={row.jobId}>
+									<TableRow key={job.id}>
 										<TableCell
 											align="right"
 											sx={{ color: theme.palette.primary.main }}
 										>
-											{row.status === config.eventListenerJobStatus.created ? (
+											{job.status === config.eventListenerJobStatus.created ? (
 												<AddCircleOutlineIcon />
 											) : null}
-											{row.status ===
+											{job.status ===
 											config.eventListenerJobStatus.resubmitted ? (
 												<RestartAltIcon />
 											) : null}
-											{row.status === config.eventListenerJobStatus.started ? (
+											{job.status === config.eventListenerJobStatus.started ? (
 												<PlayCircleOutlineIcon />
 											) : null}
-											{row.status ===
+											{job.status ===
 											config.eventListenerJobStatus.processing ? (
 												<AccessTimeIcon />
 											) : null}
-											{row.status ===
+											{job.status ===
 											config.eventListenerJobStatus.succeeded ? (
 												<CheckCircleIcon />
 											) : null}
-											{row.status === config.eventListenerJobStatus.error ? (
+											{job.status === config.eventListenerJobStatus.error ? (
 												<CancelIcon />
 											) : null}
-											{row.status === config.eventListenerJobStatus.skipped ? (
+											{job.status === config.eventListenerJobStatus.skipped ? (
 												<SkipNextIcon />
 											) : null}
 										</TableCell>
@@ -376,19 +332,25 @@ export const ExtractionJobs = (props) => {
 												component="button"
 												variant="body2"
 												onClick={() => {
-													setJobId(row.jobId);
+													setJobId(job.id);
 													handleExtractionSummary();
 												}}
 											>
-												{row.jobId}
+												{job.id}
 											</Link>
 										</TableCell>
-										<TableCell align="left">{row.listenerName}</TableCell>
-										<TableCell align="left">{row.created}</TableCell>
-										<TableCell align="left">{row.creator}</TableCell>
-										<TableCell align="left">{row.duration}</TableCell>
-										<TableCell align="left">{row.resourceType}</TableCell>
-										<TableCell align="left">{row.resourceId}</TableCell>
+										<TableCell align="left">{job.listener_id}</TableCell>
+										<TableCell align="left">{parseDate(job.created)}</TableCell>
+										<TableCell align="left">{job.creator.email}</TableCell>
+										<TableCell align="left">
+											{job.duration ? `${job.duration}seconds` : "waiting..."}
+										</TableCell>
+										<TableCell align="left">
+											{job.resource_ref.collection}
+										</TableCell>
+										<TableCell align="left">
+											{job.resource_ref.resource_id}
+										</TableCell>
 									</TableRow>
 								);
 							})}
