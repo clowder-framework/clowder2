@@ -195,33 +195,6 @@ export const ExtractionJobs = (props) => {
 	const [rows, setRows] = useState([]);
 
 	useEffect(() => {
-		// reset to first currPageNum
-		setCurrPageNum(1);
-		listListenerJobs(null, null, null, null, null, null, 0, limit);
-	}, [adminMode]);
-
-	useEffect(() => {
-		// reset to first currPageNum
-		setCurrPageNum(1);
-		if (selectedExtractor) {
-			listListenerJobs(
-				selectedExtractor["name"],
-				null,
-				null,
-				null,
-				null,
-				null,
-				0,
-				limit
-			);
-			// clear filters
-			setSelectedStatus(null);
-			setSelectedCreatedTime(null);
-		}
-	}, [selectedExtractor]);
-
-	useEffect(() => {
-		// reset to first currPageNum
 		setCurrPageNum(1);
 		listListenerJobs(
 			selectedExtractor ? selectedExtractor["name"] : null,
@@ -233,7 +206,14 @@ export const ExtractionJobs = (props) => {
 			0,
 			limit
 		);
-	}, [selectedStatus, selectedCreatedTime]);
+	}, [
+		adminMode,
+		selectedExtractor,
+		selectedStatus,
+		selectedCreatedTime,
+		limit,
+		dispatch,
+	]);
 
 	useEffect(() => {
 		const rows = [];
