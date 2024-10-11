@@ -342,9 +342,7 @@ export const ExtractionJobs = (props) => {
 										<TableCell align="left">{job.listener_id}</TableCell>
 										<TableCell align="left">{parseDate(job.created)}</TableCell>
 										<TableCell align="left">{job.creator.email}</TableCell>
-										<TableCell align="left">
-											{job.duration ? `${job.duration}seconds` : "waiting..."}
-										</TableCell>
+										<TableCell align="left">{job.duration} seconds</TableCell>
 										<TableCell align="left">
 											{job.resource_ref.collection}
 										</TableCell>
