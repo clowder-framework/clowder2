@@ -16,7 +16,7 @@ from app.models.listeners import (
     EventListenerJobStatus,
     EventListenerJobUpdateDB,
 )
-from bson import ObjectId
+from beanie import PydanticObjectId
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

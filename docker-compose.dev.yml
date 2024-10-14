@@ -131,6 +131,7 @@ services:
     environment:
       - cluster.name=clowder2
       - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - http.cors.allow-origin='*'
