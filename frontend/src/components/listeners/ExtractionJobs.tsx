@@ -197,8 +197,8 @@ export const ExtractionJobs = (props) => {
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			(currPageNum - 1) * limit,
 			limit
@@ -221,8 +221,8 @@ export const ExtractionJobs = (props) => {
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus ? selectedStatus : null,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			newSkip,
 			limit
@@ -241,8 +241,8 @@ export const ExtractionJobs = (props) => {
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus ? selectedStatus : null,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
 			newRowsPerPage
