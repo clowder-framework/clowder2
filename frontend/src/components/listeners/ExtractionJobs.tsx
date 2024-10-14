@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -169,7 +169,6 @@ export const ExtractionJobs = (props) => {
 	const [limit, setLimit] = React.useState(config.defaultExtractionJobs);
 	const [openExtractorPane, setOpenExtractorPane] = React.useState(false);
 	const [jobId, setJobId] = React.useState("");
-	const [rows, setRows] = useState([]);
 
 	useEffect(() => {
 		setCurrPageNum(1);
@@ -276,7 +275,7 @@ export const ExtractionJobs = (props) => {
 				</Dialog>
 				<TableContainer>
 					<ExtractionJobsToolbar
-						numExecution={rows.length}
+						numExecution={jobs.length}
 						selectedStatus={selectedStatus}
 						selectedCreatedTime={selectedCreatedTime}
 						setSelectedStatus={setSelectedStatus}
