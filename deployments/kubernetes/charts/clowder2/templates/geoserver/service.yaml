@@ -13,6 +13,6 @@ spec:
       targetPort: geoserver
       protocol: TCP
   selector:
-    app.kubernetes.io/name: {{ include "clowder2.name" . }}-geoserver
+    app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-geoserver
     app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
