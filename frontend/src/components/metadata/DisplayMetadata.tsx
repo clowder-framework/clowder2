@@ -39,6 +39,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 
 	const dispatch = useDispatch();
 
+	// metadata definitions
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
@@ -49,12 +50,15 @@ export const DisplayMetadata = (props: MetadataType) => {
 		skip: number,
 		limit: number
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
+
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const publicMetadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.publicMetadataDefinitionList
 	);
+
+	// metadata values
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (fileId: string | undefined) =>
@@ -63,6 +67,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 		dispatch(fetchPublicDatasetMetadata(datasetId));
 	const listPublicFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchPublicFileMetadata(fileId));
+
 	const datasetMetadataList = useSelector(
 		(state: RootState) => state.metadata.datasetMetadataList
 	);
@@ -78,18 +83,17 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const publicFileMetadataList = useSelector(
 		(state: RootState) => state.metadata.publicFileMetadataList
 	);
+
+	// about
 	const about = useSelector((state: RootState) => state.dataset.about);
 
+	// complete metadata list with both definition and values
 	useEffect(() => {
 		if (publicView) {
 			getPublicMetadatDefinitions(null, 0, 100);
 		} else {
 			getMetadatDefinitions(null, 0, 100);
 		}
-	}, []);
-
-	// complete metadata list with both definition and values
-	useEffect(() => {
 		if (resourceType === "dataset") {
 			if (publicView) {
 				listPublicDatasetMetadata(resourceId);
@@ -103,7 +107,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 				listFileMetadata(resourceId);
 			}
 		}
-	}, [resourceType, resourceId]);
+	}, [resourceType, resourceId, dispatch]);
 
 	return (
 		<>
