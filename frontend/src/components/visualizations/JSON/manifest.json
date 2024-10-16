@@ -1,0 +1,19 @@
+{
+	"name": "json-editor",
+	"version": "1.0.0",
+	"description": "A React component for visualizing and editing JSON data",
+	"main": "JSON.tsx",
+	"dependencies": {
+		"clowder2-core": "1.0.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"@uiw/react-codemirror": "^4.23.5",
+		"@codemirror/lang-json": "^6.0.1"
+	},
+	"visConfig": {
+		"name": "JSON",
+		"mainType": "application",
+		"mimeTypes": ["application/json"],
+		"fields": []
+	}
+}
