@@ -83,14 +83,14 @@ visComponentDefinitions.push({
 	mimeTypes: configVega.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configVega)),
 });
-
-const configWordCloudSpec = require("./components/visualizations/VegaSpec/manifest.json");
-visComponentDefinitions.push({
-	name: configWordCloudSpec.name,
-	mainType: configWordCloudSpec.visConfig.mainType,
-	mimeTypes: configWordCloudSpec.visConfig.mimeTypes,
-	component: React.createElement(registerComponent(configWordCloudSpec)),
-});
+//
+// const configWordCloudSpec = require("./components/visualizations/VegaSpec/manifest.json");
+// visComponentDefinitions.push({
+// 	name: configWordCloudSpec.name,
+// 	mainType: configWordCloudSpec.visConfig.mainType,
+// 	mimeTypes: configWordCloudSpec.visConfig.mimeTypes,
+// 	component: React.createElement(registerComponent(configWordCloudSpec)),
+// });
 
 const configJSON = require("./components/visualizations/JSON/manifest.json");
 visComponentDefinitions.push({
