@@ -92,7 +92,7 @@ visComponentDefinitions.push({
 // 	component: React.createElement(registerComponent(configWordCloudSpec)),
 // });
 
-const configJSON = require("./components/visualizations/JSON/manifest.json");
+const configJSON = require("./components/visualizations/JSONVisualizer/manifest.json");
 visComponentDefinitions.push({
 	name: configJSON.name,
 	mainType: configJSON.visConfig.mainType,
