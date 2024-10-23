@@ -57,7 +57,7 @@ spec:
               {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-minio
+                  name: {{include "clowder2.releaseName" . }}-secret
                   key: root-password
               {{- end }}
             - name: MINIO_UPLOAD_CHUNK_SIZE
@@ -107,7 +107,7 @@ spec:
               {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-rabbitmq
+                  name: {{ include "clowder2.releaseName" . }}-secret
                   key: rabbitmq-password
               {{- end }}
             - name: RABBITMQ_HOST

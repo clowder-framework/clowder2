@@ -1,0 +1,134 @@
+hostname: &hostname littlebeats.clowderframework.org
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  tls:
+    - hosts:
+        - *hostname
+      secretName: littlebeats.clowderframework.org-tls
+
+minio:
+  auth:
+    rootUser: littlebeats
+    existingSecret: littlebeats-secret
+    rootPasswordSecretKey: root-password
+  persistence:
+    storageClass: nfs-taiga
+    size: 20Gi
+  ingress:
+    enabled: false
+  apiIngress:
+    enabled: true
+    hostname: minio-api.littlebeats.clowderframework.org
+
+rabbitmq:
+  auth:
+    username: littlebeats
+    existingPasswordSecret: littlebeats-secret
+    existingErlangSecret: littlebeats-secret
+    existingSecretPasswordKey: rabbitmq-password
+    erlangCookie: kittencookie
+  ingress:
+    enabled: false
+  persistence:
+    storageClass: csi-cinder-sc-retain
+    size: 8Gi
+
+mongodb:
+  persistence:
+    storageClass: csi-cinder-sc-retain
+    size: 8Gi
+
+elasticsearch:
+  master:
+    persistence:
+      storageClass: csi-cinder-sc-retain
+      size: 8Gi
+  data:
+    persistence:
+      storageClass: csi-cinder-sc-retain
+      size: 8Gi
+
+keycloak:
+  auth:
+    existingSecret: littlebeats-secret
+    adminUser: littlebeats
+  ingress:
+    hostname: *hostname
+    path: /keycloak
+    tls: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+
+  postgresql:
+    auth:
+      existingSecret: littlebeats-secret
+      username: keycloak
+      database: keycloak
+    primary:
+      persistence:
+        storageClass: csi-cinder-sc-retain
+        size: 8Gi
+
+geoserver:
+  enabled: false
+
+backend:
+  existingSecret: littlebeats-secret
+  env:
+    MINIO_SERVER_URL: littlebeats-minio:9000
+    MONGODB_URL: mongodb://littlebeats-mongodb:27017
+    oauth2_scheme_auth_url: http://littlebeats-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+    auth_register_url: /keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=$(auth_redirect_uri)&scope=openid%20email
+    auth_token_url: http://littlebeats-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
+    elasticsearch_url: http://littlebeats-elasticsearch:9200
+    RABBITMQ_HOST: littlebeats-rabbitmq
+    API_HOST: http://littlebeats-clowder2-backend:80
+
+message:
+  existingSecret: littlebeats-secret
+  env:
+    MONGODB_URL: mongodb://littlebeats-mongodb:27017
+    RABBITMQ_HOST: littlebeats-rabbitmq
+
+heartbeat:
+  existingSecret: littlebeats-secret
+  env:
+    MONGODB_URL: mongodb://littlebeats-mongodb:27017
+    RABBITMQ_HOST: littlebeats-rabbitmq
+
+extractors:
+  littlebeats-extractor:
+    image: clowder/extractors-littlebeats:latest
+    existingSecret: littlebeats-secret
+    env:
+      - name: USERNAME
+        value: ccp-littlebeats
+      - name: PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: littlebeats-secret
+            key: extractor-password
+
+frontend:
+  image:
+    repository: clowder/clowder2-frontend
+    tag: 2.0.0-beta.2
+
+backend:
+  image:
+    repository: clowder/clowder2-backend
+    tag: 2.0.0-beta.2
+
+message:
+  image:
+    repository: clowder/clowder2-messages
+    tag: 2.0.0-beta.2
+
+heartbeat:
+  image:
+    repository: clowder/clowder2-heartbeat
+    tag: 2.0.0-beta.2
