@@ -46,7 +46,7 @@ spec:
               {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ $fullname }}-rabbitmq
+                  name: {{ $name }}-secret
                   key: rabbitmq-password
               {{- end }}
             - name: CLOWDER_VERSION
