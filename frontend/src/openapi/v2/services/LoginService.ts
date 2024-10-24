@@ -30,6 +30,7 @@ export class LoginService {
     }
 
     /**
+     * @deprecated
      * Login
      * @param requestBody
      * @returns any Successful Response

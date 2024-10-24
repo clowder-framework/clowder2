@@ -65,7 +65,7 @@ async def save_user(userIn: UserIn):
     return user.dict()
 
 
-@router.post("/login")
+@router.post("/login", deprecated=True)
 async def login(userIn: UserLogin):
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
