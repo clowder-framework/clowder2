@@ -91,7 +91,9 @@ async def loginPost(userIn: UserLogin):
             token_exist.refresh_token = token["refresh_token"]
             await token_exist.save()
         else:
-            token_created = TokenDB(email=userIn.email, refresh_token=token["refresh_token"])
+            token_created = TokenDB(
+                email=userIn.email, refresh_token=token["refresh_token"]
+            )
             await token_created.insert()
 
         return {"token": token["access_token"]}
