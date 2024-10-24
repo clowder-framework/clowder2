@@ -153,7 +153,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v2/users/me/is_admin": {
@@ -11912,7 +11913,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserIn"
+                "$ref": "#/components/schemas/UserLogin"
               }
             }
           },
