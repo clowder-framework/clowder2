@@ -8,6 +8,7 @@ from app.keycloak_auth import (
 )
 from app.models.datasets import DatasetDBViewList
 from app.models.users import UserDB, UserIn, UserLogin, UserOut
+from app.routers.utils import save_refresh_token
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from keycloak.exceptions import (
@@ -65,10 +66,11 @@ async def save_user(userIn: UserIn):
     return user.dict()
 
 
-@router.post("/login", deprecated=True)
+@router.post("/login")
 async def login(userIn: UserLogin):
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
+        await save_refresh_token(token["refresh_token"], userIn.email)
         return {"token": token["access_token"]}
     # bad credentials
     except KeycloakAuthenticationError as e:

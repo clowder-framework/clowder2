@@ -12,6 +12,7 @@ from app.keycloak_auth import (
 )
 from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserLogin
+from app.routers.utils import save_refresh_token
 from fastapi import APIRouter, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import ExpiredSignatureError, JWTError, jwt
@@ -84,18 +85,7 @@ async def loginPost(userIn: UserLogin):
     """Client can use this to login when redirect is not available."""
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
-
-        # store/update refresh token and link to that userid
-        token_exist = await TokenDB.find_one(TokenDB.email == userIn.email)
-        if token_exist is not None:
-            token_exist.refresh_token = token["refresh_token"]
-            await token_exist.save()
-        else:
-            token_created = TokenDB(
-                email=userIn.email, refresh_token=token["refresh_token"]
-            )
-            await token_created.insert()
-
+        await save_refresh_token(token["refresh_token"], userIn.email)
         return {"token": token["access_token"]}
     # bad credentials
     except KeycloakAuthenticationError as e:

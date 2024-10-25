@@ -153,8 +153,7 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/api/v2/users/me/is_admin": {
