@@ -67,7 +67,37 @@ async def save_user(userIn: UserIn):
     return user.dict()
 
 
-@router.patch("/users", response_model=UserOut)
+@router.post("/login")
+async def login(userIn: UserLogin):
+    try:
+        token = keycloak_openid.token(userIn.email, userIn.password)
+        return {"token": token["access_token"]}
+    # bad credentials
+    except KeycloakAuthenticationError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    # account not fully setup (for example if new password is set to temporary)
+    except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+async def authenticate_user(email: str, password: str):
+    user = await UserDB.find_one({"email": email})
+    if not user:
+        return None
+    if not user.verify_password(password):
+        return None
+    return user
+
+
+@router.patch("/users/me", response_model=UserOut)
 async def update_current_user(
     userUpdate: UserUpdate, current_user=Depends(get_current_user)
 ):
@@ -106,36 +136,6 @@ async def update_current_user(
 
     await user.save()
     return user.dict()
-
-
-@router.post("/login")
-async def login(userIn: UserLogin):
-    try:
-        token = keycloak_openid.token(userIn.email, userIn.password)
-        return {"token": token["access_token"]}
-    # bad credentials
-    except KeycloakAuthenticationError as e:
-        raise HTTPException(
-            status_code=e.response_code,
-            detail=json.loads(e.error_message),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    # account not fully setup (for example if new password is set to temporary)
-    except KeycloakGetError as e:
-        raise HTTPException(
-            status_code=e.response_code,
-            detail=json.loads(e.error_message),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
-async def authenticate_user(email: str, password: str):
-    user = await UserDB.find_one({"email": email})
-    if not user:
-        return None
-    if not user.verify_password(password):
-        return None
-    return user
 
 
 @router.get("/users/me/is_admin", response_model=bool)

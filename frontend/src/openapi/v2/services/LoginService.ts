@@ -31,26 +31,6 @@ export class LoginService {
     }
 
     /**
-     * Update Current User
-     * @param requestBody
-     * @returns UserOut Successful Response
-     * @throws ApiError
-     */
-    public static updateCurrentUserApiV2UsersPatch(
-        requestBody: UserUpdate,
-    ): CancelablePromise<UserOut> {
-        return __request({
-            method: 'PATCH',
-            path: `/api/v2/users`,
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
      * Login
      * @param requestBody
      * @returns any Successful Response
@@ -62,6 +42,26 @@ export class LoginService {
         return __request({
             method: 'POST',
             path: `/api/v2/login`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Update Current User
+     * @param requestBody
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static updateCurrentUserApiV2UsersMePatch(
+        requestBody: UserUpdate,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/users/me`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {

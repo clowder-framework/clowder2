@@ -115,13 +115,54 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/v2/login": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v2_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/me": {
       "patch": {
         "tags": [
           "login"
         ],
         "summary": "Update Current User",
-        "operationId": "update_current_user_api_v2_users_patch",
+        "operationId": "update_current_user_api_v2_users_me_patch",
         "requestBody": {
           "content": {
             "application/json": {
@@ -165,45 +206,6 @@
             "APIKeyCookie": []
           }
         ]
-      }
-    },
-    "/api/v2/login": {
-      "post": {
-        "tags": [
-          "login"
-        ],
-        "summary": "Login",
-        "operationId": "login_api_v2_login_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserLogin"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v2/users/me/is_admin": {
