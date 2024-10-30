@@ -4,6 +4,7 @@
 import type { UserIn } from '../models/UserIn';
 import type { UserLogin } from '../models/UserLogin';
 import type { UserOut } from '../models/UserOut';
+import type { UserUpdate } from '../models/UserUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -20,6 +21,26 @@ export class LoginService {
     ): CancelablePromise<UserOut> {
         return __request({
             method: 'POST',
+            path: `/api/v2/users`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Update Current User
+     * @param requestBody
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static updateCurrentUserApiV2UsersPatch(
+        requestBody: UserUpdate,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'PATCH',
             path: `/api/v2/users`,
             body: requestBody,
             mediaType: 'application/json',
