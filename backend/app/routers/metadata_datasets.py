@@ -23,7 +23,6 @@ from app.models.metadata import (
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
 from beanie import PydanticObjectId
-from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, Form, HTTPException
 
@@ -104,6 +103,16 @@ async def add_dataset_metadata(
                     409,
                     f"Metadata for {metadata_in.definition} already exists on this dataset",
                 )
+
+        # lookup json_ld context in metadata definition
+        if metadata_in.definition is not None:
+            if (
+                definition := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == metadata_in.definition
+                )
+            ) is not None:
+                metadata_in.context = definition.context
+                metadata_in.context_url = definition.context_url
 
         md = await _build_metadata_db_obj(
             metadata_in, DatasetOut(**dataset.dict()), user

@@ -1,11 +1,5 @@
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or
-from bson import ObjectId
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, Form, HTTPException
-
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
@@ -28,6 +22,11 @@ from app.models.metadata import (
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
 
 router = APIRouter()
 
@@ -145,6 +144,16 @@ async def add_file_metadata(
                         409, f"Metadata for {definition} already exists on this file"
                     )
 
+        # lookup json_ld context in metadata definition
+        if metadata_in.definition is not None:
+            if (
+                definition := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == metadata_in.definition
+                )
+            ) is not None:
+                metadata_in.context = definition.context
+                metadata_in.context_url = definition.context_url
+
         md = await _build_metadata_db_obj(metadata_in, FileOut(**file.dict()), user)
         await md.insert()
 
@@ -210,19 +219,31 @@ async def replace_file_metadata(
 
         if (orig_md := await MetadataDB.find_one(*query)) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
-            md = await _build_metadata_db_obj(
+
+            # lookup json_ld context in metadata definition
+            if metadata_in.definition is not None:
+                if (
+                    definition := await MetadataDefinitionDB.find_one(
+                        MetadataDefinitionDB.name == metadata_in.definition
+                    )
+                ) is not None:
+                    metadata_in.context = definition.context
+                    metadata_in.context_url = definition.context_url
+
+            new_md = await _build_metadata_db_obj(
                 metadata_in,
                 FileOut(**file.dict()),
                 user,
                 agent=agent,
                 version=target_version,
             )
-            md.id = orig_md.id
-            await md.save()
+            new_md.id = orig_md.id
+
+            patched_md = await patch_metadata(orig_md, new_md.content, es)
 
             # Update entry to the metadata index
             await index_file(es, FileOut(**file.dict()), update=True)
-            return md.dict()
+            return patched_md.dict()
         else:
             raise HTTPException(status_code=404, detail="No metadata found to update")
     else:
