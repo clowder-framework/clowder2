@@ -526,7 +526,7 @@ export const Dataset = (): JSX.Element => {
 								: TabStyle
 						}
 					>
-						<Listeners datasetId={datasetId} />
+						<Listeners datasetId={datasetId} process="dataset" />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
