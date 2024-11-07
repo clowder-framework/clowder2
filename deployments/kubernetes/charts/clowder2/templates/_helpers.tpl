@@ -6,6 +6,13 @@ Expand the name of the chart.
 {{- end }}
 
 {{/*
+Define release name.
+*/}}
+{{- define "clowder2.releaseName" -}}
+{{- default .Release.Name .Values.releaseOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
@@ -46,7 +53,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "clowder2.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "clowder2.name" . }}
+app.kubernetes.io/name: {{ include "clowder2.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 

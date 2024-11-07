@@ -11,7 +11,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "2.0.0-beta.2"
+    "version": "2.0.0-beta.3"
   },
   "paths": {
     "/api/v2/users": {
@@ -11964,7 +11964,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserIn"
+                "$ref": "#/components/schemas/UserLogin"
               }
             }
           },
@@ -14552,7 +14552,7 @@
           "version": {
             "title": "Version",
             "type": "string",
-            "default": "2.0.0-beta.2"
+            "default": "2.0.0-beta.3"
           }
         }
       },

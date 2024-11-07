@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserIn } from '../models/UserIn';
+import type { UserLogin } from '../models/UserLogin';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -40,7 +40,7 @@ export class AuthService {
      * @throws ApiError
      */
     public static loginPostApiV2AuthLoginPost(
-        requestBody: UserIn,
+        requestBody: UserLogin,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',

@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v2.0.0-beta.3] - 2024-07-29
+
+### Added
+
+- License management
+- Release dataset with versions
+- Enable and disable user account through Keycloak
+- Jupyterhub integration
+- Interface for creating and editing matching criteria for triggering extractors
+- Interface for editing metadata definitions
+- My dataset tab listing all the datasets created by the user
+- Drag and drop upload multiple files
+- Footer with links to documentation, source code, and contact information
+- Documentation through MKDocs
+
+### Changed
+
+- Allow public datasets and files to be searchable
+- List all the extractors with the ability to enable/disable the extractors
+- Filter listeners based on their support for file or dataset
+- Helm chart updated to support custom existing secret
+
+### Fixed
+
+- Clowder registration link on the top bar
+- Case-insensitive search
+- Download count immediately increments after download
+
 ## [v2.0.0-beta.2] - 2024-02-16
 
 ### Added
