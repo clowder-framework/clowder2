@@ -63,7 +63,7 @@ from app.search.index import (
 )
 from beanie import PydanticObjectId
 from beanie.operators import And, Or
-from bson import ObjectId, json_util
+from bson import json_util
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
@@ -557,33 +557,41 @@ async def get_freeze_datasets(
     skip: int = 0,
     limit: int = 10,
     user=Depends(get_current_user),
-    fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(Authorization("owner")),
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
+    viewer: bool = Depends(Authorization("viewer")),
 ):
-    frozen_datasets_and_count = (
-        await DatasetFreezeDB.find(
-            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+    if authenticated or public or (admin and admin_mode) or viewer:
+        frozen_datasets_and_count = (
+            await DatasetFreezeDB.find(
+                DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+            )
+            .aggregate(
+                [
+                    _get_page_query(
+                        skip, limit, sort_field="frozen_version_num", ascending=False
+                    )
+                ],
+            )
+            .to_list()
         )
-        .aggregate(
-            [
-                _get_page_query(
-                    skip, limit, sort_field="frozen_version_num", ascending=False
-                )
+
+        page_metadata = _construct_page_metadata(frozen_datasets_and_count, skip, limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                DatasetFreezeOut(id=item.pop("_id"), **item)
+                for item in frozen_datasets_and_count[0]["data"]
             ],
         )
-        .to_list()
-    )
-
-    page_metadata = _construct_page_metadata(frozen_datasets_and_count, skip, limit)
-    page = Paged(
-        metadata=page_metadata,
-        data=[
-            DatasetFreezeOut(id=item.pop("_id"), **item)
-            for item in frozen_datasets_and_count[0]["data"]
-        ],
-    )
-    return page.dict()
+        return page.dict()
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {user} does not have access to view freeze list for dataset {dataset_id}",
+        )
 
 
 @router.get("/{dataset_id}/freeze/latest_version_num", response_model=int)
