@@ -24,8 +24,9 @@ type DatasetCardProps = {
 	description?: string;
 	thumbnailId?: string;
 	publicView?: boolean | false;
-	frozen?: string;
+	frozen?: boolean;
 	frozenVersionNum?: number;
+	status?: string;
 };
 
 export default function DatasetCard(props: DatasetCardProps) {
@@ -39,6 +40,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 		publicView,
 		frozen,
 		frozenVersionNum,
+		status,
 	} = props;
 
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
@@ -130,6 +132,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 						<Download />
 					</IconButton>
 				</Tooltip>
+				<Typography>{status}</Typography>
 				{/*<Tooltip title="Favorite">*/}
 				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
 				{/*		<Favorite/>*/}
