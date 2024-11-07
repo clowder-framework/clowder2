@@ -15,6 +15,7 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
+import Chip from "@mui/material/Chip";
 
 type DatasetCardProps = {
 	id?: string;
@@ -132,17 +133,42 @@ export default function DatasetCard(props: DatasetCardProps) {
 						<Download />
 					</IconButton>
 				</Tooltip>
-				<Typography>{status}</Typography>
-				{/*<Tooltip title="Favorite">*/}
-				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
-				{/*		<Favorite/>*/}
-				{/*	</IconButton>*/}
-				{/*</Tooltip>*/}
-				{/*<Tooltip title="Share">*/}
-				{/*	<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>*/}
-				{/*		<Share/>*/}
-				{/*	</IconButton>*/}
-				{/*</Tooltip>*/}
+				{(() => {
+					switch (status) {
+						case "PUBLIC":
+							return (
+								<Tooltip title="Anyone on the internet can access this dataset">
+									<Chip
+										label={status?.toLowerCase()}
+										color="primary"
+										size="small"
+									/>
+								</Tooltip>
+							);
+						case "AUTHENTICATED":
+							return (
+								<Tooltip title="Only users who have logged in can access this dataset">
+									<Chip
+										label={status?.toLowerCase()}
+										color="primary"
+										size="small"
+									/>
+								</Tooltip>
+							);
+						case "PRIVATE":
+							return (
+								<Tooltip title="Only users given specific permissions can access this dataset">
+									<Chip
+										label={status?.toLowerCase()}
+										color="primary"
+										size="small"
+									/>
+								</Tooltip>
+							);
+						default:
+							return null;
+					}
+				})()}
 			</CardActions>
 		</Card>
 	);
