@@ -145,16 +145,6 @@ export default function DatasetCard(props: DatasetCardProps) {
 									/>
 								</Tooltip>
 							);
-						case "AUTHENTICATED":
-							return (
-								<Tooltip title="Only users who have logged in can access this dataset">
-									<Chip
-										label={status?.toLowerCase()}
-										color="primary"
-										size="small"
-									/>
-								</Tooltip>
-							);
 						case "PRIVATE":
 							return (
 								<Tooltip title="Only users given specific permissions can access this dataset">
