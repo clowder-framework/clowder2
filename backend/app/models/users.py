@@ -19,7 +19,6 @@ class UserIn(UserBase):
 
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr]
     first_name: Optional[str]
     last_name: Optional[str]
     password: Optional[str]

@@ -14792,11 +14792,6 @@
         "title": "UserUpdate",
         "type": "object",
         "properties": {
-          "email": {
-            "title": "Email",
-            "type": "string",
-            "format": "email"
-          },
           "first_name": {
             "title": "First Name",
             "type": "string"

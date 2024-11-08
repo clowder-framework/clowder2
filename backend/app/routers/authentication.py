@@ -106,7 +106,7 @@ async def update_current_user(
     try:
         await update_user(
             current_user.email,
-            userUpdate.email,
+            None,
             userUpdate.password,
             userUpdate.first_name,
             userUpdate.last_name,
@@ -127,8 +127,6 @@ async def update_current_user(
     # Update local user
     user = await UserDB.find_one(UserDB.email == current_user.email)
 
-    if userUpdate.email:
-        user.email = userUpdate.email
     if userUpdate.first_name:
         user.first_name = userUpdate.first_name
     if userUpdate.last_name:
