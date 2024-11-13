@@ -24,9 +24,15 @@ type jsonProps = {
 
 export default function JSONVisualizer(props: jsonProps) {
 	const { fileId, visualizationId, publicView } = props;
+
+	// State to store the original content of the file and the displayed JSON content that can be edited
+	const [originalContent, setOriginalContent] = useState<string | undefined>();
 	const [jsonContent, setJsonContent] = useState<string | undefined>();
+
+	// Utility states to help with saving the file, displaying loading spinner and validating JSON
 	const [fileName, setFileName] = useState<string | undefined>();
 	const [loading, setLoading] = useState<boolean>(false);
+	const [validJson, setValidJson] = useState<boolean>(true);
 
 	// use useSelector to get fileSummary to get filename.
 	const fileData = useSelector((state: RootState) => state.file);
@@ -41,10 +47,6 @@ export default function JSONVisualizer(props: jsonProps) {
 			setFileName(fileData.fileSummary.name);
 		}
 	}, [fileData.fileSummary]);
-
-	useEffect(() => {
-		console.log("fileData", fileData.fileSummary.content_type);
-	}, [fileName]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -62,6 +64,7 @@ export default function JSONVisualizer(props: jsonProps) {
 
 				const file = new File([blob], fileName);
 				const text = await readTextFromFile(file);
+				setOriginalContent(text);
 				setJsonContent(text);
 			} catch (error) {
 				console.error("Error fetching data:", error);
@@ -70,6 +73,20 @@ export default function JSONVisualizer(props: jsonProps) {
 		fetchData();
 	}, [visualizationId, fileId, publicView]);
 
+	const validateJson = (jsonString: string) => {
+		try {
+			JSON.parse(jsonString);
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	const handleChange = (value: string) => {
+		setJsonContent(value);
+		setValidJson(validateJson(value));
+	}
+
 	const handleSave = async () => {
 		try {
 			if (
@@ -77,7 +94,6 @@ export default function JSONVisualizer(props: jsonProps) {
 				fileName &&
 				fileData.fileSummary?.content_type
 			) {
-				// Parse the jsonContent to ensure it's valid JSON
 				const textBlob = new Blob([jsonContent], { type: "text/plain" });
 				const file = new File([textBlob], fileName, {
 					type: fileData.fileSummary.content_type.content_type,
@@ -86,11 +102,18 @@ export default function JSONVisualizer(props: jsonProps) {
 				setLoading(true);
 				await updateFile(file, fileId);
 				setLoading(false);
+
+				// Refreshing the page to reflect the changes. TODO: Find a better way to update the version
+				window.location.reload();
 			}
 		} catch (error) {
 			console.error("Error updating file:", error);
 		}
 	};
+
+	const disableSaveButton = () => {
+		return originalContent === jsonContent || !validJson;
+	}
 
 	return (
 		<Card>
@@ -101,13 +124,13 @@ export default function JSONVisualizer(props: jsonProps) {
 					<CodeMirror
 						value={jsonContent}
 						extensions={[json()]}
-						onChange={(value) => setJsonContent(value)}
+						onChange={(value) => handleChange(value)}
 						theme="dark"
 					/>
 				)}
 			</CardContent>
 			<CardActions>
-				<Button variant="contained" color="primary" onClick={handleSave}>
+				<Button variant="contained" color="primary" onClick={handleSave} disabled={disableSaveButton()}>
 					Save Changes
 				</Button>
 			</CardActions>
