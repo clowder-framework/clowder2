@@ -7,12 +7,11 @@ from datetime import datetime
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
-from packaging import version
-
 from app.config import settings
 from app.main import startup_beanie
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
+from packaging import version
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ async def callback(message: AbstractIncomingMessage):
         msg = json.loads(message.body.decode("utf-8"))
 
         extractor_info = msg["extractor_info"]
-        owner = msg["owner"]
+        owner = msg.get("owner")
         if owner is not None and owner != "":
             # Extractor name should match queue, which includes secret key with common extractor_info["name"]
             orig_properties = ExtractorInfo(**extractor_info)
