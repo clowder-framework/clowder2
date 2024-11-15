@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -33,7 +33,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { format } from "date-fns";
 import { parseDate } from "../../utils/common";
-import { EventListenerJobOut } from "../../openapi/v2";
 
 export interface Data {
 	status: string;
@@ -61,7 +60,7 @@ const headCells = [
 	},
 	{
 		id: "created",
-		label: "Submitted At",
+		label: "Submitted On",
 	},
 	{
 		id: "creator",
@@ -80,28 +79,6 @@ const headCells = [
 		label: "Resource Id",
 	},
 ];
-
-const createData = (
-	status: string,
-	jobId: string,
-	listenerName: string,
-	created: string,
-	creator: string,
-	duration: number,
-	resourceType: string,
-	resourceId: string
-) => {
-	return {
-		status,
-		jobId,
-		listenerName,
-		created,
-		creator,
-		duration,
-		resourceType,
-		resourceId,
-	};
-};
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 	if (b[orderBy] < a[orderBy]) {
@@ -151,6 +128,8 @@ export const ExtractionJobs = (props) => {
 		setSelectedStatus,
 		setSelectedCreatedTime,
 		selectedExtractor,
+		fileId,
+		datasetId,
 	} = props;
 
 	const dispatch = useDispatch();
@@ -190,77 +169,35 @@ export const ExtractionJobs = (props) => {
 	const [limit, setLimit] = React.useState(config.defaultExtractionJobs);
 	const [openExtractorPane, setOpenExtractorPane] = React.useState(false);
 	const [jobId, setJobId] = React.useState("");
-	const [rows, setRows] = useState([]);
 
 	useEffect(() => {
-		// reset to first currPageNum
-		setCurrPageNum(1);
-		listListenerJobs(null, null, null, null, null, null, 0, limit);
-	}, [adminMode]);
-
-	useEffect(() => {
-		// reset to first currPageNum
-		setCurrPageNum(1);
-		if (selectedExtractor) {
-			listListenerJobs(
-				selectedExtractor["name"],
-				null,
-				null,
-				null,
-				null,
-				null,
-				0,
-				limit
-			);
-			// clear filters
-			setSelectedStatus(null);
-			setSelectedCreatedTime(null);
-		}
-	}, [selectedExtractor]);
-
-	useEffect(() => {
-		// reset to first currPageNum
 		setCurrPageNum(1);
 		listListenerJobs(
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
 			limit
 		);
-	}, [selectedStatus, selectedCreatedTime]);
-
-	useEffect(() => {
-		const rows = [];
-		if (jobs && jobs.length > 0) {
-			jobs.map((job: EventListenerJobOut) => {
-				rows.push(
-					createData(
-						job["status"],
-						job["id"],
-						job["listener_id"],
-						parseDate(job["created"]),
-						job["creator"]["email"],
-						`${job["duration"]} sec`,
-						job["resource_ref"]["collection"],
-						job["resource_ref"]["resource_id"]
-					)
-				);
-			});
-		}
-		setRows(rows);
-	}, [jobs]);
+	}, [
+		adminMode,
+		selectedExtractor,
+		selectedStatus,
+		selectedCreatedTime,
+		limit,
+		dispatch,
+	]);
 
 	const handleRefresh = () => {
 		listListenerJobs(
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			(currPageNum - 1) * limit,
 			limit
@@ -283,8 +220,8 @@ export const ExtractionJobs = (props) => {
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus ? selectedStatus : null,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			newSkip,
 			limit
@@ -303,8 +240,8 @@ export const ExtractionJobs = (props) => {
 			selectedExtractor ? selectedExtractor["name"] : null,
 			selectedStatus ? selectedStatus : null,
 			null,
-			null,
-			null,
+			fileId ? fileId : null,
+			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
 			newRowsPerPage
@@ -338,7 +275,7 @@ export const ExtractionJobs = (props) => {
 				</Dialog>
 				<TableContainer>
 					<ExtractionJobsToolbar
-						numExecution={rows.length}
+						numExecution={jobs.length}
 						selectedStatus={selectedStatus}
 						selectedCreatedTime={selectedCreatedTime}
 						setSelectedStatus={setSelectedStatus}
@@ -357,58 +294,60 @@ export const ExtractionJobs = (props) => {
 							headCells={headCells}
 						/>
 						<TableBody>
-							{stableSort(rows, getComparator(order, orderBy)).map((row) => {
+							{stableSort(jobs, getComparator(order, orderBy)).map((job) => {
 								return (
-									<TableRow key={row.jobId}>
+									<TableRow key={job.id}>
 										<TableCell
 											align="right"
 											sx={{ color: theme.palette.primary.main }}
 										>
-											{row.status === config.eventListenerJobStatus.created ? (
+											{job.status === config.eventListenerJobStatus.created ? (
 												<AddCircleOutlineIcon />
 											) : null}
-											{row.status ===
+											{job.status ===
 											config.eventListenerJobStatus.resubmitted ? (
 												<RestartAltIcon />
 											) : null}
-											{row.status === config.eventListenerJobStatus.started ? (
+											{job.status === config.eventListenerJobStatus.started ? (
 												<PlayCircleOutlineIcon />
 											) : null}
-											{row.status ===
+											{job.status ===
 											config.eventListenerJobStatus.processing ? (
 												<AccessTimeIcon />
 											) : null}
-											{row.status ===
+											{job.status ===
 											config.eventListenerJobStatus.succeeded ? (
 												<CheckCircleIcon />
 											) : null}
-											{row.status === config.eventListenerJobStatus.error ? (
+											{job.status === config.eventListenerJobStatus.error ? (
 												<CancelIcon />
 											) : null}
-											{row.status === config.eventListenerJobStatus.skipped ? (
+											{job.status === config.eventListenerJobStatus.skipped ? (
 												<SkipNextIcon />
 											) : null}
 										</TableCell>
-										{Object.keys(row).map((key) => {
-											if (key == "jobId") {
-												return (
-													<TableCell align="left">
-														<Link
-															component="button"
-															variant="body2"
-															onClick={() => {
-																setJobId(row[key]);
-																handleExtractionSummary();
-															}}
-														>
-															{row[key]}
-														</Link>
-													</TableCell>
-												);
-											}
-											if (key !== "status")
-												return <TableCell align="left">{row[key]}</TableCell>;
-										})}
+										<TableCell align="left">
+											<Link
+												component="button"
+												variant="body2"
+												onClick={() => {
+													setJobId(job.id);
+													handleExtractionSummary();
+												}}
+											>
+												{job.id}
+											</Link>
+										</TableCell>
+										<TableCell align="left">{job.listener_id}</TableCell>
+										<TableCell align="left">{parseDate(job.created)}</TableCell>
+										<TableCell align="left">{job.creator.email}</TableCell>
+										<TableCell align="left">{job.duration} seconds</TableCell>
+										<TableCell align="left">
+											{job.resource_ref.collection}
+										</TableCell>
+										<TableCell align="left">
+											{job.resource_ref.resource_id}
+										</TableCell>
 									</TableRow>
 								);
 							})}

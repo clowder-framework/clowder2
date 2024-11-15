@@ -37,7 +37,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   backend:
-    image: 'clowder/clowder2-backend:2.0.0-beta.2'
+    image: 'clowder/clowder2-backend:2.0.0-beta.3'
     restart: unless-stopped
     build:
       context: ./backend
@@ -64,11 +64,16 @@ services:
       keycloak_base: http://localhost/api
       frontend_url: http://localhost
     depends_on:
-      - mongo
-      - minio-nginx
-      - keycloak
-      - elasticsearch
-      - rabbitmq
+      mongo:
+        condition: service_started
+      minio-nginx:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
@@ -77,7 +82,7 @@ services:
       - "traefik.http.routers.backend.priority=5"
 
   frontend:
-    image: "clowder/clowder2-frontend:2.0.0-beta.2"
+    image: "clowder/clowder2-frontend:2.0.0-beta.3"
     restart: unless-stopped
     build:
       context: ./frontend
@@ -245,6 +250,8 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     restart: unless-stopped
+    healthcheck:
+      test: "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow"
     networks:
       - clowder2
     environment:

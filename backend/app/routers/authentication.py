@@ -5,15 +5,18 @@ from app.keycloak_auth import (
     enable_disable_user,
     get_current_user,
     keycloak_openid,
+    update_user,
 )
 from app.models.datasets import DatasetDBViewList
-from app.models.users import UserDB, UserIn, UserLogin, UserOut
+from app.models.users import UserDB, UserIn, UserLogin, UserOut, UserUpdate
+from app.routers.utils import save_refresh_token
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from keycloak.exceptions import (
     KeycloakAuthenticationError,
     KeycloakGetError,
     KeycloakPostError,
+    KeycloakPutError,
 )
 from passlib.hash import bcrypt
 
@@ -69,6 +72,7 @@ async def save_user(userIn: UserIn):
 async def login(userIn: UserLogin):
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
+        await save_refresh_token(token["refresh_token"], userIn.email)
         return {"token": token["access_token"]}
     # bad credentials
     except KeycloakAuthenticationError as e:
@@ -93,6 +97,45 @@ async def authenticate_user(email: str, password: str):
     if not user.verify_password(password):
         return None
     return user
+
+
+@router.patch("/users/me", response_model=UserOut)
+async def update_current_user(
+    userUpdate: UserUpdate, current_user=Depends(get_current_user)
+):
+    try:
+        await update_user(
+            current_user.email,
+            None,
+            userUpdate.password,
+            userUpdate.first_name,
+            userUpdate.last_name,
+        )
+    except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except KeycloakPutError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Update local user
+    user = await UserDB.find_one(UserDB.email == current_user.email)
+
+    if userUpdate.first_name:
+        user.first_name = userUpdate.first_name
+    if userUpdate.last_name:
+        user.last_name = userUpdate.last_name
+    if userUpdate.password:
+        user.hashed_password = bcrypt.hash(userUpdate.password)
+
+    await user.save()
+    return user.dict()
 
 
 @router.get("/users/me/is_admin", response_model=bool)

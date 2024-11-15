@@ -1,6 +1,6 @@
 {{- if .Values.extractors }}
 {{- $fullname := include "clowder2.fullname" . }}
-{{- $name := include "clowder2.name" . }}
+{{- $name := include "clowder2.releaseName" . }}
 {{- $labels := include "clowder2.labels" . }}
 {{- range $key, $val := .Values.extractors }}
 {{- if or .enabled (not (hasKey . "enabled")) }}
@@ -38,10 +38,17 @@ spec:
             - name: RABBITMQ_USER
               value: {{ $.Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
+              {{- if $val.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: clowder2-rabbitmq
+                  name: {{ $val.existingSecret }}
+                  key: {{ $val.existingRabbitMQSecretKey | default "rabbitmq-password" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $name }}-secret
                   key: rabbitmq-password
+              {{- end }}
             - name: CLOWDER_VERSION
               value: "2"
             - name: RABBITMQ_URI

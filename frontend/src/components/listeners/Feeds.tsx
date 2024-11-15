@@ -5,9 +5,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	Divider,
-	FormControl,
-	FormControlLabel,
 	Grid,
 	IconButton,
 	Pagination,
@@ -31,7 +28,6 @@ import { Link } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ErrorModal } from "../errors/ErrorModal";
 import DeleteFeedModal from "./DeleteFeedModal";
-import { EditFeedModal } from "./EditFeedModal";
 import { CreateFeedModal } from "./CreateFeedModal";
 
 export function Feeds() {
@@ -129,15 +125,17 @@ export function Feeds() {
 				<Grid container>
 					<Grid item xs={8} />
 					<Grid item xs={4}>
-						<Button
-							variant="contained"
-							onClick={() => {
-								setCreateFeedModalOpen(true);
-							}}
-							sx={{ float: "right" }}
-						>
-							Create New Feed
-						</Button>
+						{adminMode ? (
+							<Button
+								variant="contained"
+								onClick={() => {
+									setCreateFeedModalOpen(true);
+								}}
+								sx={{ float: "right" }}
+							>
+								Create New Feed
+							</Button>
+						) : null}
 					</Grid>
 				</Grid>
 				<Grid container spacing={2} paddingBottom={"16px"}>

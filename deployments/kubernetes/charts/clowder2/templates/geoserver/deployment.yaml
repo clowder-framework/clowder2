@@ -9,14 +9,14 @@ spec:
   replicas: {{ .Values.geoserver.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "clowder2.name" . }}-geoserver
+      app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-geoserver
       app.kubernetes.io/instance: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "clowder2.name" . }}-geoserver
+        app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-geoserver
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -29,15 +29,19 @@ spec:
           imagePullPolicy: {{ .Values.geoserver.image.pullPolicy }}
           env:
             - name: GEOSERVER_ADMIN_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-services
-                  key: GEOSERVER_USER
+              value: {{ .Values.geoserver.username }}
             - name: GEOSERVER_ADMIN_PASSWORD
+              {{- if .Values.geoserver.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-services
+                  name: {{.Values.geoserver.existingSecret }}
+                  key: {{.Values.geoserver.existingGeoserverSecretKey | default "GEOSERVER_PW" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "clowder2.releaseName" . }}-secret
                   key: GEOSERVER_PW
+              {{- end }}
           ports:
             - containerPort: 8080
               name: geoserver

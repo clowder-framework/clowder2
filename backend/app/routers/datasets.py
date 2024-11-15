@@ -63,7 +63,7 @@ from app.search.index import (
 )
 from beanie import PydanticObjectId
 from beanie.operators import And, Or
-from bson import ObjectId, json_util
+from bson import json_util
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
@@ -73,6 +73,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
+from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
 security = HTTPBearer()
@@ -556,33 +557,41 @@ async def get_freeze_datasets(
     skip: int = 0,
     limit: int = 10,
     user=Depends(get_current_user),
-    fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(Authorization("owner")),
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
+    viewer: bool = Depends(Authorization("viewer")),
 ):
-    frozen_datasets_and_count = (
-        await DatasetFreezeDB.find(
-            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+    if authenticated or public or (admin and admin_mode) or viewer:
+        frozen_datasets_and_count = (
+            await DatasetFreezeDB.find(
+                DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+            )
+            .aggregate(
+                [
+                    _get_page_query(
+                        skip, limit, sort_field="frozen_version_num", ascending=False
+                    )
+                ],
+            )
+            .to_list()
         )
-        .aggregate(
-            [
-                _get_page_query(
-                    skip, limit, sort_field="frozen_version_num", ascending=False
-                )
+
+        page_metadata = _construct_page_metadata(frozen_datasets_and_count, skip, limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                DatasetFreezeOut(id=item.pop("_id"), **item)
+                for item in frozen_datasets_and_count[0]["data"]
             ],
         )
-        .to_list()
-    )
-
-    page_metadata = _construct_page_metadata(frozen_datasets_and_count, skip, limit)
-    page = Paged(
-        metadata=page_metadata,
-        data=[
-            DatasetFreezeOut(id=item.pop("_id"), **item)
-            for item in frozen_datasets_and_count[0]["data"]
-        ],
-    )
-    return page.dict()
+        return page.dict()
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {user} does not have access to view freeze list for dataset {dataset_id}",
+        )
 
 
 @router.get("/{dataset_id}/freeze/latest_version_num", response_model=int)
@@ -1192,16 +1201,26 @@ async def download_dataset(
         bag_info_path = os.path.join(current_temp_dir, "bag-info.txt")
         tagmanifest_path = os.path.join(current_temp_dir, "tagmanifest-md5.txt")
 
-        with open(manifest_path, "w") as f:
-            pass  # Create empty file so no errors later if the dataset is empty
+        await run_in_threadpool(lambda: open(manifest_path, "w").close())
+        await run_in_threadpool(lambda: open(manifest_path, "w").close())
+        await run_in_threadpool(
+            lambda: open(bagit_path, "w").write(
+                "Bag-Software-Agent: clowder.ncsa.illinois.edu"
+                + "\n"
+                + "Bagging-Date: "
+                + str(datetime.datetime.now())
+                + "\n"
+            )
+        )
 
-        with open(bagit_path, "w") as f:
-            f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
-            f.write("Bagging-Date: " + str(datetime.datetime.now()) + "\n")
-
-        with open(bag_info_path, "w") as f:
-            f.write("BagIt-Version: 0.97" + "\n")
-            f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
+        await run_in_threadpool(
+            lambda: open(bag_info_path, "w").write(
+                "BagIt-Version: 0.97"
+                + "\n"
+                + "Tag-File-Character-Encoding: UTF-8"
+                + "\n"
+            )
+        )
 
         # Write dataset metadata if found
         metadata = await MetadataDB.find(
@@ -1214,6 +1233,10 @@ async def download_dataset(
             metadata_content = json_util.dumps(metadata)
             with open(datasetmetadata_path, "w") as f:
                 f.write(metadata_content)
+            await run_in_threadpool(
+                lambda: open(datasetmetadata_path, "w").write(metadata_content)
+            )
+
             crate.add_file(
                 datasetmetadata_path,
                 dest_path="metadata/_dataset_metadata.json",
@@ -1236,16 +1259,20 @@ async def download_dataset(
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "")
                 dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                 if not os.path.isdir(dest_folder):
-                    os.makedirs(dest_folder, exist_ok=True)
+                    await run_in_threadpool(os.makedirs, dest_folder, exist_ok=True)
                 file_name = hierarchy + file_name
             current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
 
             content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
             file_md5_hash = hashlib.md5(content.data).hexdigest()
-            with open(current_file_path, "wb") as f1:
-                f1.write(content.data)
-            with open(manifest_path, "a") as mpf:
-                mpf.write(file_md5_hash + " " + file_name + "\n")
+            await run_in_threadpool(
+                lambda: open(current_file_path, "wb").write(content.data)
+            )
+            await run_in_threadpool(
+                lambda: open(manifest_path, "a").write(
+                    file_md5_hash + " " + file_name + "\n"
+                )
+            )
             crate.add_file(
                 current_file_path,
                 dest_path="data/" + file_name,
@@ -1266,8 +1293,11 @@ async def download_dataset(
                     current_temp_dir, metadata_filename
                 )
                 metadata_content = json_util.dumps(metadata)
-                with open(metadata_filename_temp_path, "w") as f:
-                    f.write(metadata_content)
+                await run_in_threadpool(
+                    lambda: open(metadata_filename_temp_path, "w").write(
+                        metadata_content
+                    )
+                )
                 crate.add_file(
                     metadata_filename_temp_path,
                     dest_path="metadata/" + metadata_filename,
@@ -1275,14 +1305,31 @@ async def download_dataset(
                 )
 
         bag_size_kb = bag_size / 1024
-
-        with open(bagit_path, "a") as f:
-            f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
-            f.write("Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n")
-            f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
-            f.write("Internal-Sender-Description: " + dataset.description + "\n")
-            f.write("Contact-Name: " + user_full_name + "\n")
-            f.write("Contact-Email: " + user.email + "\n")
+        await run_in_threadpool(
+            lambda: open(bagit_path, "a").write(
+                "Bag-Size: "
+                + str(bag_size_kb)
+                + " kB"
+                + "\n"
+                + "Payload-Oxum: "
+                + str(bag_size)
+                + "."
+                + str(file_count)
+                + "\n"
+                + "Internal-Sender-Identifier: "
+                + dataset_id
+                + "\n"
+                + "Internal-Sender-Description: "
+                + dataset.description
+                + "\n"
+                + "Contact-Name: "
+                + user_full_name
+                + "\n"
+                + "Contact-Email: "
+                + user.email
+                + "\n"
+            )
+        )
         crate.add_file(
             bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
         )
@@ -1296,14 +1343,33 @@ async def download_dataset(
         )
 
         # Generate tag manifest file
-        manifest_md5_hash = hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
-        bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
-        bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
+        manifest_md5_hash = await run_in_threadpool(
+            lambda: hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
+        )
+        bagit_md5_hash = await run_in_threadpool(
+            lambda: hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
+        )
+        bag_info_md5_hash = await run_in_threadpool(
+            lambda: hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
+        )
 
-        with open(tagmanifest_path, "w") as f:
-            f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
-            f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
-            f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
+        await run_in_threadpool(
+            lambda: open(tagmanifest_path, "w").write(
+                bagit_md5_hash
+                + " "
+                + "bagit.txt"
+                + "\n"
+                + manifest_md5_hash
+                + " "
+                + "manifest-md5.txt"
+                + "\n"
+                + bag_info_md5_hash
+                + " "
+                + "bag-info.txt"
+                + "\n"
+            )
+        )
+
         crate.add_file(
             tagmanifest_path,
             dest_path="tagmanifest-md5.txt",
@@ -1317,13 +1383,16 @@ async def download_dataset(
         )
         zip_name = dataset.name + version_name + ".zip"
         path_to_zip = os.path.join(current_temp_dir, zip_name)
-        crate.write_zip(path_to_zip)
-        f = open(path_to_zip, "rb", buffering=0)
-        zip_bytes = f.read()
+
+        await run_in_threadpool(crate.write_zip, path_to_zip)  # takes the most time?
+
+        f = await run_in_threadpool(open, path_to_zip, "rb", 0)
+        zip_bytes = await run_in_threadpool(f.read)
         stream = io.BytesIO(zip_bytes)
-        f.close()
+        await run_in_threadpool(f.close)
+
         try:
-            shutil.rmtree(current_temp_dir)
+            await run_in_threadpool(shutil.rmtree, current_temp_dir)
         except Exception as e:
             print("could not delete file")
             print(e)
