@@ -1,6 +1,5 @@
 version: '3.7'
 
-
 services:
   name-entity-recognition:
     image: socialmediamacroscope/name_entity_recognition_extractor:latest
@@ -40,15 +39,6 @@ services:
 
   sentiment-analysis:
     image: socialmediamacroscope/sentiment_analysis_extractor:latest
-    environment:
-      CLOWDER_VERSION: 2
-      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
-    networks:
-      - clowder2
-    restart: unless-stopped
-
-  wordcount:
-    image: clowder/extractors-wordcount:latest
     environment:
       CLOWDER_VERSION: 2
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F

@@ -64,11 +64,16 @@ services:
       keycloak_base: http://localhost/api
       frontend_url: http://localhost
     depends_on:
-      - mongo
-      - minio-nginx
-      - keycloak
-      - elasticsearch
-      - rabbitmq
+      mongo:
+        condition: service_started
+      minio-nginx:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
@@ -245,6 +250,8 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     restart: unless-stopped
+    healthcheck:
+      test: "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow"
     networks:
       - clowder2
     environment:
