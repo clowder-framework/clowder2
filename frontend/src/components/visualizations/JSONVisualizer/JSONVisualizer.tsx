@@ -9,7 +9,7 @@ import {
 import CodeMirror from "@uiw/react-codemirror"; // CodeMirror editor
 import { json } from "@codemirror/lang-json"; // JSON language support for CodeMirror
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
-import { updateFile as updateFileAction } from "../../../actions/file";
+import {fetchFileVersions, updateFile as updateFileAction} from "../../../actions/file";
 import { readTextFromFile } from "../../../utils/common";
 import { downloadPublicVisData } from "../../../actions/public_visualization";
 import { filePublicDownloaded } from "../../../actions/public_file";
@@ -23,19 +23,21 @@ type jsonProps = {
 };
 
 export default function JSONVisualizer(props: jsonProps) {
-	const { fileId, visualizationId, publicView } = props;
+	const {  visualizationId, publicView } = props;
+	// TODO: Use fileData to get the fileid to reflect version change
+	const fileId = useSelector((state: RootState) => state.file.fileSummary?.id);
+	const versionNum = useSelector((state: RootState) => state.file.selected_version_num);
+	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
+	const fileData = useSelector((state: RootState) => state.file);
 
 	// State to store the original content of the file and the displayed JSON content that can be edited
 	const [originalContent, setOriginalContent] = useState<string | undefined>();
 	const [jsonContent, setJsonContent] = useState<string | undefined>();
 
-	// Utility states to help with saving the file, displaying loading spinner and validating JSON
+	// Utility state to help with saving the file, displaying loading spinner and validating JSON
 	const [fileName, setFileName] = useState<string | undefined>();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [validJson, setValidJson] = useState<boolean>(true);
-
-	// use useSelector to get fileSummary to get filename.
-	const fileData = useSelector((state: RootState) => state.file);
 
 	// use useDispatch to update file
 	const dispatch = useDispatch();
@@ -43,12 +45,19 @@ export default function JSONVisualizer(props: jsonProps) {
 		dispatch(updateFileAction(file, fileId));
 
 	useEffect(() => {
-		if (fileData.fileSummary) {
-			setFileName(fileData.fileSummary.name);
-		}
-	}, [fileData.fileSummary]);
+		console.log("File Data: ", fileData);
+	}, [fileData]);
 
 	useEffect(() => {
+		if (fileSummary) {
+			setFileName(fileSummary.name);
+			console.log("File Summary: ", fileSummary);
+		}
+	}, [fileSummary]);
+
+	useEffect(() => {
+		console.log("File ID: ", fileId);
+		console.log("Version Num: ", versionNum);
 		const fetchData = async () => {
 			try {
 				let blob;
@@ -59,7 +68,7 @@ export default function JSONVisualizer(props: jsonProps) {
 				} else {
 					blob = publicView
 						? await filePublicDownloaded(fileId)
-						: await fileDownloaded(fileId, 0);
+						: await fileDownloaded(fileId, versionNum);
 				}
 
 				const file = new File([blob], fileName);
@@ -71,7 +80,7 @@ export default function JSONVisualizer(props: jsonProps) {
 			}
 		};
 		fetchData();
-	}, [visualizationId, fileId, publicView]);
+	}, [visualizationId, fileId, publicView, versionNum]);
 
 	const validateJson = (jsonString: string) => {
 		try {
@@ -92,11 +101,11 @@ export default function JSONVisualizer(props: jsonProps) {
 			if (
 				jsonContent !== undefined &&
 				fileName &&
-				fileData.fileSummary?.content_type
+				fileSummary?.content_type
 			) {
 				const textBlob = new Blob([jsonContent], { type: "text/plain" });
 				const file = new File([textBlob], fileName, {
-					type: fileData.fileSummary.content_type.content_type,
+					type: fileSummary.content_type.content_type,
 				});
 
 				setLoading(true);

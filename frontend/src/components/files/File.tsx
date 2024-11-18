@@ -15,7 +15,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-import { fetchFileSummary, fetchFileVersions } from "../../actions/file";
+import { fetchFileSummary, fetchFileVersions, changeSelectedVersion } from "../../actions/file";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
@@ -77,6 +77,8 @@ export const File = (): JSX.Element => {
 		dispatch(deleteFileMetadataAction(fileId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
+	const changeFileVersion = (fileId: string | undefined, version: number) =>
+		dispatch(changeSelectedVersion(fileId, version));
 
 	const file = useSelector((state: RootState) => state.file);
 	const latestVersionNum = useSelector(
@@ -178,6 +180,11 @@ export const File = (): JSX.Element => {
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};
+
+	// Set file version
+	useEffect(() => {
+		changeFileVersion(fileId, selectedVersionNum);
+	}, [selectedVersionNum]);
 
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
