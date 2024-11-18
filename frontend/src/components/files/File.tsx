@@ -15,7 +15,11 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-import { fetchFileSummary, fetchFileVersions, changeSelectedVersion } from "../../actions/file";
+import {
+	fetchFileSummary,
+	fetchFileVersions,
+	changeSelectedVersion,
+} from "../../actions/file";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";

@@ -9,7 +9,10 @@ import {
 import CodeMirror from "@uiw/react-codemirror"; // CodeMirror editor
 import { json } from "@codemirror/lang-json"; // JSON language support for CodeMirror
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
-import {fetchFileVersions, updateFile as updateFileAction} from "../../../actions/file";
+import {
+	fetchFileVersions,
+	updateFile as updateFileAction,
+} from "../../../actions/file";
 import { readTextFromFile } from "../../../utils/common";
 import { downloadPublicVisData } from "../../../actions/public_visualization";
 import { filePublicDownloaded } from "../../../actions/public_file";
@@ -23,10 +26,12 @@ type jsonProps = {
 };
 
 export default function JSONVisualizer(props: jsonProps) {
-	const {  visualizationId, publicView } = props;
+	const { visualizationId, publicView } = props;
 	// TODO: Use fileData to get the fileid to reflect version change
 	const fileId = useSelector((state: RootState) => state.file.fileSummary?.id);
-	const versionNum = useSelector((state: RootState) => state.file.selected_version_num);
+	const versionNum = useSelector(
+		(state: RootState) => state.file.selected_version_num
+	);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const fileData = useSelector((state: RootState) => state.file);
 
@@ -89,20 +94,16 @@ export default function JSONVisualizer(props: jsonProps) {
 		} catch (error) {
 			return false;
 		}
-	}
+	};
 
 	const handleChange = (value: string) => {
 		setJsonContent(value);
 		setValidJson(validateJson(value));
-	}
+	};
 
 	const handleSave = async () => {
 		try {
-			if (
-				jsonContent !== undefined &&
-				fileName &&
-				fileSummary?.content_type
-			) {
+			if (jsonContent !== undefined && fileName && fileSummary?.content_type) {
 				const textBlob = new Blob([jsonContent], { type: "text/plain" });
 				const file = new File([textBlob], fileName, {
 					type: fileSummary.content_type.content_type,
@@ -122,7 +123,7 @@ export default function JSONVisualizer(props: jsonProps) {
 
 	const disableSaveButton = () => {
 		return originalContent === jsonContent || !validJson;
-	}
+	};
 
 	return (
 		<Card>
@@ -139,7 +140,12 @@ export default function JSONVisualizer(props: jsonProps) {
 				)}
 			</CardContent>
 			<CardActions>
-				<Button variant="contained" color="primary" onClick={handleSave} disabled={disableSaveButton()}>
+				<Button
+					variant="contained"
+					color="primary"
+					onClick={handleSave}
+					disabled={disableSaveButton()}
+				>
 					Save Changes
 				</Button>
 			</CardActions>
