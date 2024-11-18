@@ -8,11 +8,9 @@ import {
 } from "@mui/material";
 import CodeMirror from "@uiw/react-codemirror"; // CodeMirror editor
 import { json } from "@codemirror/lang-json"; // JSON language support for CodeMirror
+
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
-import {
-	fetchFileVersions,
-	updateFile as updateFileAction,
-} from "../../../actions/file";
+import { updateFile as updateFileAction } from "../../../actions/file";
 import { readTextFromFile } from "../../../utils/common";
 import { downloadPublicVisData } from "../../../actions/public_visualization";
 import { filePublicDownloaded } from "../../../actions/public_file";
@@ -26,14 +24,11 @@ type jsonProps = {
 };
 
 export default function JSONVisualizer(props: jsonProps) {
-	const { visualizationId, publicView } = props;
-	// TODO: Use fileData to get the fileid to reflect version change
-	const fileId = useSelector((state: RootState) => state.file.fileSummary?.id);
-	const versionNum = useSelector(
+	const { fileId, visualizationId, publicView } = props;
+	const selectedFileVersion = useSelector(
 		(state: RootState) => state.file.selected_version_num
 	);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
-	const fileData = useSelector((state: RootState) => state.file);
 
 	// State to store the original content of the file and the displayed JSON content that can be edited
 	const [originalContent, setOriginalContent] = useState<string | undefined>();
@@ -50,19 +45,12 @@ export default function JSONVisualizer(props: jsonProps) {
 		dispatch(updateFileAction(file, fileId));
 
 	useEffect(() => {
-		console.log("File Data: ", fileData);
-	}, [fileData]);
-
-	useEffect(() => {
 		if (fileSummary) {
 			setFileName(fileSummary.name);
-			console.log("File Summary: ", fileSummary);
 		}
 	}, [fileSummary]);
 
 	useEffect(() => {
-		console.log("File ID: ", fileId);
-		console.log("Version Num: ", versionNum);
 		const fetchData = async () => {
 			try {
 				let blob;
@@ -73,7 +61,7 @@ export default function JSONVisualizer(props: jsonProps) {
 				} else {
 					blob = publicView
 						? await filePublicDownloaded(fileId)
-						: await fileDownloaded(fileId, versionNum);
+						: await fileDownloaded(fileId, selectedFileVersion);
 				}
 
 				const file = new File([blob], fileName);
@@ -85,7 +73,7 @@ export default function JSONVisualizer(props: jsonProps) {
 			}
 		};
 		fetchData();
-	}, [visualizationId, fileId, publicView, versionNum]);
+	}, [visualizationId, fileId, publicView, selectedFileVersion]);
 
 	const validateJson = (jsonString: string) => {
 		try {
@@ -125,6 +113,10 @@ export default function JSONVisualizer(props: jsonProps) {
 		return originalContent === jsonContent || !validJson;
 	};
 
+	// Flag for previous versions
+	const isPreviousVersion = () => {
+		return selectedFileVersion !== fileSummary?.version_num;
+	};
 	return (
 		<Card>
 			<CardContent>
@@ -140,14 +132,16 @@ export default function JSONVisualizer(props: jsonProps) {
 				)}
 			</CardContent>
 			<CardActions>
-				<Button
-					variant="contained"
-					color="primary"
-					onClick={handleSave}
-					disabled={disableSaveButton()}
-				>
-					Save Changes
-				</Button>
+				{!isPreviousVersion() && (
+					<Button
+						variant="contained"
+						color="primary"
+						onClick={handleSave}
+						disabled={disableSaveButton()}
+					>
+						Save Changes
+					</Button>
+				)}
 			</CardActions>
 		</Card>
 	);
