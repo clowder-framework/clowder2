@@ -115,7 +115,7 @@ const PrivateRoute = (props): JSX.Element => {
 
 export const AppRoutes = (): JSX.Element => {
 	return (
-		<BrowserRouter>
+		<BrowserRouter basename={config.baseUrlRoute}>
 			<Routes>
 				<Route path="/public" element={<Public />} />
 				{isAuthorized() ? (
