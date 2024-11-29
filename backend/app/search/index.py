@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional, Union
 
 from app.config import settings
@@ -51,6 +52,7 @@ async def index_dataset(
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
         metadata=metadata,
+        metadata_stringify=json.dumps(metadata),
         status=dataset_status,
     ).dict()
 
@@ -103,6 +105,7 @@ async def index_file(
         folder_id=str(file.folder_id),
         bytes=file.bytes,
         metadata=metadata,
+        metadata_stringify=json.dumps(metadata),
         status=file.status,
     ).dict()
     if update:
@@ -207,6 +210,7 @@ async def index_thumbnail(
                 folder_id=str(file.folder_id),
                 bytes=thumbnail.bytes,
                 metadata=metadata,
+                metadata_stringify=json.dumps(metadata),
                 downloads=thumbnail.downloads,
             ).dict()
             if update:
