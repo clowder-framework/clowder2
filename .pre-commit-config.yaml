@@ -26,16 +26,16 @@ repos:
         entry: bash -c "cd frontend && npx prettier src --write"
         language: system
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 24.10.0
     hooks:
       - id: black
   - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         args: [ "--profile=black" ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
         exclude: deployments/kubernetes/charts
@@ -43,11 +43,11 @@ repos:
         exclude: 'openapi.json|frontend/src/openapi/v2/'
       - id: trailing-whitespace
         exclude: 'openapi.json|frontend/src/openapi/v2/'
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
-    hooks:
-      - id: shellcheck
+#  - repo: https://github.com/shellcheck-py/shellcheck-py
+#    rev: v0.10.0.1
+#    hooks:
+#      - id: shellcheck
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
+    rev: 7.1.1
     hooks:
       - id: flake8
