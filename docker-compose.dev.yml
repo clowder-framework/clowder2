@@ -146,8 +146,7 @@ services:
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat:latest"
     build:
-      context: backend
-      dockerfile: heartbeat.Dockerfile
+      dockerfile: backend/heartbeat.Dockerfile
     environment:
       - MONGODB_URL=mongodb://mongo:27017
       - RABBITMQ_HOST=rabbitmq
@@ -162,8 +161,7 @@ services:
   extractors-messages:
     image: "clowder/clowder2-messages:latest"
     build:
-      context: backend
-      dockerfile: messages.Dockerfile
+      dockerfile: backend/messages.Dockerfile
     environment:
       - MONGODB_URL=mongodb://mongo:27017
       - RABBITMQ_HOST=rabbitmq

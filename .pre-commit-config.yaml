@@ -25,15 +25,6 @@ repos:
         name: prettier
         entry: bash -c "cd frontend && npx prettier src --write"
         language: system
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
-    hooks:
-      - id: black
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [ "--profile=black" ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -43,11 +34,17 @@ repos:
         exclude: 'openapi.json|frontend/src/openapi/v2/'
       - id: trailing-whitespace
         exclude: 'openapi.json|frontend/src/openapi/v2/'
+# Failing under uv
 #  - repo: https://github.com/shellcheck-py/shellcheck-py
 #    rev: v0.10.0.1
 #    hooks:
 #      - id: shellcheck
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.8.2
     hooks:
-      - id: flake8
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
