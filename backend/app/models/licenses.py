@@ -73,6 +73,6 @@ standard_licenses = [
         description="CC0 (aka CC Zero) is a public dedication tool, which enables creators to give up their copyright and put their works into the worldwide public domain. CC0 enables reusers to distribute, remix, adapt, and build upon the material in any medium or format, with no conditions.",
         url="https://creativecommons.org/publicdomain/zero/1.0/",
     ),
-    LicenseOption(id="Custom", description="Create your own custom license", url="")
+    LicenseOption(id="Custom", description="Create your own custom license", url=""),
     # Add more standard license options as needed
 ]

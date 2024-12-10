@@ -1,6 +1,5 @@
 from app.models.folders import FolderDBViewList
 from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter()

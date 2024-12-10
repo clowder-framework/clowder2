@@ -263,7 +263,7 @@ async def search_listeners(
         if dataset_id is None:
             criteria_list.append(
                 Or(
-                    EventListenerDB.access == None,
+                    EventListenerDB.access is None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -272,7 +272,7 @@ async def search_listeners(
         else:
             criteria_list.append(
                 Or(
-                    EventListenerDB.access == None,
+                    EventListenerDB.access is None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -377,7 +377,7 @@ async def get_listeners(
     if label:
         aggregation_pipeline.append({"$match": {"properties.default_labels": label}})
     if alive_only:
-        aggregation_pipeline.append({"$match": {"alive": True}}),
+        (aggregation_pipeline.append({"$match": {"alive": True}}),)
     if process:
         if process == "file":
             aggregation_pipeline.append(
@@ -420,7 +420,7 @@ async def get_listeners(
         if dataset_id is None:
             criteria_list.append(
                 Or(
-                    EventListenerDB.access == None,
+                    EventListenerDB.access is None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -429,7 +429,7 @@ async def get_listeners(
         else:
             criteria_list.append(
                 Or(
-                    EventListenerDB.access == None,
+                    EventListenerDB.access is None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),

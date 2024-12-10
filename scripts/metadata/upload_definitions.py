@@ -1,4 +1,4 @@
-""" Upload metadata definitions from a local directory of JSON definitions.
+"""Upload metadata definitions from a local directory of JSON definitions.
 
 `python upload_definitions.py http://localhost:8000/api/v2 {API_KEY} definitions`
 """

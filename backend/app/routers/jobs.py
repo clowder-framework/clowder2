@@ -12,7 +12,6 @@ from app.models.listeners import (
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from beanie import PydanticObjectId
 from beanie.operators import GTE, LT, Or, RegEx
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
