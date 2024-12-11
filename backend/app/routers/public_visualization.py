@@ -13,7 +13,6 @@ from app.models.visualization_data import (
     VisualizationDataOut,
 )
 from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from minio import Minio

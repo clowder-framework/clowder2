@@ -10,9 +10,3 @@ Lines show interactions between containers over the docker network.
   ![Clowder v2 architecture](../assets/images/architecture.jpg)
   <figcaption>Architecture</figcaption>
 </figure>
-I want to `slkdfjslkdjf` include a 
-
-- alkdjflskjdf
-- alskdjflksajfd
-  - [slkjdf](http://clowder.com)
-  - 
