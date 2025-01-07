@@ -36,7 +36,7 @@ jobs:
       - name: Build Backend no push
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          file: ./backend/Dockerfile
           platforms: linux/amd64
           push: false
           tags: github-action
