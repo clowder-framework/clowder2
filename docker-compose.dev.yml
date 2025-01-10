@@ -1,5 +1,3 @@
-version: '3.7'
-
 # Settings and configurations that are common for all containers
 x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
@@ -66,7 +64,7 @@ services:
       - minio4
 
   postgres:
-      image: postgres
+      image: postgres:16
       networks:
         - clowder2
       volumes:

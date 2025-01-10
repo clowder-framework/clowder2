@@ -180,7 +180,7 @@ services:
       - minio4
 
   postgres:
-    image: postgres
+    image: postgres:16
     restart: unless-stopped
     networks:
       - clowder2

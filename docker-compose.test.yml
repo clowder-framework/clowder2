@@ -1,5 +1,3 @@
-version: '3.7'
-
 # Settings and configurations that are common for all minio containers
 x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
