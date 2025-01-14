@@ -163,11 +163,13 @@ services:
     hostname: minio4
     volumes:
       - data4:/data
-
+  
   minio-nginx:
     image: nginx:1.19.2-alpine
     restart: unless-stopped
     hostname: nginx
+    ports:
+      - "9000:9000"
     networks:
       - clowder2
     volumes:
@@ -177,6 +179,25 @@ services:
       - minio2
       - minio3
       - minio4
+
+  minio-mounted:
+    build: extractors-core/minio-mounted
+    networks:
+      - clowder2
+    restart: unless-stopped
+    environment:
+      MINIO_ENDPOINT: minio-nginx:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    privileged: true
+    devices:
+      - /dev/fuse:/dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    depends_on:
+      - minio-nginx
 
   postgres:
     image: postgres
