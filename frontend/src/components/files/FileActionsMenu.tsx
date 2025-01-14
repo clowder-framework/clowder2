@@ -38,6 +38,9 @@ type FileActionsMenuProps = {
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const { fileId, datasetId, setSelectedVersion } = props;
+	const selectedFileVersion = useSelector(
+		(state: RootState) => state.file.selected_version_num
+	);
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
@@ -158,7 +161,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 						type: INCREMENT_FILE_DOWNLOADS,
 						receivedAt: Date.now(),
 					});
-					window.location.href = `${config.hostname}/api/v2/files/${fileId}`;
+					window.location.href = `${config.hostname}/api/v2/files/${fileId}?version=${selectedFileVersion}`;
 				}}
 				endIcon={<Download />}
 			>
