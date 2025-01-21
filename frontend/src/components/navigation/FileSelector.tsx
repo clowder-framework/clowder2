@@ -24,30 +24,27 @@ import TextIcon from "@mui/icons-material/Description";
 import { fetchDatasets } from "../../actions/dataset";
 import { V2 } from "../../openapi";
 
-// Define the file details
 interface FileDetails {
 	fileId: string;
 	fileName: string;
 }
 
-// Define the RecursiveComponent component with props type
 interface RecursiveComponentProps {
 	item: FSItem;
 	depth?: number;
-	onSelectFile: (fileId: string, fileName: string) => void;
+	onHighlightFile: (fileId: string, fileName: string) => void;
+	highlightedFileId: string;
 }
 
-// Define a type for items in the directory structure
 interface FSItem {
 	datasetId: string;
 	id?: string;
 	label: string;
 	children?: FSItem[] | undefined;
-	type: string; // A FSItem can be a folder or a file,
+	type: string;
 	content_type?: string;
 }
 
-// Function to fetch children of a folder
 async function fetchFolderFiles(
 	datasetid: string,
 	folderId: string | undefined
@@ -57,7 +54,6 @@ async function fetchFolderFiles(
 			await V2.DatasetsService.getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
 				datasetid,
 				folderId,
-				// TODO: Remove hardcoded values
 				0,
 				3000
 			);
@@ -85,13 +81,14 @@ async function fetchFolderFiles(
 const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 	item,
 	depth = 0,
-	onSelectFile,
+	onHighlightFile,
+	highlightedFileId,
 }) => {
 	const [expanded, setExpanded] = useState(false);
 	const [children, setChildren] = useState<FSItem[] | undefined>(item.children);
 	const isFolderOrDataset = item.type === "folder" || item.type === "dataset";
+	const isHighlighted = item.id === highlightedFileId;
 
-	// Function to generate Icon based on item type
 	const getIcon = () => {
 		if (item.type === "folder") {
 			return <FolderIcon />;
@@ -112,7 +109,6 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 		}
 	};
 
-	// Function to handle selection of folder or file
 	const onSelect = () => {
 		if (isFolderOrDataset) {
 			if (!expanded) {
@@ -123,21 +119,25 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 			setExpanded(!expanded);
 		} else {
 			if (item.id !== undefined) {
-				onSelectFile(item.id, item.label);
+				onHighlightFile(item.id, item.label);
 			}
 		}
 	};
 
 	return (
 		<List disablePadding>
-			{/* Indentation of item proportional to depth */}
 			<ListItem
 				sx={{
 					pl: depth * 2,
 					borderBottom: "none",
 					py: 0.5,
+					backgroundColor: isHighlighted
+						? "rgba(25, 118, 210, 0.12)"
+						: "transparent",
 					"&:hover": {
-						backgroundColor: "rgba(0, 0, 0, 0.1)", // or any other color
+						backgroundColor: isHighlighted
+							? "rgba(25, 118, 210, 0.2)"
+							: "rgba(0, 0, 0, 0.1)",
 						cursor: "pointer",
 					},
 				}}
@@ -166,7 +166,8 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 								key={child.id}
 								item={child}
 								depth={depth + 1}
-								onSelectFile={onSelectFile}
+								onHighlightFile={onHighlightFile}
+								highlightedFileId={highlightedFileId}
 							/>
 						))}
 					</Box>
@@ -177,22 +178,20 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 };
 
 const FileSystemViewer: React.FC<{
-	onSelectFile: (fileId: string, fileName: string) => void;
-}> = ({ onSelectFile }) => {
+	onHighlightFile: (fileId: string, fileName: string) => void;
+	highlightedFileId: string;
+}> = ({ onHighlightFile, highlightedFileId }) => {
 	const dispatch = useDispatch();
 	const datasets = useSelector((state: any) => state.dataset.datasets);
 	const [FSItems, setFSItems] = useState<FSItem[]>([]);
 
-	// API function call to get Datasets
 	const listDatasets = (skip?: number, limit?: number, mine?: boolean) => {
 		dispatch(fetchDatasets(skip, limit, mine));
 	};
 
-	// Fetch datasets on component mount
 	useEffect(() => {
-		// TODO: Remove hardcoded values for skip and limit
 		listDatasets(0, 3000, true);
-	}, []); //
+	}, []);
 
 	useEffect(() => {
 		if (datasets.data) {
@@ -225,7 +224,8 @@ const FileSystemViewer: React.FC<{
 				<RecursiveComponent
 					key={FSItem.id}
 					item={FSItem}
-					onSelectFile={onSelectFile}
+					onHighlightFile={onHighlightFile}
+					highlightedFileId={highlightedFileId}
 				/>
 			))}
 		</Box>
@@ -233,12 +233,12 @@ const FileSystemViewer: React.FC<{
 };
 
 const DatasetFileViewer: React.FC<{
-	onSelectFile: (fileId: string, fileName: string) => void;
+	onHighlightFile: (fileId: string, fileName: string) => void;
+	highlightedFileId: string;
 	datasetId: string;
-}> = ({ onSelectFile, datasetId }) => {
+}> = ({ onHighlightFile, highlightedFileId, datasetId }) => {
 	const [FSItems, setFSItems] = useState<FSItem[]>([]);
 
-	// Only display contents of the passed dataset
 	useEffect(() => {
 		fetchFolderFiles(datasetId, undefined).then((data) => {
 			setFSItems(data);
@@ -263,7 +263,8 @@ const DatasetFileViewer: React.FC<{
 				<RecursiveComponent
 					key={FSItem.id}
 					item={FSItem}
-					onSelectFile={onSelectFile}
+					onHighlightFile={onHighlightFile}
+					highlightedFileId={highlightedFileId}
 				/>
 			))}
 		</Box>
@@ -280,14 +281,27 @@ const FileSelector: React.FC<{
 		fileId: "",
 		fileName: "",
 	});
+	const [highlightedFile, setHighlightedFile] = useState<FileDetails>({
+		fileId: "",
+		fileName: "",
+	});
 
 	const handleOpen = () => setOpen(true);
-	const handleClose = () => setOpen(false);
+	const handleClose = () => {
+		setHighlightedFile({ fileId: "", fileName: "" });
+		setOpen(false);
+	};
 
-	const handleFileSelect = (fileId: string, fileName: string) => {
-		setSelectedFile({ fileId: fileId, fileName: fileName });
-		onChange(fileId);
-		handleClose();
+	const handleHighlight = (fileId: string, fileName: string) => {
+		setHighlightedFile({ fileId, fileName });
+	};
+
+	const handleConfirmSelection = () => {
+		if (highlightedFile.fileId) {
+			setSelectedFile(highlightedFile);
+			onChange(highlightedFile.fileId);
+			handleClose();
+		}
 	};
 
 	return (
@@ -324,12 +338,25 @@ const FileSelector: React.FC<{
 				>
 					{showOnlyDatasetFiles ? (
 						<DatasetFileViewer
-							onSelectFile={handleFileSelect}
+							onHighlightFile={handleHighlight}
+							highlightedFileId={highlightedFile.fileId}
 							datasetId={datasetId as string}
 						/>
 					) : (
-						<FileSystemViewer onSelectFile={handleFileSelect} />
+						<FileSystemViewer
+							onHighlightFile={handleHighlight}
+							highlightedFileId={highlightedFile.fileId}
+						/>
 					)}
+					<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+						<Button
+							variant="contained"
+							onClick={handleConfirmSelection}
+							disabled={!highlightedFile.fileId}
+						>
+							Select
+						</Button>
+					</Box>
 				</Box>
 			</Modal>
 		</Box>
