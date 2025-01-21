@@ -305,7 +305,7 @@ const FileSystemSelector: React.FC<{
 	showOnlyDatasetFiles: boolean;
 	selectFolder: boolean;
 	datasetId: string | undefined;
-	onChange: (SelectionDetails: SelectionDetails) => void;
+	onChange: (SelectionDetails: string) => void;
 }> = ({ showOnlyDatasetFiles, selectFolder, datasetId, onChange }) => {
 	const [open, setOpen] = useState(false);
 	const [selection, setSelection] = useState<SelectionDetails>({
@@ -350,12 +350,15 @@ const FileSystemSelector: React.FC<{
 	const handleConfirmSelection = () => {
 		if (highlightedSelection.selectionID) {
 			setSelection(highlightedSelection);
-			onChange({
+			const selection = {
 				selectionID: highlightedSelection.selectionID,
 				selectionName: highlightedSelection.selectionName,
 				datasetId: highlightedSelection.datasetId,
 				selectionType: highlightedSelection.selectionType,
-			});
+			}
+			// Convert to string
+			const selectionString = JSON.stringify(selection);
+			onChange(selectionString);
 			handleClose();
 		}
 	};
