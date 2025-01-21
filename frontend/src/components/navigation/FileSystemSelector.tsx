@@ -235,7 +235,7 @@ const FileSystemViewer: React.FC<{
 			}}
 		>
 			<Typography variant="h6" sx={{ ml: 2, my: 2 }}>
-				File Selector
+				{selectFolder ? "Select a Folder" : "Select a File"}
 			</Typography>
 			{FSItems.map((FSItem) => (
 				<RecursiveComponent
@@ -286,7 +286,7 @@ const DatasetFileViewer: React.FC<{
 			}}
 		>
 			<Typography variant="h6" sx={{ ml: 2, my: 2 }}>
-				File Selector
+				{selectFolder ? "Select a Folder" : "Select a File"}
 			</Typography>
 			{FSItems.map((FSItem) => (
 				<RecursiveComponent
@@ -355,7 +355,7 @@ const FileSystemSelector: React.FC<{
 				selectionName: highlightedSelection.selectionName,
 				datasetId: highlightedSelection.datasetId,
 				selectionType: highlightedSelection.selectionType,
-			}
+			};
 			// Convert to string
 			const selectionString = JSON.stringify(selection);
 			onChange(selectionString);
