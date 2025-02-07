@@ -38,7 +38,7 @@ services:
     image: 'clowder/clowder2-backend:github-action'
     restart: unless-stopped
     build:
-      context: ./backend
+      context: backend/Dockerfile
     networks:
       - clowder2
     environment:
@@ -127,7 +127,7 @@ services:
         POSTGRES_PASSWORD: password
 
   keycloak:
-      image: quay.io/keycloak/keycloak:19.0
+      image: quay.io/keycloak/keycloak:20.0
       restart: unless-stopped
       networks:
         - clowder2
