@@ -54,11 +54,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.backend.existingSecret }}
                   key: {{ .Values.backend.existingMinioSecretKey | default "root-password" }}
-              {{- else }}
+              {{- else if (lookup "v1" "Secret" .Release.Namespace (printf "%s-secret" (include "clowder2.releaseName" .))) }}
               valueFrom:
                 secretKeyRef:
                   name: {{include "clowder2.releaseName" . }}-secret
                   key: root-password
+              {{- else }}
+              value: {{ .Values.minio.auth.rootPassword }}
               {{- end }}
             - name: MINIO_UPLOAD_CHUNK_SIZE
               value: "10485760"
