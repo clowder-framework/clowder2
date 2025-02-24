@@ -5,7 +5,6 @@ from typing import List, Optional, Union
 
 from app import dependencies
 from app.config import settings
-from app.db.dataset.version import remove_file_entry, remove_local_file_entry
 from app.db.file.download import _increment_file_downloads
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
