@@ -13,6 +13,7 @@ import {
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	Paged,
+	ProjectOut,
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
@@ -118,6 +119,12 @@ interface AttatchTo {
 export interface Thumbnail {
 	id: string;
 	thumbnail: string;
+}
+
+export interface ProjectState {
+	newProject: ProjectOut;
+	datasets: DatasetOut[];
+	members: DatasetRoles;
 }
 
 export interface DatasetState {
@@ -285,6 +292,7 @@ export interface RootState {
 	file: FileState;
 	publicFile: PublicFileState;
 	dataset: DatasetState;
+	project: ProjectState;
 	publicDataset: PublicDatasetState;
 	listener: ListenerState;
 	group: GroupState;

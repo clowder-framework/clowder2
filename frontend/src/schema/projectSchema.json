@@ -1,0 +1,33 @@
+{
+	"schema": {
+		"type": "object",
+		"required": [
+			"name"
+		],
+		"properties": {
+			"name": {
+				"type": "string",
+				"title": "Name"
+			},
+			"description": {
+				"type": "string",
+				"title": "Description"
+			}
+		}
+	},
+	"uiSchema": {
+		"name": {
+			"ui:autofocus": true,
+			"ui:emptyValue": "",
+			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
+			"ui:description": "Name of the dataset."
+		},
+		"description": {
+			"ui:autofocus": true,
+			"ui:emptyValue": "",
+			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
+			"ui:description": "Description of a dataset.",
+			"ui:widget": "TextAreaWidget"
+		}
+	}
+}

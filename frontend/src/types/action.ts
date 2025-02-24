@@ -1,4 +1,4 @@
-import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
+import {ExtractedMetadata, FilePreview, Folder, MetadataJsonld} from "./data";
 import {
 	AuthorizationBase,
 	DatasetFreezeOut,
@@ -7,8 +7,8 @@ import {
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
-	FeedOut,
 	EventListenerOut,
+	FeedOut,
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
@@ -18,17 +18,14 @@ import {
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
 	Paged,
+	ProjectOut as Project,
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
-import {
-	LIST_USERS,
-	PREFIX_SEARCH_USERS,
-	RECEIVE_USER_PROFILE,
-} from "../actions/user";
+import {LIST_USERS, PREFIX_SEARCH_USERS, RECEIVE_USER_PROFILE,} from "../actions/user";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -225,6 +222,11 @@ interface RESET_API_KEY {
 interface RECEIVE_USER_PROFILE {
 	type: "RECEIVE_USER_PROFILE";
 	profile: UserOut;
+}
+
+interface CREATE_PROJECT {
+	type: "CREATE_PROJECT";
+	project: Project;
 }
 
 interface CREATE_DATASET {
@@ -768,6 +770,7 @@ export type DataAction =
 	| DELETE_API_KEY
 	| GENERATE_API_KEY
 	| RESET_API_KEY
+	| CREATE_PROJECT
 	| CREATE_DATASET
 	| RESET_CREATE_DATASET
 	| CREATE_FILE

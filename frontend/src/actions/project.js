@@ -41,3 +41,40 @@ export function fetchProject(id) {
 			});
 	};
 }
+
+export const CREATE_PROJECT = "CREATE_PROJECT";
+
+export function projectCreated(formData) {
+	return (dispatch) => {
+		// If licenseFormData is not present, directly save the dataset
+		return V2.ProjectsService.saveProjectApiV2ProjectsPost(
+			formData
+		)
+			.then((project) => {
+				dispatch({
+					type: CREATE_PROJECT,
+					project: project,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						projectCreated(formData)
+					)
+				);
+			});
+	};
+}
+
+export const RESET_CREATE_PROJECT = "RESET_CREATE_PROJECT";
+
+export function resetProjectCreated() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_PROJECT,
+			receivedAt: Date.now(),
+		});
+	};
+}
