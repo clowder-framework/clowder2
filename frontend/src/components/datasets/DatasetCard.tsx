@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import {Link} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import {CardActionArea, CardHeader, CardMedia, IconButton, Tooltip,} from "@mui/material";
-import {Add, Download} from "@mui/icons-material";
+import {Download} from "@mui/icons-material";
 import {generateThumbnailUrl} from "../../utils/visualization";
 import config from "../../app.config";
 
@@ -126,16 +126,6 @@ export default function DatasetCard(props: DatasetCardProps) {
 						<Download/>
 					</IconButton>
 				</Tooltip> : null}
-				<Tooltip title="Add">
-					<IconButton
-						href={`${config.hostname}/api/v2/datasets/${id}/download`}
-						color="primary"
-						aria-label="add"
-						sx={{mr: 3}}
-					>
-						<Add/>
-					</IconButton>
-				</Tooltip>
 				{/*<Tooltip title="Favorite">*/}
 				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
 				{/*		<Favorite/>*/}

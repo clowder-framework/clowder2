@@ -7,8 +7,16 @@ import {Button} from "@mui/material";
 import {parseDate} from "../../utils/common";
 import {generateThumbnailUrl} from "../../utils/visualization";
 import {MoreHoriz} from "@material-ui/icons";
+import {DatasetOut} from "../../openapi/v2";
 
-export function DatsetTableEntry(props) {
+type DatasetTableEntryProps = {
+	iconStyle: {};
+	selectDataset: any;
+	dataset: DatasetOut;
+};
+
+
+export default function DatsetTableEntry(props: DatasetTableEntryProps) {
 	const {iconStyle, selectDataset, dataset} = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
@@ -43,7 +51,7 @@ export function DatsetTableEntry(props) {
 				) : (
 					<Dataset sx={iconStyle}/>
 				)}
-				<Button onClick={() => selectDataset(dataset.id)}>
+				<Button onClick={() => selectDataset(dataset.id, dataset.name)}>
 					{dataset.name}
 				</Button>
 			</TableCell>
