@@ -1,16 +1,16 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Box, Button, Grid, Pagination, Tab, Tabs } from "@mui/material";
+import React, {ChangeEvent, useEffect, useState} from "react";
+import {Box, Button, Grid, Pagination, Tab, Tabs} from "@mui/material";
 
-import { RootState } from "../types/data";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchDatasets } from "../actions/dataset";
+import {RootState} from "../types/data";
+import {useDispatch, useSelector} from "react-redux";
+import {fetchDatasets} from "../actions/dataset";
 
-import { a11yProps, TabPanel } from "./tabs/TabComponent";
+import {a11yProps, TabPanel} from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import Layout from "./Layout";
-import { Link as RouterLink } from "react-router-dom";
-import { ErrorModal } from "./errors/ErrorModal";
-import { DatasetOut } from "../openapi/v2";
+import {Link as RouterLink} from "react-router-dom";
+import {ErrorModal} from "./errors/ErrorModal";
+import {DatasetOut} from "../openapi/v2";
 import config from "../app.config";
 
 const tab = {
@@ -83,10 +83,10 @@ export const Explore = (): JSX.Element => {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen}/>
 			<Grid container spacing={4}>
 				<Grid item xs>
-					<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+					<Box sx={{borderBottom: 1, borderColor: "divider"}}>
 						<Tabs
 							value={selectedTabIndex}
 							onChange={handleTabChange}
@@ -111,6 +111,7 @@ export const Explore = (): JSX.Element => {
 												thumbnailId={dataset.thumbnail_id}
 												frozen={dataset.frozen}
 												frozenVersionNum={dataset.frozen_version_num}
+												download={true}
 											/>
 										</Grid>
 									);
@@ -129,7 +130,7 @@ export const Explore = (): JSX.Element => {
 											component={RouterLink}
 											to="/create-dataset"
 											variant="contained"
-											sx={{ m: 2 }}
+											sx={{m: 2}}
 										>
 											Create Dataset
 										</Button>
@@ -140,7 +141,7 @@ export const Explore = (): JSX.Element => {
 							)}
 						</Grid>
 						{datasets.length !== 0 ? (
-							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<Box display="flex" justifyContent="center" sx={{m: 1}}>
 								<Pagination
 									count={Math.ceil(pageMetadata.total_count / limit)}
 									page={currPageNum}
@@ -166,6 +167,7 @@ export const Explore = (): JSX.Element => {
 												created={dataset.created}
 												description={dataset.description}
 												thumbnailId={dataset.thumbnail_id}
+												download={true}
 											/>
 										</Grid>
 									);
@@ -184,7 +186,7 @@ export const Explore = (): JSX.Element => {
 											component={RouterLink}
 											to="/create-dataset"
 											variant="contained"
-											sx={{ m: 2 }}
+											sx={{m: 2}}
 										>
 											Create Dataset
 										</Button>
@@ -195,7 +197,7 @@ export const Explore = (): JSX.Element => {
 							)}
 						</Grid>
 						{datasets.length !== 0 ? (
-							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<Box display="flex" justifyContent="center" sx={{m: 1}}>
 								<Pagination
 									count={Math.ceil(pageMetadata.total_count / limit)}
 									page={currPageNum}
@@ -208,9 +210,9 @@ export const Explore = (): JSX.Element => {
 							<></>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4} />
-					<TabPanel value={selectedTabIndex} index={2} />
-					<TabPanel value={selectedTabIndex} index={3} />
+					<TabPanel value={selectedTabIndex} index={4}/>
+					<TabPanel value={selectedTabIndex} index={2}/>
+					<TabPanel value={selectedTabIndex} index={3}/>
 				</Grid>
 			</Grid>
 		</Layout>

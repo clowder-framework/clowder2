@@ -20,13 +20,13 @@
 			"ui:autofocus": true,
 			"ui:emptyValue": "",
 			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
-			"ui:description": "Name of the dataset."
+			"ui:description": "Name of the project."
 		},
 		"description": {
 			"ui:autofocus": true,
 			"ui:emptyValue": "",
 			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
-			"ui:description": "Description of a dataset.",
+			"ui:description": "Description of a project.",
 			"ui:widget": "TextAreaWidget"
 		}
 	}

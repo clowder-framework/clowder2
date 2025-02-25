@@ -125,6 +125,8 @@ export interface ProjectState {
 	newProject: ProjectOut;
 	datasets: DatasetOut[];
 	members: DatasetRoles;
+	selectDatasets: Paged;
+	selectUsers: Paged;
 }
 
 export interface DatasetState {

@@ -8,6 +8,7 @@ import {useNavigate} from "react-router-dom";
 import Layout from "../Layout";
 import {ErrorModal} from "../errors/ErrorModal";
 import {CreateProjectModal} from "./CreateProjectModal"
+import {SelectDatasetsModal} from "./SelectDatasetsModal";
 
 export const CreateProject = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -90,14 +91,16 @@ export const CreateProject = (): JSX.Element => {
 							<Step key="select-datasets">
 								<StepLabel>Select Datasets</StepLabel>
 								<StepContent>
-									<Box />
+									<Box>
+										<SelectDatasetsModal/>
+									</Box>
 								</StepContent>
 							</Step>
 
 							<Step key="invite-users">
 								<StepLabel>Invite Users</StepLabel>
 								<StepContent>
-									<Box />
+									<Box/>
 								</StepContent>
 							</Step>
 						</Stepper>
