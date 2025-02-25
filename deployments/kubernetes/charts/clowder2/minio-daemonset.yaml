@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: minio-mounter
+  namespace: ibm-hpc
+  labels:
+    app: minio-mounter
+spec:
+  selector:
+    matchLabels:
+      app: minio-mounter
+  template:
+    metadata:
+      labels:
+        app: minio-mounter
+    spec:
+      containers:
+        - name: minio-fuse
+          image: vismayak/minio-mount-daemon-container
+          securityContext:
+            privileged: true
+          envFrom:
+            - secretRef:
+                name: minio-credentials
+          volumeMounts:
+            - name: fuse
+              mountPath: /dev/fuse
+            - name: minio-point
+              mountPath: /var/clowderfs:shared
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "fusermount -u /var/clowderfs"]
+      volumes:
+        - name: fuse
+          hostPath:
+            path: /dev/fuse
+        - name: minio-point
+          hostPath:
+            path: /mnt/clowderfs
