@@ -37,4 +37,5 @@ spec:
             path: /dev/fuse
         - name: minio-point
           hostPath:
-            path: /mnt/clowderfs
+            path: /mnt/ibm-hpc-clowderfs
+            type: DirectoryOrCreate
