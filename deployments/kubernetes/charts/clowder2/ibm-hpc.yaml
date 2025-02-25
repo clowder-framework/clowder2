@@ -84,3 +84,13 @@ extractors:
   wordcount:
     enabled: true
     image: clowder/extractors-wordcount:latest
+  rcnn-iwp-inference:
+    enabled: true
+    image: vismayak/rcnn_iwp_inference_extractor_k8:latest
+    volumes:
+      - name: minio-storage
+        hostPath:
+          path: /mnt/ibm-hpc-clowderfs
+    volumeMounts:
+      - name: minio-storage
+        mountPath: /clowderfs

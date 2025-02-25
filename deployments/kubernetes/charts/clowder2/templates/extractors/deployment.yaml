@@ -28,6 +28,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- if .volumes }}
+      volumes:
+        {{- toYaml .volumes | nindent 8 }}
+    {{- end }}
       containers:
         - name: extractor
           image: {{ .image | quote }}
@@ -56,6 +60,10 @@ spec:
 
 {{- if .env }}
             {{- toYaml .env | nindent 12 }}
+{{- end }}
+{{- if .volumeMounts }}
+          volumeMounts:
+            {{- toYaml .volumeMounts | nindent 12 }}
 {{- end }}
 {{- if .resources }}
           resources:
