@@ -33,7 +33,7 @@ export const CreateProject = (): JSX.Element => {
 		return required;
 	};
 
-	// step 1 - pick datasets
+	// step 1 - project details
 	const onProjectSave = (formData: any) => {
 		setProjectRequestForm(formData);
 
@@ -46,7 +46,14 @@ export const CreateProject = (): JSX.Element => {
 
 		handleNext();
 	};
-	// step 2 - add users
+
+	// step 2 - pick datasets
+	const onDatasetsSave = (selectedDatasets: any[]) => {
+		console.log(selectedDatasets);
+		handleNext();
+	};
+
+	// step 3 - add users
 
 	// step
 	const [activeStep, setActiveStep] = useState(0);
@@ -92,7 +99,7 @@ export const CreateProject = (): JSX.Element => {
 								<StepLabel>Select Datasets</StepLabel>
 								<StepContent>
 									<Box>
-										<SelectDatasetsModal/>
+										<SelectDatasetsModal onSave={onDatasetsSave}/>
 									</Box>
 								</StepContent>
 							</Step>
@@ -100,7 +107,9 @@ export const CreateProject = (): JSX.Element => {
 							<Step key="invite-users">
 								<StepLabel>Invite Users</StepLabel>
 								<StepContent>
-									<Box/>
+									<Box>
+										<SelectDatasetsModal onSave={onDatasetsSave}/>
+									</Box>
 								</StepContent>
 							</Step>
 						</Stepper>

@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useEffect, useState} from "react";
-import {Box, Chip, Grid, Pagination, Table} from "@mui/material";
+import {Box, Button, Chip, Grid, Pagination, Table} from "@mui/material";
 
 import {useDispatch, useSelector} from "react-redux";
 import config from "../../app.config";
@@ -12,12 +12,18 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import {theme} from "../../theme";
 
+type SelectDatasetsModalProps = {
+	onSave: any;
+};
+
 type SelectedDataset = {
 	id: string,
 	label: string
 };
 
-export const SelectDatasetsModal = (): JSX.Element => {
+export const SelectDatasetsModal = (props: SelectDatasetsModalProps): JSX.Element => {
+	const {onSave} = props;
+
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listDatasets = (skip: number | undefined, limit: number | undefined) =>
@@ -41,12 +47,18 @@ export const SelectDatasetsModal = (): JSX.Element => {
 	const selectDataset = (selectedDatasetId: string | undefined, selectedDatasetName: string | undefined) => {
 		// add dataset to selection list
 		if (selectedDatasetId && selectedDatasetName) {
-			setSelectedDatasets([
-				...selectedDatasets,
-				{id: selectedDatasetId, label: selectedDatasetName}
-			]);
+			const record = {id: selectedDatasetId, label: selectedDatasetName};
+			if (selectedDatasets.filter(ds => ds.id === selectedDatasetId).length === 0) {
+				setSelectedDatasets([
+					...selectedDatasets,
+					record
+				]);
+			} else {
+				setSelectedDatasets(selectedDatasets.filter(ds => ds.id !== selectedDatasetId));
+			}
 		}
 	};
+
 
 	// pagination
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
@@ -58,15 +70,18 @@ export const SelectDatasetsModal = (): JSX.Element => {
 	return (
 		<Grid container spacing={4}>
 			<Grid item xs>
-				<Grid container spacing={2}>
-					{
-						selectedDatasets?.map((selected) => {
-							return (
-								<Chip label={selected.label} key={selected.id}/>
-							);
-						})
-					}
-				</Grid>
+				<Box display="flex" sx={{m: 1}}>
+					<Grid container spacing={2}>
+						{
+							selectedDatasets?.map((selected) => {
+								return (
+									<Chip label={selected.label} key={selected.id}
+										  onDelete={() => selectDataset(selected.id, selected.label)}/>
+								);
+							})
+						}
+					</Grid>
+				</Box>
 				<Grid container spacing={2}>
 					{datasets !== undefined ? (<>
 							<Table sx={{minWidth: 650}} aria-label="simple table">
@@ -90,6 +105,9 @@ export const SelectDatasetsModal = (): JSX.Element => {
 													}}
 													selectDataset={selectDataset}
 													dataset={dataset}
+													selected={selectedDatasets.filter(ds =>
+														ds.id === dataset.id
+													).length > 0}
 												/>
 											);
 										})
@@ -114,6 +132,11 @@ export const SelectDatasetsModal = (): JSX.Element => {
 				) : (
 					<></>
 				)}
+				<Box className="inputGroup">
+					<Button variant="contained" onClick={() => onSave(selectedDatasets)}>
+						Next
+					</Button>
+				</Box>
 			</Grid>
 		</Grid>
 	);

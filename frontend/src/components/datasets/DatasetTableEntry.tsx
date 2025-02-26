@@ -13,11 +13,12 @@ type DatasetTableEntryProps = {
 	iconStyle: {};
 	selectDataset: any;
 	dataset: DatasetOut;
+	selected: boolean;
 };
 
 
 export default function DatsetTableEntry(props: DatasetTableEntryProps) {
-	const {iconStyle, selectDataset, dataset} = props;
+	const {iconStyle, selectDataset, dataset, selected} = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
@@ -28,6 +29,11 @@ export default function DatsetTableEntry(props: DatasetTableEntryProps) {
 		setThumbnailUrl(url);
 	}, [dataset]);
 
+	useEffect(() => {
+		console.log(dataset.id);
+		console.log(selected);
+	}, [selected]);
+
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -37,7 +43,11 @@ export default function DatsetTableEntry(props: DatasetTableEntryProps) {
 	return (
 		<TableRow
 			key={dataset.id}
-			sx={{"&:last-child td, &:last-child th": {border: 0}}}
+			sx={{
+				"&:last-child td, &:last-child th": {border: 0},
+				//backgroundColor: selected ? theme.palette.secondary.main : null,
+				backgroundColor: selected ? "lightyellow" : null,
+			}}
 		>
 			<TableCell component="th" scope="row" key={`${dataset.id}-icon`}>
 				{dataset.thumbnail_id ? (
