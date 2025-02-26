@@ -25,7 +25,12 @@ minio:
     hostname: minio.ibmclowder.software-dev.ncsa.illinois.edu
   apiIngress:
     enabled: true
-    hostname: minio-api.ibmclowder.software-dev.ncsa.illinois.edu
+    hostname: minio.ibmclowder.software-dev.ncsa.illinois.edu
+
+frontend:
+  image:
+    repository: vismayak/clowder-frontend
+    tag: latest
 
 rabbitmq:
   # login
@@ -87,6 +92,22 @@ extractors:
   rcnn-iwp-inference:
     enabled: true
     image: vismayak/rcnn_iwp_inference_extractor_k8:latest
+    env:
+      - name: MINIO_MOUNTED_PATH
+        value: /clowderfs
+    volumes:
+      - name: minio-storage
+        hostPath:
+          path: /mnt/ibm-hpc-clowderfs
+    volumeMounts:
+      - name: minio-storage
+        mountPath: /clowderfs
+  rcnn-iwp-finetuning:
+    enabled: true
+    image: vismayak/rcnn_iwp_finetuning_extractor_k8:latest
+    env:
+      - name: MINIO_MOUNTED_PATH
+        value: /clowderfs
     volumes:
       - name: minio-storage
         hostPath:
