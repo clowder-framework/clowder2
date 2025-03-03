@@ -3,14 +3,23 @@ kind: Pod
 metadata:
   name: minio-test-pod
 spec:
+  volumes:
+      - name: "minio-dataset"
+        persistentVolumeClaim:
+          claimName: "minio-dataset"
   containers:
   - name: minio-test-pod
     image: alpine
     command: [ "sleep", "infinity" ]
     volumeMounts:
-      - name: minio-storage
+      - name: minio-dataset
         mountPath: /clowderfs
-  volumes:
-  - name: minio-storage
-    hostPath:
-      path: /mnt/ibm-hpc-clowderfs
+  #   volumeMounts:
+  #     - name: minio-storage
+  #       mountPath: /clowderfs
+  # volumes:
+  # - name: minio-storage
+  #   hostPath:
+  #     path: /mnt/ibm-hpc-clowderfs
+
+        
