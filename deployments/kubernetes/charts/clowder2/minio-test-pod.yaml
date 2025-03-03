@@ -14,12 +14,5 @@ spec:
     volumeMounts:
       - name: minio-dataset
         mountPath: /clowderfs
-  #   volumeMounts:
-  #     - name: minio-storage
-  #       mountPath: /clowderfs
-  # volumes:
-  # - name: minio-storage
-  #   hostPath:
-  #     path: /mnt/ibm-hpc-clowderfs
 
-        
+

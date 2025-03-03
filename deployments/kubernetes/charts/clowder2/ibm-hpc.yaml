@@ -96,11 +96,11 @@ extractors:
       - name: MINIO_MOUNTED_PATH
         value: /clowderfs
     volumes:
-      - name: minio-storage
-        hostPath:
-          path: /mnt/ibm-hpc-clowderfs
+      - name: minio-dataset
+        persistentVolumeClaim:
+          claimName: minio-dataset
     volumeMounts:
-      - name: minio-storage
+      - name: minio-dataset
         mountPath: /clowderfs
   rcnn-iwp-finetuning:
     enabled: true
@@ -109,9 +109,9 @@ extractors:
       - name: MINIO_MOUNTED_PATH
         value: /clowderfs
     volumes:
-      - name: minio-storage
-        hostPath:
-          path: /mnt/ibm-hpc-clowderfs
+      - name: minio-dataset
+        persistentVolumeClaim:
+          claimName: minio-dataset
     volumeMounts:
-      - name: minio-storage
+      - name: minio-dataset
         mountPath: /clowderfs

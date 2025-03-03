@@ -5,7 +5,7 @@ metadata:
   namespace: ibm-hpc
 spec:
   local:
-    readonly: "true" # <----
+    readonly: "true"
     bucket: clowder
     endpoint: http://clowder2-minio.ibm-hpc.svc.cluster.local:9000/
     secret-name: minio-credentials
