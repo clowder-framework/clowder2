@@ -1,7 +1,5 @@
 import React from "react";
 
-import {Box, Button} from "@mui/material";
-
 import Form from "@rjsf/mui";
 import projectSchema from "../../schema/projectSchema.json";
 import {FormProps} from "@rjsf/core";
@@ -26,20 +24,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = (
 	const {onSave} = props;
 
 	return (
-		<Form
-			widgets={widgets}
-			schema={projectSchema["schema"] as FormProps<any>["schema"]}
-			uiSchema={projectSchema["uiSchema"] as FormProps<any>["uiSchema"]}
-			validator={validator}
-			onSubmit={({formData}) => {
-				onSave(formData);
-			}}
-		>
-			<Box className="inputGroup">
-				<Button variant="contained" type="submit">
-					Next
-				</Button>
-			</Box>
-		</Form>
+
 	);
 };

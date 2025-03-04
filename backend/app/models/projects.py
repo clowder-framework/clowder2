@@ -20,18 +20,19 @@ class ProjectBase(BaseModel):
     is deleted (which deletes the associated group).
 
     """
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
     name: str
     description: Optional[str] = None
     # Individual users are added to one of the project's hidden groups (viewers or editors)
-    viewers_group_id: Optional[str] = None
-    editors_group_id: Optional[str] = None
+    viewers_group_id: Optional[PydanticObjectId] = None
+    editors_group_id: Optional[PydanticObjectId] = None
     groups: List[ProjectMember] = []
     dataset_ids: List[PydanticObjectId] = []
 
 
 class ProjectDB(Document, ProjectBase):
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+
     class Settings:
         name = "projects"
 

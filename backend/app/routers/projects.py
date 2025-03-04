@@ -25,11 +25,11 @@ async def save_project(
         project_in: ProjectIn,
         user=Depends(get_current_user),
 ):
-    project = ProjectDB(**project_in.dict())
+    project = ProjectDB(**project_in.dict(), creator=user)
     await project.insert()
 
     # Automatically create viewer and editor groups to go with this project
-    viewer_group = GroupDB({
+    viewer_group = GroupDB(**{
         "name": project.name + " (Viewers)",
         "description": f"Automatically created for viewers of {project.name} project.",
         "users": [],
@@ -38,19 +38,19 @@ async def save_project(
     }, creator=user.email)
     await viewer_group.insert()
 
-    editor_group = GroupDB({
+    editor_group = GroupDB(**{
         "name": project.name + " (Editors)",
         "description": f"Automatically created for editors of {project.name} project.",
         "users": [
             {"user": user, "editor": True}
         ],
-        "project_id": project.id,
+        "project_id": str(project.id),
         "type": GroupType.PROJECT
     }, creator=user.email)
     await editor_group.insert()
 
-    project.viewers_group = viewer_group.id
-    project.editors_group = editor_group.id
+    project.viewers_group_id = viewer_group.id
+    project.editors_group_id = editor_group.id
     await project.save()
 
     return project.dict()

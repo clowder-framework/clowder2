@@ -1,19 +1,22 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Box, Button, Grid, Pagination } from "@mui/material";
+import React, {ChangeEvent, useEffect, useState} from "react";
+import {Box, Button, CardContent, Grid, Pagination} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
-import { useDispatch, useSelector } from "react-redux";
-import { fetchProjects } from "../../actions/project";
+import {useDispatch, useSelector} from "react-redux";
+import {fetchProjects} from "../../actions/project";
 
 import ProjectCard from "./ProjectCard";
 import Layout from "../Layout";
-import { Link as RouterLink } from "react-router-dom";
-import { ErrorModal } from "../errors/ErrorModal";
+import {Link as RouterLink, useNavigate} from "react-router-dom";
+import {ErrorModal} from "../errors/ErrorModal";
 import config from "../../app.config";
-import { RootState } from "../../types/data";
+import {RootState} from "../../types/data";
+import Card from "@mui/material/Card";
 
 export const Projects = (): JSX.Element => {
-	// Redux connect equivalent
+	const history = useNavigate();
 	const dispatch = useDispatch();
+
 	const listProjects = (skip: number | undefined, limit: number | undefined) =>
 		dispatch(fetchProjects(skip, limit));
 	const projects = useSelector(
@@ -42,7 +45,7 @@ export const Projects = (): JSX.Element => {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen}/>
 			<Grid container spacing={4}>
 				<Grid item xs>
 					<Grid container spacing={2}>
@@ -56,12 +59,11 @@ export const Projects = (): JSX.Element => {
 											author={`${project.creator.first_name} ${project.creator.last_name}`}
 											created={project.created}
 											description={project.description}
-											numFiles={project.file_ids ? project.file_ids.length : 0}
-											numFolders={
-												project.folder_ids ? project.folder_ids.length : 0
-											}
 											numDatasets={
 												project.dataset_ids ? project.dataset_ids.length : 0
+											}
+											numUsers={
+												project.groups ? project.groups.length : 0
 											}
 										/>
 									</Grid>
@@ -70,9 +72,30 @@ export const Projects = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						{projects.length === 0 ? (
-							<Grid container justifyContent="center">
-								<Box textAlign="center">
+						{projects?.length > 0 ?
+							<Grid item key={"create_new"} xs={1} sm={1} md={1} lg={1}>
+								<Card
+									sx={{
+										display: "flex",
+										flexDirection: "column",
+										height: "100%",
+										justifyContent: "center",
+										alignItems: "center",
+										cursor: "pointer",
+									}}
+									variant="outlined"
+									onClick={() => {
+										history(`/create-project`)
+									}}
+								>
+									<CardContent>
+										<AddIcon sx={{fontSize: 48, color: "gray"}}/>
+									</CardContent>
+								</Card>
+							</Grid> : null}
+						<Grid container justifyContent="center">
+							<Box textAlign="center">
+								{projects?.length === 0 ? <>
 									<p>
 										Nobody has created any projects on this instance. Click
 										below to create a project!
@@ -81,18 +104,17 @@ export const Projects = (): JSX.Element => {
 										component={RouterLink}
 										to="/create-project"
 										variant="contained"
-										sx={{ m: 2 }}
+										sx={{m: 2}}
 									>
 										Create Project
 									</Button>
-								</Box>
-							</Grid>
-						) : (
-							<></>
-						)}
+								</> : null}
+
+							</Box>
+						</Grid>
 					</Grid>
-					{projects.length !== 0 ? (
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+					{projects?.length !== 0 ? (
+						<Box display="flex" justifyContent="center" sx={{m: 1}}>
 							<Pagination
 								count={Math.ceil(pageMetadata.total_count / limit)}
 								page={currPageNum}

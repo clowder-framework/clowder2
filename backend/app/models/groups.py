@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from beanie import Document
+from beanie import Document, PydanticObjectId
 from pydantic import BaseModel
 
 from app.models.authorization import Provenance
@@ -27,7 +27,7 @@ class GroupBase(BaseModel):
     description: Optional[str]
     users: List[Member] = []
     type: GroupType = GroupType.STANDARD
-    project_id: Optional[str] = None
+    project_id: Optional[PydanticObjectId] = None
 
 
 class GroupIn(GroupBase):

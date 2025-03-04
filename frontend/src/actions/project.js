@@ -46,7 +46,6 @@ export const CREATE_PROJECT = "CREATE_PROJECT";
 
 export function projectCreated(formData) {
 	return (dispatch) => {
-		// If licenseFormData is not present, directly save the dataset
 		return V2.ProjectsService.saveProjectApiV2ProjectsPost(
 			formData
 		)

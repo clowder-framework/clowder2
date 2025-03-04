@@ -229,6 +229,20 @@ interface CREATE_PROJECT {
 	project: Project;
 }
 
+interface RESET_CREATE_PROJECT {
+	type: "RESET_CREATE_PROJECT";
+}
+
+interface RECEIVE_PROJECT {
+	type: "RECEIVE_PROJECT";
+	project: Project;
+}
+
+interface RECEIVE_PROJECTS {
+	type: "RECEIVE_PROJECTS";
+	projects: Paged;
+}
+
 interface CREATE_DATASET {
 	type: "CREATE_DATASET";
 	dataset: Dataset;
@@ -771,6 +785,9 @@ export type DataAction =
 	| GENERATE_API_KEY
 	| RESET_API_KEY
 	| CREATE_PROJECT
+	| RESET_CREATE_PROJECT
+	| RECEIVE_PROJECT
+	| RECEIVE_PROJECTS
 	| CREATE_DATASET
 	| RESET_CREATE_DATASET
 	| CREATE_FILE

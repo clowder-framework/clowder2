@@ -29,11 +29,6 @@ export default function DatsetTableEntry(props: DatasetTableEntryProps) {
 		setThumbnailUrl(url);
 	}, [dataset]);
 
-	useEffect(() => {
-		console.log(dataset.id);
-		console.log(selected);
-	}, [selected]);
-
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

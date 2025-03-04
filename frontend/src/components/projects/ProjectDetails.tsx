@@ -1,10 +1,11 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
-import { parseDate } from "../../utils/common";
-import { StackedList } from "../util/StackedList";
+import {Box, Typography} from "@mui/material";
+import {parseDate} from "../../utils/common";
+import {StackedList} from "../util/StackedList";
+
 
 export function ProjectDetails(props) {
-	const { id, created, modified, creator } = props.details;
+	const {id, created, creator} = props.details;
 
 	const details = new Map<
 		string,
@@ -19,18 +20,13 @@ export function ProjectDetails(props) {
 		value: parseDate(created),
 		info: "Date and time of project creation",
 	});
-	details.set("Updated", {
-		value: parseDate(modified),
-		info: "Date and time of project modification",
-	});
-	details.set("Project identifier", { value: id });
 
 	return (
-		<Box sx={{ mt: 5, mb: 2 }}>
+		<Box sx={{mt: 5, mb: 2}}>
 			<Typography variant="h5" gutterBottom>
 				Details
 			</Typography>
-			<StackedList keyValues={details} />
+			<StackedList keyValues={details}/>
 		</Box>
 	);
 }

@@ -122,7 +122,9 @@ export interface Thumbnail {
 }
 
 export interface ProjectState {
+	about: ProjectOut;
 	newProject: ProjectOut;
+	projects: Paged;
 	datasets: DatasetOut[];
 	members: DatasetRoles;
 	selectDatasets: Paged;
