@@ -1,5 +1,5 @@
 import logging
-from typing import Generator, AsyncGenerator
+from typing import AsyncGenerator
 
 import boto3
 import pika
@@ -14,13 +14,28 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-async def get_fs() -> Generator:
-    file_system = Minio(
-        settings.MINIO_SERVER_URL,
-        access_key=settings.MINIO_ACCESS_KEY,
-        secret_key=settings.MINIO_SECRET_KEY,
-        secure=False,
-    )
+async def get_fs() -> AsyncGenerator[Minio, None]:
+    # Either use AWS Identity and Access Management (IAM) to connect to S3 or connect to Minio server
+    if settings.AWS_IAM:
+        logger.debug("AWS IAM enabled for s3 authentication")
+        session = boto3.Session()
+        credentials = session.get_credentials()
+        credentials = credentials.get_frozen_credentials()
+        file_system = Minio(
+            settings.MINIO_EXTERNAL_SERVER_URL,
+            access_key=credentials.access_key,
+            secret_key=credentials.secret_key,
+            session_token=credentials.token,
+            secure=settings.MINIO_SECURE.lower() == "true",
+        )
+    else:
+        logger.debug("Local MinIO authentication")
+        file_system = Minio(
+            settings.MINIO_EXTERNAL_SERVER_URL,
+            access_key=settings.MINIO_ACCESS_KEY,
+            secret_key=settings.MINIO_SECRET_KEY,
+            secure=settings.MINIO_SECURE.lower() == "true",
+        )
     clowder_bucket = settings.MINIO_BUCKET_NAME
     if not file_system.bucket_exists(clowder_bucket):
         file_system.make_bucket(clowder_bucket)
@@ -30,7 +45,7 @@ async def get_fs() -> Generator:
 
 # This will be needed for generating presigned URL for sharing
 async def get_external_fs() -> AsyncGenerator[Minio, None]:
-    # Either use AWS Identity and Access Management (IAM) to connect to S3 Ïor connect to Minio server
+    # Either use AWS Identity and Access Management (IAM) to connect to S3 or connect to Minio server
     if settings.AWS_IAM:
         logger.debug("AWS IAM enabled for s3 authentication")
         session = boto3.Session()
