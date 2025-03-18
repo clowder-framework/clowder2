@@ -1,25 +1,35 @@
-FROM python:3.9
+# Use a Python image with uv pre-installed
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
-WORKDIR /code
+# Install the project into `/app`
+WORKDIR /app
 
-# set python env variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Enable bytecode compilation
+ENV UV_COMPILE_BYTECODE=1
 
-# install pipenv
-RUN pip install pipenv
+# Copy from the cache instead of linking since it's a mounted volume
+ENV UV_LINK_MODE=copy
 
-# copy required pipenv files
-COPY ./Pipfile ./Pipfile.lock /code/
+# Install the project's dependencies using the lockfile and settings
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
-# install requirements locally in the project at /code/.venv
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
+# Then, add the rest of the project source code and install it
+# Installing separately from its dependencies allows optimal layer caching
+ADD backend /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-dev
 
-# add requirements to path
-ENV PATH="/code/.venv/bin:$PATH"
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
 
-# copy app code at end to make it easier to change code and not have to rebuild requirement layers
-COPY ./app /code/app
+# Reset the entrypoint, don't invoke `uv`
+ENTRYPOINT []
 
 # launch app using uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+# Number of recommended workers is 2 x number_of_cores +1
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "17"]

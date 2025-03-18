@@ -22,7 +22,6 @@ from app.models.visualization_data import (
 )
 from app.routers.utils import get_content_type
 from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.security import HTTPBearer
 from minio import Minio

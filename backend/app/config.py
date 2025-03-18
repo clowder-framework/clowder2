@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
-    version: str = "2.0.0-beta.2"
+    version: str = "2.0.0-beta.3"
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     MINIO_UPLOAD_CHUNK_SIZE: int = 10 * 1024 * 1024
     MINIO_EXPIRES: int = 3600  # seconds
     MINIO_SECURE: str = "False"  # http vs https
+
+    # If AWS_IAM is set to True, the MINIO_ACCESS_KEY and MINIO_SECRET_KEY will be ignored and AWS IAM will be used
+    AWS_IAM: bool = False
 
     # Files in the listed directories can be added to Clowder without copying them elsewhere
     LOCAL_WHITELIST: List[str] = []

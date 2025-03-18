@@ -10,7 +10,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "clowder2.name" . }}-messages
+      app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-messages
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/name: {{ include "clowder2.name" . }}-messages
+        app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-messages
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -34,16 +34,23 @@ spec:
           imagePullPolicy: {{ .Values.message.image.pullPolicy }}
           env:
             - name: MONGODB_URL
-              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
+              value: mongodb://{{ include "clowder2.releaseName" . }}-mongodb:27017
             - name: RABBITMQ_USER
               value: {{ .Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
+              {{- if .Values.message.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: clowder2-rabbitmq
+                  name: {{ .Values.message.existingSecret }}
+                  key: {{ .Values.message.existingRabbitMQSecretKey | default "rabbitmq-password" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clowder2.releaseName" . }}-secret
                   key: rabbitmq-password
+              {{- end }}
             - name: RABBITMQ_HOST
-              value: {{ include "clowder2.name" .  }}-rabbitmq
+              value: {{ include "clowder2.releaseName" .  }}-rabbitmq
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

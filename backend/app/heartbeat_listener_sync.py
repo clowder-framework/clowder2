@@ -8,7 +8,6 @@ from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInf
 from app.models.search import SearchCriteria
 from app.routers.feeds import FeedDB, FeedListener
 from packaging import version
-from pymongo import MongoClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,13 +33,10 @@ def callback(ch, method, properties, body):
     if owner is not None:
         extractor_db.access = {"owner": owner}
 
-    mongo_client = MongoClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-
     # check to see if extractor already exists
     if owner is None:
         existing_extractor = EventListenerDB.find_one(
-            EventListenerDB.name == msg["queue"], EventListenerDB.access == None
+            EventListenerDB.name == msg["queue"], EventListenerDB.access is None
         )
     else:
         existing_extractor = EventListenerDB.find_one(

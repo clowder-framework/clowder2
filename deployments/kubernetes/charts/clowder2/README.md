@@ -17,13 +17,13 @@ hostname: { your hostname. E.g. clowder2.software-dev.ncsa.illinois.edu }
 frontend:
   image:
     repository: clowder/clowder2-frontend
-    tag: 2.0.0-beta.2
+    tag: 2.0.0-beta.3
     pullPolicy: Always
 
 backend:
   image:
     repository: clowder/clowder2-backend
-    tag: 2.0.0-beta.2
+    tag: 2.0.0-beta.3
     pullPolicy: Always
 
 geoserver:

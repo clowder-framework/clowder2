@@ -13,7 +13,6 @@ from app.models.metadata import (
 )
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.logical import Or
-from bson import ObjectId
 from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer

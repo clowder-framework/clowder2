@@ -18,6 +18,12 @@ class UserIn(UserBase):
     password: str
 
 
+class UserUpdate(BaseModel):
+    first_name: Optional[str]
+    last_name: Optional[str]
+    password: Optional[str]
+
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str

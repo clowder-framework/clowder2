@@ -86,7 +86,7 @@ app = FastAPI(
     description="A cloud native data management framework to support any research domain. Clowder was "
     "developed to help researchers and scientists in data intensive domains manage raw data, complex "
     "metadata, and automatic data pipelines. ",
-    version="2.0.0-beta.2",
+    version="2.0.0-beta.3",
     contact={"name": "Clowder", "url": "https://clowderframework.org/"},
     license_info={
         "name": "Apache 2.0",
@@ -316,7 +316,9 @@ async def startup_beanie():
             ThumbnailDBViewList,
             LicenseDB,
         ],
-        recreate_views=True,
+        # If view exists, will not recreate
+        # When view query changes, make sure to manually drop view and recreate
+        recreate_views=False,
     )
 
 

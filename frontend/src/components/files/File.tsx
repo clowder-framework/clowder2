@@ -422,7 +422,7 @@ export const File = (): JSX.Element => {
 								: TabStyle
 						}
 					>
-						<Listeners fileId={fileId} datasetId={datasetId} process={"file"} />
+						<Listeners fileId={fileId} datasetId={datasetId} process="file" />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
