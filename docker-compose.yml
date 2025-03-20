@@ -168,7 +168,10 @@ services:
   minio-nginx:
     image: nginx:1.19.2-alpine
     restart: unless-stopped
-    hostname: nginx
+    hostname: minio-nginx
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     networks:
       - clowder2
     volumes:
