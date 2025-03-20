@@ -75,7 +75,9 @@ You can run the backend module using either of the below options:
 
 - Using the PyCharm's run configuration by navigating to `PyCharm -> Run -> Run...` and clicking `uvicorn`. Running
   directly from PyCharm helps the developer by providing easy access to its debugging features.
-- From the command line by running `pipenv run uvicorn app.main:app --reload` .
+- From the command line by running `pipenv run uvicorn app.main:app --host 0.0.0.0 --reload`.
+- To run the backend module with multiple workers, similar to production, run
+  `pipenv run uvicorn app.main:app --host 0.0.0.0 --workers 17`
 
 Additional steps/details:
 
