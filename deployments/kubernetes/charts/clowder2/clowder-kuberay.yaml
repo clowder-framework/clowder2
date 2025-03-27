@@ -1,0 +1,39 @@
+image:
+  repository: vismayak/clowder-ray
+  tag: latest
+  pullPolicy: Always
+
+head:
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4G"
+    requests:
+      cpu: "2"
+      memory: "4G"
+  volumes:
+      - name: minio-dataset
+        persistentVolumeClaim:
+          claimName: minio-dataset
+  volumeMounts:
+    - name: minio-dataset
+      mountPath: /clowderfs
+
+worker:
+  replicas: 2
+  minReplicas: 2
+  maxReplicas: 2
+  resources:
+    limits:
+      cpu: "2"
+      memory: "8G"
+    requests:
+      cpu: "2"
+      memory: "8G"
+  volumes:
+      - name: minio-dataset
+        persistentVolumeClaim:
+          claimName: minio-dataset
+  volumeMounts:
+    - name: minio-dataset
+      mountPath: /clowderfs
