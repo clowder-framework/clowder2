@@ -4,46 +4,51 @@ import React, { useEffect } from "react";
 import mirador from "mirador";
 import miradorAnnotationPlugin from "mirador-annotations";
 import LocalStorageAdapter from "mirador-annotations/lib/LocalStorageAdapter";
+import { VisualizationConfigOut } from "../../../openapi/v2";
 
 type WSIProps = {
-	fileId?: string;
-	visualizationId?: string;
-	publicView?: boolean;
+	visConfigEntry?: VisualizationConfigOut;
 };
 
 export default function WSI(props: WSIProps) {
-	const { fileId, visualizationId, publicView } = props;
-
-	const config = {
-		annotation: {
-			adapter: (canvasId) =>
-				new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`),
-		},
-		id: "mirador-container",
-		window: {
-			sideBarOpen: true,
-			defaultSideBarPanel: "annotations",
-		},
-		workspace: {
-			type: "mosaic",
-			height: 1000,
-		},
-		workspaceControlPanel: {
-			enabled: false,
-		},
-		windows: [
-			{
-				manifestId:
-					"http://localhost:8002/iiif-presentation-server/manifest.json",
-				allowClose: true,
-			},
-		],
-	};
-	const plugins = [miradorAnnotationPlugin];
+	const { visConfigEntry } = props;
 
 	useEffect(() => {
-		mirador.viewer(config, plugins);
-	}, [visualizationId, fileId, publicView, config, plugins]);
+		if (visConfigEntry !== undefined) {
+			if (
+				visConfigEntry.parameters &&
+				visConfigEntry.parameters["manifestId"]
+			) {
 
-	return <div id="mirador-container" />;
+				const config = {
+					annotation: {
+						adapter: (canvasId) =>
+							new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`),
+					},
+					id: "mirador-container",
+					window: {
+						allowFullscreen: true,
+					},
+					workspace: {
+						type: "mosaic",
+						height: 400,
+					},
+					workspaceControlPanel: {
+						enabled: false,
+					},
+					windows: [
+						{
+							manifestId: visConfigEntry.parameters["manifestId"],
+							allowClose: true,
+						},
+					],
+				};
+				const plugins = [miradorAnnotationPlugin];
+
+				mirador.viewer(config, plugins);
+			}
+		}
+	}, [visConfigEntry]);
+
+	return <div id="mirador-container" style={{ width: "450px", height: "400px", position: "relative"}} />;
 }
