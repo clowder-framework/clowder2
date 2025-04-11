@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Drag and drop upload multiple files
 - Footer with links to documentation, source code, and contact information
 - Documentation through MKDocs
+- Visualization for Whole Slide Images (WSI) using Mirador. [#1225](https://github.com/clowder-framework/clowder2/issues/1225)
 
 ### Changed
 
