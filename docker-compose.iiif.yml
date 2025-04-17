@@ -20,7 +20,7 @@ services:
     ports:
       - "8002:8000"
     environment:
-      IIIF_IMAGE_API_SERVER_URL: "http://192.168.4.100:8182/iiif/3"
+      IIIF_IMAGE_API_SERVER_URL: ${IIIF_IMAGE_API_SERVER_URL}
     networks:
       - clowder2
 networks:
