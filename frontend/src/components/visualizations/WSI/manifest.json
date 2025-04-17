@@ -12,7 +12,7 @@
 	"visConfig": {
 		"name": "WSI",
 		"mainType": "image",
-		"mimeTypes": ["image/tiff"],
+		"mimeTypes": ["application/octet-stream"],
 		"fields": []
 	}
 }

@@ -22,7 +22,7 @@ export default function WSI(props: WSIProps) {
 
 				const config = {
 					annotation: {
-						adapter: (canvasId) =>
+						adapter: (canvasId: string) =>
 							new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`),
 					},
 					id: "mirador-container",
