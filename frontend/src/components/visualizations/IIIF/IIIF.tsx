@@ -6,11 +6,11 @@ import miradorAnnotationPlugin from "mirador-annotations";
 import LocalStorageAdapter from "mirador-annotations/lib/LocalStorageAdapter";
 import { VisualizationConfigOut } from "../../../openapi/v2";
 
-type WSIProps = {
+type IIIFProps = {
 	visConfigEntry?: VisualizationConfigOut;
 };
 
-export default function WSI(props: WSIProps) {
+export default function IIIF(props: IIIFProps) {
 	const { visConfigEntry } = props;
 
 	useEffect(() => {
