@@ -95,8 +95,13 @@ export function PublicSearch() {
 										showFilter={true}
 										showClear={true}
 										renderNoSuggestion="No suggestions found."
-										dataField={["name", "description"]}
-										fieldWeights={[3, 2, 1]}
+										dataField={[
+											"name",
+											"description",
+											"metadata_stringify",
+											"creator.keyword",
+										]}
+										fieldWeights={[3, 2, 2, 1]}
 										innerClass={{
 											title: "search-title",
 											input: "search-input",
