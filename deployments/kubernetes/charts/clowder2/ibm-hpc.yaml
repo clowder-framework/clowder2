@@ -118,6 +118,7 @@ extractors:
   rcnn-iwp-inference-kuberay:
     enabled: true
     image: vismayak/rcnn_iwp_inference_kuberay:latest
+    imagePullPolicy: Always
     env:
       - name: MINIO_MOUNTED_PATH
         value: /clowderfs
@@ -125,6 +126,8 @@ extractors:
         value: "2"
       - name: RAY_CLUSTER_URL
         value: "http://clowder-raycluster-kuberay-head-svc.ibm-hpc.svc.cluster.local:8265"
+      - name: NUM_ACTORS
+        value: "2"
     volumes:
       - name: minio-dataset
         persistentVolumeClaim:
