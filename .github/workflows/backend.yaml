@@ -28,7 +28,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
       -
         name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       -
         name: Login to DockerHub
         if: github.event_name != 'pull_request'
@@ -85,7 +85,8 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          context: .
+          file: ./backend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.backendMeta.outputs.tags }}
@@ -95,20 +96,20 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          context: .
+          file: ./backend/heartbeat.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.heartbeatMeta.outputs.tags }}
-          file: ./backend/heartbeat.Dockerfile
           labels: ${{ steps.heartbeatMeta.outputs.labels }}
 
       -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          context: .
+          file: ./backend/messages.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.messagesMeta.outputs.tags }}
-          file: ./backend/messages.Dockerfile
           labels: ${{ steps.messagesMeta.outputs.labels }}
