@@ -604,6 +604,21 @@ export const Dataset = (): JSX.Element => {
 						) : (
 							<></>
 						)}
+						<br />
+						{dataset.doi && dataset.doi !== undefined ? (
+							<div>
+								<Typography variant="h5" gutterBottom>
+									DOI
+								</Typography>
+								<Typography>
+									<Link href={`https://doi.org/${dataset.doi}`}>
+										https://doi.org/{dataset.doi}
+									</Link>
+								</Typography>
+							</div>
+						) : (
+							<></>
+						)}
 					</>
 					<DatasetDetails details={dataset} myRole={datasetRole.role} />
 				</Grid>
