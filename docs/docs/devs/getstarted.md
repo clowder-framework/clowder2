@@ -34,12 +34,13 @@ section below).
 
 ### Initial Development Dependencies
 
-- Run `python3 -m venv venv` to create a Python Virtual Environment and add it to PyCharm by navigating to
-  `PyCharm -> Settings... -> Project: clowder2 -> Python Interpreter -> Add Interpreter`.
-- Run `source venv/bin/activate && pip install --upgrade pip` to activate the created Python Virtual Environment and
-  upgrade
-  pip.
-- Run `pip install pipenv` to install [Pipenv](https://pipenv.pypa.io/en/latest/).
+- Install [uv](https://docs.astral.sh/uv/getting-started/installation/) for Python package management
+- Create a virtual environment using `uv venv` and activate it using `source .venv/bin/activate`
+- Run `uv sync --dev` to install all dependencies and create a virtual environment
+- Add the virtual environment to PyCharm by navigating to
+  `PyCharm -> Settings... -> Project: clowder2 -> Python Interpreter -> Add Interpreter` and selecting type `uv` and then selecting the virtual environment.
+
+  For detailed PyCharm configuration instructions, see the [official PyCharm uv documentation](https://www.jetbrains.com/help/pycharm/uv.html).
 
 ### Required Services
 
@@ -61,13 +62,12 @@ After starting up the required services, setup and run the backend module.
 
 The backend module is developed using [Python](https://www.python.org/), [FastAPI](https://fastapi.tiangolo.com/),
 and [Motor](https://motor.readthedocs.io/en/stable/).
-We recommend using [Python 3.9](https://www.python.org/downloads/)
-and Pipenv for dependency management.
+We recommend using [Python 3.9+](https://www.python.org/downloads/)
+and uv for dependency management.
 
 #### Install Backend Dependencies
 
-1. Switch to backend module directory `cd backend`.
-2. Install dependencies using `pipenv install --dev`.
+1. Install dependencies using `uv sync --dev` from the project root directory.
 
 #### Run Backend Module
 
@@ -75,9 +75,9 @@ You can run the backend module using either of the below options:
 
 - Using the PyCharm's run configuration by navigating to `PyCharm -> Run -> Run...` and clicking `uvicorn`. Running
   directly from PyCharm helps the developer by providing easy access to its debugging features.
-- From the command line by running `pipenv run uvicorn app.main:app --host 0.0.0.0 --reload`.
+- From the command line by running `uv run uvicorn app.main:app --host 0.0.0.0 --reload`.
 - To run the backend module with multiple workers, similar to production, run
-  `pipenv run uvicorn app.main:app --host 0.0.0.0 --workers 17`
+  `uv run uvicorn app.main:app --host 0.0.0.0 --workers 17`
 
 Additional steps/details:
 
@@ -85,15 +85,15 @@ Additional steps/details:
 2. Create a user using `POST /api/v2/users` and getting a JWT token by using `POST /api/v2/login`. Place the token in
    header of requests that require authentications using the `Authorization: Bearer <your token>` HTTP header.
     * You can also run the frontend module below and use the Login link available there.
-3. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`
+3. Manually run tests before pushing with `uv run pytest -v` or right-clicking on `test` folder and clicking `Run`
    in PyCharm.
 4. Linting is done using [Black](https://black.readthedocs.io/en/stable/). You can set up PyCharm to automatically
    run it when you save a file using
    these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
    The git repository includes an action to run Black on push and pull_request.
-5. Before pushing new code, please make sure all files are properly formatted by running the following command in
-   the `/backend` directory:
-   ```pipenv run black app```
+5. Before pushing new code, please make sure all files are properly formatted by running the following command from
+   the project root directory:
+   ```uv run black app```
 
 ### Frontend Module
 

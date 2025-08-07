@@ -45,3 +45,11 @@ dev = [
 docs = [
     "mkdocs-material"
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "faker>=37.5.3",
+    "httpx>=0.28.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest>=8.4.1",
+]
