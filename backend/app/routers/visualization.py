@@ -22,7 +22,6 @@ from app.models.visualization_data import (
 )
 from app.routers.utils import get_content_type
 from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.security import HTTPBearer
 from minio import Minio
@@ -228,7 +227,8 @@ async def get_resource_visconfig(
     user=Depends(get_current_user),
 ):
     query = [
-        VisualizationConfigDBViewList.resource.resource_id == ObjectId(resource_id)
+        VisualizationConfigDBViewList.resource.resource_id
+        == PydanticObjectId(resource_id)
     ]
     visconfigs = []
     async for vzconfig in VisualizationConfigDBViewList.find(*query):

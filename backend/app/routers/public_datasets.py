@@ -6,6 +6,16 @@ import shutil
 import tempfile
 from typing import List, Optional
 
+from beanie import PydanticObjectId
+from beanie.operators import And, Or
+from bson import json_util
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPBearer
+from minio import Minio
+from rocrate.rocrate import ROCrate
+
 from app import dependencies
 from app.config import settings
 from app.db.dataset.download import _increment_data_downloads
@@ -23,15 +33,6 @@ from app.models.folders import FolderDB, FolderDBViewList, FolderOut
 from app.models.metadata import MetadataDBViewList, MetadataDefinitionDB, MetadataOut
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.search.index import index_dataset, index_folder
-from beanie import PydanticObjectId
-from beanie.operators import And, Or
-from bson import ObjectId, json_util
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, Form, HTTPException
-from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPBearer
-from minio import Minio
-from rocrate.rocrate import ROCrate
 
 router = APIRouter()
 security = HTTPBearer()
@@ -95,10 +96,10 @@ async def get_dataset_files(
     ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
-                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                FileDBViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
             if folder_id is not None:
-                query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+                query.append(FileDBViewList.folder_id == PydanticObjectId(folder_id))
             files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
             return [file.dict() for file in files]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -118,10 +119,12 @@ async def get_dataset_folders(
     ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
-                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                FolderDBViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
             if parent_folder is not None:
-                query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+                query.append(
+                    FolderDBViewList.parent_folder == PydanticObjectId(parent_folder)
+                )
             else:
                 query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
             folders = (
@@ -145,7 +148,7 @@ async def get_dataset_folders_and_files(
     ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
-                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
             if folder_id is None:
                 # only show folder and file at root level without parent folder
@@ -158,8 +161,8 @@ async def get_dataset_folders_and_files(
             else:
                 query.append(
                     Or(
-                        FolderFileViewList.folder_id == ObjectId(folder_id),
-                        FolderFileViewList.parent_folder == ObjectId(folder_id),
+                        FolderFileViewList.folder_id == PydanticObjectId(folder_id),
+                        FolderFileViewList.parent_folder == PydanticObjectId(folder_id),
                     )
                 )
 
@@ -209,7 +212,9 @@ async def get_dataset_metadata(
         )
     ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
-            query = [MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)]
+            query = [
+                MetadataDBViewList.resource.resource_id == PydanticObjectId(dataset_id)
+            ]
 
             if listener_name is not None:
                 query.append(MetadataDBViewList.agent.listener.name == listener_name)
@@ -270,7 +275,7 @@ async def download_dataset(
 
             # Write dataset metadata if found
             metadata = await MetadataDBViewList.find(
-                MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)
+                MetadataDBViewList.resource.resource_id == PydanticObjectId(dataset_id)
             ).to_list()
             if len(metadata) > 0:
                 datasetmetadata_path = os.path.join(
@@ -289,7 +294,7 @@ async def download_dataset(
             file_count = 0
 
             async for file in FileDBViewList.find(
-                FileDBViewList.dataset_id == ObjectId(dataset_id)
+                FileDBViewList.dataset_id == PydanticObjectId(dataset_id)
             ):
                 # find the bytes id
                 # if it's working draft file_id == origin_id
@@ -325,7 +330,8 @@ async def download_dataset(
                 bag_size += current_file_size
 
                 metadata = await MetadataDBViewList.find(
-                    MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)
+                    MetadataDBViewList.resource.resource_id
+                    == PydanticObjectId(dataset_id)
                 ).to_list()
                 if len(metadata) > 0:
                     metadata_filename = file_name + "_metadata.json"

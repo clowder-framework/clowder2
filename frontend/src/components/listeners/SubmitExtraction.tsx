@@ -26,6 +26,7 @@ import { EventListenerOut as Extractor } from "../../openapi/v2";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import { ClowderFileSelector } from "../styledComponents/ClowderFileSelector";
+import { ClowderImageAnnotator } from "../styledComponents/ClowderImageAnnotator";
 import ExtractorStatus from "./ExtractorStatus";
 import CloseIcon from "@mui/icons-material/Close";
 import validator from "@rjsf/validator-ajv8";
@@ -42,7 +43,8 @@ type SubmitExtractionProps = {
 const widgets = {
 	TextWidget: ClowderRjsfTextWidget,
 	SelectWidget: ClowderRjsfSelectWidget,
-	clowderFile: ClowderFileSelector,
+	ClowderFile: ClowderFileSelector,
+	ImageAnnotator: ClowderImageAnnotator,
 };
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
@@ -83,7 +85,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		}
 	};
 
-	// The for loop is used to pass the datasetId to a widget if it is a clowderFile Widget
+	// The for loop is used to pass the datasetId to a widget if it is a ClowderFile Widget
 	if (
 		selectedExtractor &&
 		selectedExtractor["properties"] &&
@@ -92,14 +94,25 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	) {
 		const parameters = selectedExtractor["properties"]["parameters"]["schema"];
 		for (const key in parameters) {
-			// Check if field "format" present and equals "clowderFile"
-			if (parameters[key].format && parameters[key].format === "clowderFile") {
-				uiSchema[key] = {
-					"ui:widget": "clowderFile",
-					"ui:options": {
-						datasetId: datasetId,
-					},
-				};
+			if (parameters[key].format) {
+				switch (parameters[key].format) {
+					case "ClowderFile":
+						uiSchema[key] = {
+							"ui:widget": "ClowderFile",
+							"ui:options": {
+								datasetId: datasetId,
+							},
+						};
+						break;
+					case "ImageAnnotator":
+						uiSchema[key] = {
+							"ui:widget": "ImageAnnotator",
+							"ui:options": {
+								fileId: fileId,
+							},
+						};
+						break;
+				}
 			}
 		}
 	}

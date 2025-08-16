@@ -2,6 +2,7 @@
 import json
 import logging
 from datetime import datetime
+from typing import Optional
 
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import APIKeyCookie, APIKeyHeader, OAuth2AuthorizationCodeBearer
@@ -436,6 +437,43 @@ async def create_user(
         exist_ok=False,
     )
     return user
+
+
+async def update_user(
+    email: str,
+    new_email: Optional[str],
+    new_password: Optional[str],
+    new_firstName: Optional[str],
+    new_lastName: Optional[str],
+):
+    """Update existing user in Keycloak."""
+    keycloak_admin = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name=settings.keycloak_realm_name,
+        user_realm_name=settings.keycloak_user_realm_name,
+        # client_secret_key=settings.auth_client_secret,
+        # client_id=settings.keycloak_client_id,
+        verify=True,
+    )
+    existing_user_id = keycloak_admin.get_user_id(email)
+    existing_user = keycloak_admin.get_user(existing_user_id)
+    # Update user and set password
+    keycloak_admin.update_user(
+        existing_user_id,
+        {
+            "email": new_email or existing_user["email"],
+            "username": new_email or existing_user["email"],
+            "firstName": new_firstName or existing_user["firstName"],
+            "lastName": new_lastName or existing_user["lastName"],
+        },
+    )
+    if new_password:
+        keycloak_admin.set_user_password(existing_user_id, new_password, False)
+
+    updated_user = keycloak_admin.get_user(existing_user_id)
+    return updated_user
 
 
 def delete_user(email: str):

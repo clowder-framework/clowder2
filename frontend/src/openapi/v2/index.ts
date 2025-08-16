@@ -5,6 +5,7 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 
+export type { AccessList } from './models/AccessList';
 export type { AuthorizationBase } from './models/AuthorizationBase';
 export type { AuthorizationMetadata } from './models/AuthorizationMetadata';
 export type { AuthorizationOut } from './models/AuthorizationOut';
@@ -77,6 +78,7 @@ export type { UserAPIKeyOut } from './models/UserAPIKeyOut';
 export type { UserIn } from './models/UserIn';
 export type { UserLogin } from './models/UserLogin';
 export type { UserOut } from './models/UserOut';
+export type { UserUpdate } from './models/UserUpdate';
 export type { ValidationError } from './models/ValidationError';
 export type { VisualizationConfigIn } from './models/VisualizationConfigIn';
 export type { VisualizationConfigOut } from './models/VisualizationConfigOut';

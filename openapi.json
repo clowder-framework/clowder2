@@ -156,6 +156,58 @@
         }
       }
     },
+    "/api/v2/users/me": {
+      "patch": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Update Current User",
+        "operationId": "update_current_user_api_v2_users_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/users/me/is_admin": {
       "get": {
         "tags": [
@@ -7279,7 +7331,7 @@
           "listeners"
         ],
         "summary": "Get Listeners",
-        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status\n    all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode",
+        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status\n    process -- filter by file or dataset type (if specified)\n    dataset_id -- restrict to listeners that run on the given dataset or a file within (if not otherwise permitted)\n    all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode",
         "operationId": "get_listeners_api_v2_listeners_get",
         "parameters": [
           {
@@ -7352,6 +7404,15 @@
           {
             "required": false,
             "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
               "title": "All",
               "type": "boolean",
               "default": false
@@ -7367,15 +7428,6 @@
               "default": false
             },
             "name": "enable_admin",
-            "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
-              "title": "Dataset Id",
-              "type": "string"
-            },
-            "name": "dataset_id",
             "in": "query"
           }
         ],
@@ -7526,20 +7578,20 @@
           {
             "required": false,
             "schema": {
-              "title": "Enable Admin",
-              "type": "boolean",
-              "default": false
+              "title": "Dataset Id",
+              "type": "string"
             },
-            "name": "enable_admin",
+            "name": "dataset_id",
             "in": "query"
           },
           {
             "required": false,
             "schema": {
-              "title": "Dataset Id",
-              "type": "string"
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
             },
-            "name": "dataset_id",
+            "name": "enable_admin",
             "in": "query"
           }
         ],
@@ -8078,6 +8130,474 @@
                 "schema": {
                   "$ref": "#/components/schemas/EventListenerOut"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/users/{target_user}": {
+      "post": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Add User Permission",
+        "operationId": "add_user_permission_api_v2_listeners__listener_id__users__target_user__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Target User",
+              "type": "string"
+            },
+            "name": "target_user",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Remove User Permission",
+        "operationId": "remove_user_permission_api_v2_listeners__listener_id__users__target_user__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Target User",
+              "type": "string"
+            },
+            "name": "target_user",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/groups/{target_group}": {
+      "post": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Add Group Permission",
+        "operationId": "add_group_permission_api_v2_listeners__listener_id__groups__target_group__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Target Group",
+              "type": "string"
+            },
+            "name": "target_group",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Remove Group Permission",
+        "operationId": "remove_group_permission_api_v2_listeners__listener_id__groups__target_group__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Target Group",
+              "type": "string"
+            },
+            "name": "target_group",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/datasets/{target_dataset}": {
+      "post": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Add Dataset Permission",
+        "operationId": "add_dataset_permission_api_v2_listeners__listener_id__datasets__target_dataset__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Target Dataset",
+              "type": "string"
+            },
+            "name": "target_dataset",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Remove Dataset Permission",
+        "operationId": "remove_dataset_permission_api_v2_listeners__listener_id__datasets__target_dataset__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Target Dataset",
+              "type": "string"
+            },
+            "name": "target_dataset",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Enable Admin",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "enable_admin",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -11444,7 +11964,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserIn"
+                "$ref": "#/components/schemas/UserLogin"
               }
             }
           },
@@ -11627,6 +12147,52 @@
   },
   "components": {
     "schemas": {
+      "AccessList": {
+        "title": "AccessList",
+        "required": [
+          "owner"
+        ],
+        "type": "object",
+        "properties": {
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "users": {
+            "title": "Users",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "groups": {
+            "title": "Groups",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
+            },
+            "default": []
+          },
+          "datasets": {
+            "title": "Datasets",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
+            },
+            "default": []
+          }
+        },
+        "description": "Container object for lists of user emails/group IDs/dataset IDs that can submit to listener.\nThe singular owner is the primary who can modify other lists."
+      },
       "AuthorizationBase": {
         "title": "AuthorizationBase",
         "required": [
@@ -12229,6 +12795,9 @@
             "title": "Description",
             "type": "string",
             "default": ""
+          },
+          "access": {
+            "$ref": "#/components/schemas/AccessList"
           }
         },
         "description": "On submission, minimum info for a listener is name, version and description. Clowder will use name and version to locate queue."
@@ -12420,6 +12989,9 @@
             "type": "string",
             "default": ""
           },
+          "access": {
+            "$ref": "#/components/schemas/AccessList"
+          },
           "id": {
             "title": "Id",
             "type": "string",
@@ -12565,6 +13137,10 @@
             "title": "Version",
             "type": "string",
             "default": "1.0"
+          },
+          "unique_key": {
+            "title": "Unique Key",
+            "type": "string"
           }
         },
         "description": "Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."
@@ -13194,6 +13770,10 @@
             "title": "Version",
             "type": "string",
             "default": "1.0"
+          },
+          "unique_key": {
+            "title": "Unique Key",
+            "type": "string"
           },
           "description": {
             "title": "Description",
@@ -14207,6 +14787,24 @@
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
+      },
+      "UserUpdate": {
+        "title": "UserUpdate",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          }
+        }
       },
       "ValidationError": {
         "title": "ValidationError",

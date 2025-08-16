@@ -1,5 +1,7 @@
 import time
 
+from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import (
     create_dataset,
@@ -7,7 +9,6 @@ from app.tests.utils import (
     register_v2_listener,
     upload_file,
 )
-from fastapi.testclient import TestClient
 
 
 def test_feeds(client: TestClient, headers: dict):
@@ -23,11 +24,15 @@ def test_feeds(client: TestClient, headers: dict):
     feed_id = response.json().get("id")
 
     # Assign listener to feed
+    jbody = {"listener_id": listener_id, "automatic": True}
+    print(jbody)
     response = client.post(
         f"{settings.API_V2_STR}/feeds/{feed_id}/listeners",
-        json={"listener_id": listener_id, "automatic": True},
+        json=jbody,
         headers=headers,
     )
+    print(response)
+    print(response.json())
     assert response.status_code == 200
 
     # Upload file to trigger the feed

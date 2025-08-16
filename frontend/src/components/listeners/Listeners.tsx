@@ -55,7 +55,8 @@ export function Listeners(props: ListenerProps) {
 				selectedCategory,
 				selectedLabel,
 				aliveOnly,
-				process
+				process,
+				datasetId
 			)
 		);
 	const searchListeners = (
@@ -64,7 +65,10 @@ export function Listeners(props: ListenerProps) {
 		limit: number | undefined,
 		heartbeatInterval: number | undefined,
 		process: string | undefined
-	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
+	) =>
+		dispatch(
+			queryListeners(text, skip, limit, heartbeatInterval, process, datasetId)
+		);
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
