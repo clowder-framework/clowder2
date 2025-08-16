@@ -61,7 +61,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 					}}
 					sx={{ textDecoration: "none", cursor: "pointer" }}
 				>
-					{extractorName}
+					{extractorName.replace("private.", "")}
 				</Link>
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (

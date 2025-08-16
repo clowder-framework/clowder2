@@ -23,7 +23,7 @@ async def save_license(
     license_in: LicenseIn,
     user=Depends(get_current_user),
 ):
-    if license_in.holders == None:
+    if license_in.holders is None:
         license_in = user
     license_db = LicenseDB(**license_in.dict(), creator=user.email)
     await license_db.insert()

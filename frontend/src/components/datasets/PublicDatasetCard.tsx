@@ -16,6 +16,8 @@ import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
 // import {Favorite, Share} from "@material-ui/icons";
+import PublicIcon from "@mui/icons-material/Public";
+import Chip from "@mui/material/Chip";
 
 type PublicDatasetCardProps = {
 	id?: string;
@@ -27,11 +29,20 @@ type PublicDatasetCardProps = {
 	publicView?: boolean | false;
 	frozen?: boolean | false;
 	frozenVersionNum?: number;
+	status?: string;
 };
 
 export default function PublicDatasetCard(props: PublicDatasetCardProps) {
-	const { id, name, author, created, description, thumbnailId, publicView } =
-		props;
+	const {
+		id,
+		name,
+		author,
+		created,
+		description,
+		thumbnailId,
+		publicView,
+		status,
+	} = props;
 
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
@@ -111,27 +122,16 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 					</CardContent>
 				</CardActionArea>
 			)}
-			<CardActions sx={{ pb: 0, justifyContent: "space-between" }}>
+			<CardActions sx={{ pb: 0, pr: 0 }}>
 				<Tooltip title="Download">
 					<IconButton
 						href={`${config.hostname}/api/v2/public_datasets/${id}/download`}
 						color="primary"
 						aria-label="download"
-						sx={{ mr: 3 }}
 					>
 						<Download />
 					</IconButton>
 				</Tooltip>
-				{/*<Tooltip title="Favorite">*/}
-				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
-				{/*		<Favorite/>*/}
-				{/*	</IconButton>*/}
-				{/*</Tooltip>*/}
-				{/*<Tooltip title="Share">*/}
-				{/*	<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>*/}
-				{/*		<Share/>*/}
-				{/*	</IconButton>*/}
-				{/*</Tooltip>*/}
 			</CardActions>
 		</Card>
 	);

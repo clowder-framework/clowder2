@@ -8,16 +8,20 @@ nav:
       - Visualizations: users/visualizations.md
   - Developers:
       - Getting started: devs/getstarted.md
+      - Development Environment Setup: devs/devsetup.md
+      - Development Handbook: devs/devhandbook.md
       - Architecture: devs/architecture.md
       - Frontend:
         - devs/frontend/lazyloading.md
       - Keycloak: devs/keycloak.md
-      - Metadata: devs/metadata.md
       - Mongo: devs/mongo-fastapi.md
       - PyCharm: devs/pycharm.md
       - Elasticsearch: devs/elasticsearch.md
-      - Listeners: devs/listeners.md
       - Standalone Docker Deployment: devs/standalone-docker-deployment.md
+      - Design Docs:
+          - Listeners: devs/listeners.md
+          - Metadata: devs/metadata.md
+          - Dataset Versioning: devs/dataset-versioning.md
       - Proposals:
         - Storage: devs/storage.md
   - Admins:

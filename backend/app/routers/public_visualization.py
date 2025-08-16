@@ -13,7 +13,6 @@ from app.models.visualization_data import (
     VisualizationDataOut,
 )
 from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from minio import Minio
@@ -106,7 +105,8 @@ async def get_resource_visconfig(
     resource_id: PydanticObjectId,
 ):
     query = [
-        VisualizationConfigDBViewList.resource.resource_id == ObjectId(resource_id)
+        VisualizationConfigDBViewList.resource.resource_id
+        == PydanticObjectId(resource_id)
     ]
     visconfigs = []
     async for vzconfig in VisualizationConfigDBViewList.find(*query):

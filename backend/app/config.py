@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     MINIO_EXPIRES: int = 3600  # seconds
     MINIO_SECURE: str = "False"  # http vs https
 
+    # If AWS_IAM is set to True, the MINIO_ACCESS_KEY and MINIO_SECRET_KEY will be ignored and AWS IAM will be used
+    AWS_IAM: bool = False
+
     # Files in the listed directories can be added to Clowder without copying them elsewhere
     LOCAL_WHITELIST: List[str] = []
 

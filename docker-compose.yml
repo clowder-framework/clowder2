@@ -1,5 +1,3 @@
-version: '3.7'
-
 # Settings and configurations that are common for all minio containers
 x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
@@ -40,7 +38,7 @@ services:
     image: 'clowder/clowder2-backend:2.0.0-beta.3'
     restart: unless-stopped
     build:
-      context: ./backend
+      dockerfile: backend/Dockerfile
     networks:
       - clowder2
     environment:
@@ -64,11 +62,16 @@ services:
       keycloak_base: http://localhost/api
       frontend_url: http://localhost
     depends_on:
-      - mongo
-      - minio-nginx
-      - keycloak
-      - elasticsearch
-      - rabbitmq
+      mongo:
+        condition: service_started
+      minio-nginx:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
@@ -97,8 +100,7 @@ services:
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat:main"
     build:
-      context: backend
-      dockerfile: heartbeat.Dockerfile
+      dockerfile: backend/heartbeat.Dockerfile
     networks:
       - clowder2
     restart: unless-stopped
@@ -114,8 +116,7 @@ services:
   extractors-messages:
     image: "clowder/clowder2-messages:main"
     build:
-      context: backend
-      dockerfile: messages.Dockerfile
+      dockerfile: backend/messages.Dockerfile
     environment:
       MONGODB_URL: mongodb://mongo:27017
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
@@ -179,7 +180,7 @@ services:
       - minio4
 
   postgres:
-    image: postgres
+    image: postgres:16
     restart: unless-stopped
     networks:
       - clowder2
@@ -245,6 +246,8 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     restart: unless-stopped
+    healthcheck:
+      test: "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow"
     networks:
       - clowder2
     environment:

@@ -27,7 +27,7 @@ async def index_dataset(
         # Get authorized users from db
         authorized_user_ids = []
         async for auth in AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset.id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset.id)
         ):
             authorized_user_ids += auth.user_ids
     else:
@@ -36,7 +36,7 @@ async def index_dataset(
     # Get full metadata from db (granular updates possible but complicated)
     metadata = []
     async for md in MetadataDB.find(
-        MetadataDB.resource.resource_id == ObjectId(dataset.id)
+        MetadataDB.resource.resource_id == PydanticObjectId(dataset.id)
     ):
         metadata.append(md.content)
     dataset_status = dataset.status
@@ -76,7 +76,7 @@ async def index_file(
         # Get authorized users from db
         authorized_user_ids = []
         async for auth in AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(file.dataset_id)
         ):
             authorized_user_ids += auth.user_ids
     else:
@@ -85,7 +85,7 @@ async def index_file(
     # Get full metadata from db (granular updates possible but complicated)
     metadata = []
     async for md in MetadataDB.find(
-        MetadataDB.resource.resource_id == ObjectId(file.id)
+        MetadataDB.resource.resource_id == PydanticObjectId(file.id)
     ):
         metadata.append(md.content)
 
@@ -184,13 +184,13 @@ async def index_thumbnail(
             # Get authorized users from db
             authorized_user_ids = []
             async for auth in AuthorizationDB.find(
-                AuthorizationDB.dataset_id == ObjectId(dataset_id)
+                AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
             ):
                 authorized_user_ids += auth.user_ids
             # Get full metadata from db (granular updates possible but complicated)
             metadata = []
             async for md in MetadataDB.find(
-                MetadataDB.resource.resource_id == ObjectId(file.id)
+                MetadataDB.resource.resource_id == PydanticObjectId(file.id)
             ):
                 metadata.append(md.content)
             # Add en entry to the file index

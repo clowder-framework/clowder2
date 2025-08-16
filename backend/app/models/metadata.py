@@ -308,9 +308,11 @@ async def validate_context(
             detail="Context is required",
         )
     if context is not None:
-        pass
+        # TODO validate context
+        return content
     if context_url is not None:
-        pass
+        # TODO validate context
+        return content
     if definition is not None:
         if (
             md_def := await MetadataDefinitionDB.find_one(
@@ -323,7 +325,7 @@ async def validate_context(
                 status_code=400,
                 detail=f"{definition} is not valid metadata definition",
             )
-    return content
+        return content
 
 
 def deep_update(orig: dict, new: dict):

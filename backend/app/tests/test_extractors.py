@@ -1,11 +1,22 @@
 from app.config import settings
-from app.tests.utils import create_dataset, register_v1_extractor, upload_file
+from app.tests.utils import (
+    create_user,
+    create_dataset,
+    upload_file,
+    register_v1_extractor,
+)
 from fastapi.testclient import TestClient
 
 
 def test_register(client: TestClient, headers: dict):
     ext_name = "test.test_register"
     register_v1_extractor(client, headers, ext_name)
+
+
+def test_register_private(client: TestClient, headers: dict):
+    ext_name = "test.test_register_private"
+    create_user(client, headers, email="extract_master@email.com")
+    register_v1_extractor(client, headers, ext_name, user="extract_master@email.com")
 
 
 def test_get_one(client: TestClient, headers: dict):

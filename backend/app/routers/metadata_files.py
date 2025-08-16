@@ -144,6 +144,16 @@ async def add_file_metadata(
                         409, f"Metadata for {definition} already exists on this file"
                     )
 
+        # lookup json_ld context in metadata definition
+        if metadata_in.definition is not None:
+            if (
+                definition := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == metadata_in.definition
+                )
+            ) is not None:
+                metadata_in.context = definition.context
+                metadata_in.context_url = definition.context_url
+
         md = await _build_metadata_db_obj(metadata_in, FileOut(**file.dict()), user)
         await md.insert()
 
@@ -167,14 +177,14 @@ async def replace_file_metadata(
     """
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # First, make sure the metadata we are replacing actually exists.
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
 
         version = metadata_in.file_version
         if version is not None:
             if (
                 await FileVersionDB.find_one(
                     Or(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
                         FileVersionDB.file_id == file.origin_id,
                     ),
                     FileVersionDB.version_num == version,
@@ -209,19 +219,31 @@ async def replace_file_metadata(
 
         if (orig_md := await MetadataDB.find_one(*query)) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
-            md = await _build_metadata_db_obj(
+
+            # lookup json_ld context in metadata definition
+            if metadata_in.definition is not None:
+                if (
+                    definition := await MetadataDefinitionDB.find_one(
+                        MetadataDefinitionDB.name == metadata_in.definition
+                    )
+                ) is not None:
+                    metadata_in.context = definition.context
+                    metadata_in.context_url = definition.context_url
+
+            new_md = await _build_metadata_db_obj(
                 metadata_in,
                 FileOut(**file.dict()),
                 user,
                 agent=agent,
                 version=target_version,
             )
-            md.id = orig_md.id
-            await md.save()
+            new_md.id = orig_md.id
+
+            patched_md = await patch_metadata(orig_md, new_md.content, es)
 
             # Update entry to the metadata index
             await index_file(es, FileOut(**file.dict()), update=True)
-            return md.dict()
+            return patched_md.dict()
         else:
             raise HTTPException(status_code=404, detail="No metadata found to update")
     else:
@@ -246,7 +268,7 @@ async def update_file_metadata(
     # check if metadata with file version exists, replace metadata if none exists
     if (
         await MetadataDB.find_one(
-            MetadataDB.resource.resource_id == ObjectId(file_id),
+            MetadataDB.resource.resource_id == PydanticObjectId(file_id),
             MetadataDB.resource.version == metadata_in.file_version,
         )
     ) is None:
@@ -254,14 +276,14 @@ async def update_file_metadata(
         return result
 
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
             if (
                 existing_md := await MetadataDB.find_one(
-                    MetadataDB.id == ObjectId(metadata_in.metadata_id)
+                    MetadataDB.id == PydanticObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
                 content = await validate_context(
@@ -282,7 +304,7 @@ async def update_file_metadata(
             if (
                 await FileVersionDB.find_one(
                     Or(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
                         FileVersionDB.file_id == file.origin_id,
                     ),
                     FileVersionDB.version_num == metadata_in.file_version,
@@ -345,7 +367,7 @@ async def get_file_metadata(
             FileDBViewList.id == PydanticObjectId(file_id)
         )
     ) is not None:
-        query = [MetadataDBViewList.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDBViewList.resource.resource_id == PydanticObjectId(file_id)]
 
         # Validate specified version, or use latest by default
         if not all_versions:
@@ -353,7 +375,7 @@ async def get_file_metadata(
                 if (
                     await FileVersionDB.find_one(
                         Or(
-                            FileVersionDB.file_id == ObjectId(file_id),
+                            FileVersionDB.file_id == PydanticObjectId(file_id),
                             FileVersionDB.file_id == file.origin_id,
                         ),
                         FileVersionDB.version_num == version,
@@ -403,13 +425,13 @@ async def delete_file_metadata(
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (await FileDB.get(PydanticObjectId(file_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(file_id)]
 
         # # Validate specified version, or use latest by default
         # if version is not None:
         #     if (
         #         version_q := await FileVersionDB.find_one(
-        #             FileVersionDB.file_id == ObjectId(file_id),
+        #             FileVersionDB.file_id == PydanticObjectId(file_id),
         #             FileVersionDB.version_num == version,
         #         )
         #     ) is None:
@@ -427,7 +449,7 @@ async def delete_file_metadata(
             # If a specific metadata_id is provided, delete the matching entry
             if (
                 await MetadataDB.find_one(
-                    MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
+                    MetadataDB.metadata_id == PydanticObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
                 query.append(MetadataDB.metadata_id == metadata_in.metadata_id)

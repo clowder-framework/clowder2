@@ -153,7 +153,7 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/1", headers=headers
     )
     assert response.status_code == 200
-    assert response.json().get("deleted") == True
+    assert response.json().get("deleted") is True
     assert response.json().get("id") == dataset_version_1_id
 
     # check the original dataset still exist

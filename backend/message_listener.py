@@ -16,7 +16,7 @@ from app.models.listeners import (
     EventListenerJobStatus,
     EventListenerJobUpdateDB,
 )
-from bson import ObjectId
+from beanie import PydanticObjectId
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -104,7 +104,7 @@ async def callback(message: AbstractIncomingMessage):
 
         # Check if the job exists, and update if so
         job = await EventListenerJobDB.find_one(
-            EventListenerJobDB.id == ObjectId(job_id)
+            EventListenerJobDB.id == PydanticObjectId(job_id)
         )
         if job:
             # Update existing job with new info

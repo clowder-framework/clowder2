@@ -190,7 +190,7 @@ async def edit_group(
                 await group.replace()
                 # Add user to all affected Authorization entries
                 await AuthorizationDB.find(
-                    AuthorizationDB.group_ids == ObjectId(group_id),
+                    AuthorizationDB.group_ids == PydanticObjectId(group_id),
                 ).update(
                     Push({AuthorizationDB.user_ids: user.email}),
                 )
@@ -247,7 +247,7 @@ async def add_member(
                 await group.replace()
                 # Add user to all affected Authorization entries
                 await AuthorizationDB.find(
-                    AuthorizationDB.group_ids == ObjectId(group_id),
+                    AuthorizationDB.group_ids == PydanticObjectId(group_id),
                 ).update(
                     Push({AuthorizationDB.user_ids: username}),
                 )
@@ -290,8 +290,9 @@ async def remove_member(
             return group
 
         # Remove user from all affected Authorization entries
-        # TODO not sure if this is right
-        async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.group_ids == PydanticObjectId(group_id),
+        ):
             if username in auth.user_ids:
                 auth.user_ids.remove(username)
                 await auth.replace()
