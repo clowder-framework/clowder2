@@ -4,6 +4,12 @@ from datetime import datetime
 import requests
 from dotenv import dotenv_values
 
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    import tomli as tomllib
+
+
 from scripts.migration.migrate_metadata_definitions import (
     check_metadata_definition_exists,
     get_clowder_v1_metadata_definitions,
