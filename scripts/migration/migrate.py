@@ -295,7 +295,7 @@ def create_admin_user():
 
 def add_dataset_license(v1_license, headers):
     """Create appropriate license (standard/custom) based on v1 license details"""
-    license_id = "CC-BY"
+    license_id = "CC BY"
     # standard licenses
     if v1_license["license_type"] == "license2":
         if (
@@ -362,7 +362,7 @@ def create_v2_dataset(dataset, headers):
         v2_license_id = add_dataset_license(dataset["license"], headers)
     except Exception as e:
         print(f"Error creating dataset license: {e}")
-        v2_license_id = "CC-BY"
+        v2_license_id = "CC BY"
 
     dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
     dataset_example = {
