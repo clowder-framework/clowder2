@@ -4,7 +4,11 @@ from datetime import datetime
 import requests
 from dotenv import dotenv_values
 
-path_to_env = os.path.join(os.getcwd(), ".env")
+path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
+if not os.path.exists(path_to_env):
+    raise FileNotFoundError(
+        f"Environment file not found at {path_to_env}. Please ensure it exists."
+    )
 config = dotenv_values(dotenv_path=path_to_env)
 
 CLOWDER_V1_URL = config["CLOWDER_V1"]
@@ -12,6 +16,11 @@ ADMIN_KEY_V1 = config["ADMIN_KEY_V1"]
 
 CLOWDER_V2_URL = config["CLOWDER_V2"]
 ADMIN_KEY_V2 = config["ADMIN_KEY_V2"]
+
+if not CLOWDER_V1_URL or not ADMIN_KEY_V1 or not CLOWDER_V2_URL or not ADMIN_KEY_V2:
+    print("MISSING SOME ENVIRONMENT VARIABLES")
+else:
+    print("WE HAVE THEM ALL")
 
 base_headers_v1 = {"X-API-key": ADMIN_KEY_V1}
 clowder_headers_v1 = {

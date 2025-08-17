@@ -24,13 +24,18 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_FILE = f"migrated_new_users_{timestamp}.log"
 
 # Load environment variables
-path_to_env = os.path.join(os.getcwd(), ".env")
+path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
 config = dotenv_values(dotenv_path=path_to_env)
 
 CLOWDER_V1 = config["CLOWDER_V1"]
 ADMIN_KEY_V1 = config["ADMIN_KEY_V1"]
 CLOWDER_V2 = config["CLOWDER_V2"]
 ADMIN_KEY_V2 = config["ADMIN_KEY_V2"]
+
+if not CLOWDER_V1 or not ADMIN_KEY_V1 or not CLOWDER_V2 or not ADMIN_KEY_V2:
+    print("MISSING SOME ENVIRONMENT VARIABLES")
+else:
+    print("WE HAVE THEM ALL")
 
 base_headers_v1 = {"X-API-key": ADMIN_KEY_V1}
 base_headers_v2 = {"X-API-key": ADMIN_KEY_V2}
