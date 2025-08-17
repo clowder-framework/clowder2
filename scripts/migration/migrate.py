@@ -39,6 +39,7 @@ if os.path.exists(path_to_toml):
     toml_config = tomllib.loads(open(path_to_toml).read())
     print(f"Loaded toml config")
     toml_space_ids = toml_config["spaces"]["space_ids"]
+    toml_exclude_space_ids = toml_config["spaces"]["exclude_space_ids"]
     toml_users = toml_config["users"]["user_emails"]
     toml_exclude_dataset_ids = toml_config["datasets"]["exclude_dataset_ids"]
 
