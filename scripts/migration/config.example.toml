@@ -6,3 +6,8 @@ space_ids = [
 [users]
 user_email = [
 ]
+
+[exclude_users]
+exclude_user_emails = [
+
+]
