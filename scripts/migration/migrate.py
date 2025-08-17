@@ -150,7 +150,7 @@ def get_clowder_v1_user_collections(headers, user_v1):
     response = requests.get(endpoint, headers=headers)
     return [col for col in response.json() if col["authorId"] == user_v1["id"]]
 
-
+# TODO this is too slow, we need to optimize it
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
     endpoint = f"{CLOWDER_V1}/api/collections/allCollections"
@@ -687,8 +687,10 @@ def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
     return dataset_collections
 
 
+# TODO test this method
 def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     dataset_id = dataset["id"]
+    # TODO this is too slow we need a way to sort through collection hierarchy better
     dataset_collections = get_clowder_v1_dataset_collections(
         headers=headers, user_v1=user_v1, dataset_id=dataset_id
     )
