@@ -358,7 +358,11 @@ def create_v2_dataset(dataset, headers):
     """Create a dataset in Clowder v2."""
     # TODO: GET correct license
     print("Creating dataset license in Clowder v2.")
-    v2_license_id = add_dataset_license(dataset["license"], headers)
+    try:
+        v2_license_id = add_dataset_license(dataset["license"], headers)
+    except Exception as e:
+        print(f"Error creating dataset license: {e}")
+        v2_license_id = "CC-BY"
 
     dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
     dataset_example = {
