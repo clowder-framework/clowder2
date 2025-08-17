@@ -1,13 +1,27 @@
 [spaces]
 space_ids = [
+    "66ec6210e4b08e5e86b30c20",
+    "62d992dce4b0e32fd16081f4"
+]
+exclude_space_ids = [
 
 ]
 
 [users]
-user_email = [
+user_emails = [
+    "tcnichol@illinois.edu",
+    "cwang138@illinois.edu",
+    "lmarini@illinois.edu"
+
+]
+exclude_space_ids = [
+
 ]
 
-[exclude_users]
-exclude_user_emails = [
+[datasets]
+dataset_ids = [
 
+]
+exclude_dataset_ids = [
+    "66eb1ddfe4b08e5e86b2e124"
 ]

@@ -25,7 +25,23 @@ OUTPUT_FILE = f"migrated_new_users_{timestamp}.log"
 
 # Load environment variables
 path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
+path_to_toml = os.path.join(os.getcwd(),"scripts","migration", "config.toml")
 config = dotenv_values(dotenv_path=path_to_env)
+
+toml_space_ids=None
+toml_exclude_space_ids=None
+toml_users=None
+toml_exclude_users=None
+toml_exclude_dataset_ids=None
+
+# Load configuration from toml file
+if os.path.exists(path_to_toml):
+    toml_config = tomllib.loads(open(path_to_toml).read())
+    print(f"Loaded toml config")
+    toml_space_ids = toml_config["spaces"]["space_ids"]
+    toml_users = toml_config["users"]["user_emails"]
+    toml_exclude_dataset_ids = toml_config["datasets"]["exclude_dataset_ids"]
+
 
 CLOWDER_V1 = config["CLOWDER_V1"]
 ADMIN_KEY_V1 = config["ADMIN_KEY_V1"]
@@ -791,6 +807,14 @@ if __name__ == "__main__":
     USER_MAP = {}
     DATASET_MAP = {}
     users_v1 = get_clowder_v1_users()
+    # TODO filter if toml users
+    if toml_users is not None and len(toml_users) > 0:
+        print(f"Using spaces from config.toml: {toml_users}")
+        users_v1 = [
+            user for user in users_v1 if user["email"] in toml_users
+        ]
+    else:
+        print("No spaces specified in config.toml, migrating all users.")
     for user_v1 in users_v1:
         if (
             "[Local Account]" in user_v1["identityProvider"]
