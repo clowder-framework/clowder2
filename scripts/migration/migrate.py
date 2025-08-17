@@ -153,9 +153,19 @@ def get_clowder_v1_user_collections(headers, user_v1):
 # TODO this is too slow, we need to optimize it
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
-    endpoint = f"{CLOWDER_V1}/api/collections/allCollections"
-    response = requests.get(endpoint, headers=headers)
+    endpoint1 = f"{CLOWDER_V1}/api/collections/rootCollections?superAdmin=true"
+    endpint2 = f"{CLOWDER_V1}/api/collections/topLevelCollections?superAdmin=true"
+    response = requests.get(endpoint1, headers=headers)
+    response2 = requests.get(endpint2, headers=headers)
     user_collections = response.json()
+    user_collections_ids = []
+    user_collections_ids_2 = []
+    user_collections_2 = response2.json()
+    for collection in user_collections_2:
+        id = collection['id']
+        user_collections_ids_2.append(id)
+    for collection in user_collections:
+        user_collections_ids.append(collection['id'])
     for collection in user_collections:
         collection_id = collection["id"]
         collection_dataset_endpoint = (
