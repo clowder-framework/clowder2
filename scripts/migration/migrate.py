@@ -16,6 +16,10 @@ from scripts.migration.migrate_metadata_definitions import (
     post_metadata_definition,
 )
 
+from scripts.migration.dataset_collection_json import get_dataset_collections_map
+
+DATASET_COLLECTIONS_MAP = get_dataset_collections_map()
+
 # Configuration and Constants
 DEFAULT_PASSWORD = "Password123&"
 
@@ -725,10 +729,12 @@ def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
 # TODO test this method
 def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     dataset_id = dataset["id"]
-    # TODO this is too slow we need a way to sort through collection hierarchy better
-    dataset_collections = get_clowder_v1_dataset_collections(
-        headers=headers, user_v1=user_v1, dataset_id=dataset_id
-    )
+    dataset_collections = []
+    if dataset_id in DATASET_COLLECTIONS_MAP:
+        dataset_collections_ids = DATASET_COLLECTIONS_MAP[dataset_id]
+        for col_id in dataset_collections_ids:
+            collection = get_clowder_v1_collection(col_id, headers=headers)
+            dataset_collections.append(collection)
     dataset_spaces = dataset["spaces"]
     space_entries = []
     for space_id in dataset_spaces:
@@ -739,7 +745,8 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
             space_entry = {
                 "id": space["id"],
                 "name": space["name"],
-                "creator": space["creator"],
+                # TODO this is not part of the json
+                # "creator": space["creator"],
             }
             space_entries.append(space_entry)
         except Exception as e:

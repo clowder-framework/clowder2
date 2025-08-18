@@ -27,6 +27,11 @@ def get_dataset_collections_map():
 
     for collection, datasets in data.items():
         for dataset in datasets:
-            dataset_to_collection[dataset] = collection
+            if dataset not in dataset_to_collection:
+                dataset_to_collection[dataset] = [collection]
+            else:
+                current_value = dataset_to_collection[dataset]
+                current_value.append(collection)
+                dataset_to_collection[dataset] = current_value
     return dataset_to_collection
 
