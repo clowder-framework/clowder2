@@ -145,6 +145,22 @@ def add_v1_space_members_to_v2_group(space, group_id, headers):
         )
 
 
+def get_collection_v1_descendants(headers, collection_id):
+    descendant_ids = []
+
+    collection_endpoint = f"{CLOWDER_V1}/api/collections/{collection_id}"
+    response = requests.get(collection_endpoint, headers=headers, verify=False)
+    collection_json = response.json()
+    print(collection_json["child_collection_ids"])
+    if int(collection_json["childCollectionsCount"]) > 0:
+        child_collections_ids = collection_json["child_collection_ids"]
+        descendant_ids = child_collections_ids[5:-1].split(', ')
+        for id in descendant_ids:
+            sub_descendants = get_collection_v1_descendants(headers, id)
+            descendant_ids.extend(sub_descendants)
+    return descendant_ids
+    print('we got collection')
+
 def get_clowder_v1_user_collections(headers, user_v1):
     endpoint = f"{CLOWDER_V1}/api/collections"
     response = requests.get(endpoint, headers=headers)
@@ -154,6 +170,7 @@ def get_clowder_v1_user_collections(headers, user_v1):
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
     endpoint1 = f"{CLOWDER_V1}/api/collections/rootCollections?superAdmin=true"
+    # use this one below
     endpint2 = f"{CLOWDER_V1}/api/collections/topLevelCollections?superAdmin=true"
     response = requests.get(endpoint1, headers=headers)
     response2 = requests.get(endpint2, headers=headers)
@@ -163,7 +180,10 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     user_collections_2 = response2.json()
     for collection in user_collections_2:
         id = collection['id']
-        user_collections_ids_2.append(id)
+        descendants = get_collection_v1_descendants(headers, id)
+        # test_descendants = get_collection_v1_descendants(headers, "68a34b28e4b0cc7386c091a4")
+        # TODO check here if the dataset is in a descendant
+        print('got descendants')
     for collection in user_collections:
         user_collections_ids.append(collection['id'])
     for collection in user_collections:
