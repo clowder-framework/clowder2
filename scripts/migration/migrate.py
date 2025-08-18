@@ -746,18 +746,18 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
                 "id": space["id"],
                 "name": space["name"],
                 # TODO this is not part of the json
-                # "creator": space["creator"],
+                "creator": space["creator"],
             }
             space_entries.append(space_entry)
         except Exception as e:
             print(f"Error in getting space entry.")
             print(e)
-        try:
-            space_entry = {"id": space["id"], "name": space["name"]}
-            space_entries.append(space_entry)
-        except Exception as e:
-            print(f"Error in getting space entry")
-            print(e)
+            try:
+                space_entry = {"id": space["id"], "name": space["name"]}
+                space_entries.append(space_entry)
+            except Exception as e:
+                print(f"Error in getting space entry")
+                print(e)
     collection_data = []
     for collection in dataset_collections:
         collection_children = build_collection_hierarchy(
@@ -773,6 +773,7 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
     user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
+    user_v1_datasets = user_v1_datasets[:2]
     user_v2_api_key = create_local_user(user_v1)
     USER_MAP[user_v1["id"]] = user_v2_api_key
     base_user_headers_v2 = {"x-api-key": user_v2_api_key}
@@ -866,6 +867,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 print(
                     f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
                 )
+        else:
+            print(f"Skipping dataset {dataset_v1_id} as it does not meet the criteria.")
 
     return [USER_MAP, DATASET_MAP]
 
@@ -911,21 +914,21 @@ if __name__ == "__main__":
 
     ##############################################################################################################
     # migrate spaces
-    # print("Now migrating spaces.")
-    # for user_v1 in users_v1:
-    #     print(f"Migrating spaces of user {user_v1['email']}")
-    #     user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
-    #     user_v2_api_key = USER_MAP[user_v1["id"]]
-    #     for space in user_v1_spaces:
-    #         group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
-    #         add_v1_space_members_to_v2_group(
-    #             space, group_id, headers={"X-API-key": user_v2_api_key}
-    #         )
-    #         space_datasets = get_clowder_v2_space_datasets(space["id"])
-    #         for space_dataset in space_datasets:
-    #             dataset_v2_id = DATASET_MAP[space_dataset["id"]]
-    #             share_dataset_with_group(
-    #                 group_id, space, headers={"X-API-key": user_v2_api_key}
-    #             )
-    #     print(f"Migrated spaces of user {user_v1['email']}")
+    print("Now migrating spaces.")
+    for user_v1 in users_v1:
+        print(f"Migrating spaces of user {user_v1['email']}")
+        user_v1_spaces = get_clowder_v1_user_spaces(user_v1)
+        user_v2_api_key = USER_MAP[user_v1["id"]]
+        for space in user_v1_spaces:
+            group_id = create_v2_group(space, headers={"X-API-key": user_v2_api_key})
+            add_v1_space_members_to_v2_group(
+                space, group_id, headers={"X-API-key": user_v2_api_key}
+            )
+            space_datasets = get_clowder_v2_space_datasets(space["id"])
+            for space_dataset in space_datasets:
+                dataset_v2_id = DATASET_MAP[space_dataset["id"]]
+                share_dataset_with_group(
+                    group_id, space, headers={"X-API-key": user_v2_api_key}
+                )
+        print(f"Migrated spaces of user {user_v1['email']}")
     print("Migration complete.")
