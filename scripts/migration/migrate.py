@@ -156,10 +156,13 @@ def get_collection_v1_descendants(headers, collection_id):
         child_collections_ids = collection_json["child_collection_ids"]
         descendant_ids = child_collections_ids[5:-1].split(', ')
         for id in descendant_ids:
-            sub_descendants = get_collection_v1_descendants(headers, id)
-            descendant_ids.extend(sub_descendants)
+            descendent_endpoint = f"{CLOWDER_V1}/api/collections/{id}"
+            descendent_response = requests.get(descendent_endpoint, headers=headers, verify=False)
+            descendent_json = descendent_response.json()
+            if int(descendent_json["childCollectionsCount"]) > 0:
+                sub_descendants = get_collection_v1_descendants(headers, id)
+                descendant_ids.extend(sub_descendants)
     return descendant_ids
-    print('we got collection')
 
 def get_clowder_v1_user_collections(headers, user_v1):
     endpoint = f"{CLOWDER_V1}/api/collections"
@@ -169,23 +172,10 @@ def get_clowder_v1_user_collections(headers, user_v1):
 # TODO this is too slow, we need to optimize it
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
-    endpoint1 = f"{CLOWDER_V1}/api/collections/rootCollections?superAdmin=true"
-    # use this one below
-    endpint2 = f"{CLOWDER_V1}/api/collections/topLevelCollections?superAdmin=true"
-    response = requests.get(endpoint1, headers=headers)
-    response2 = requests.get(endpint2, headers=headers)
+    endpoint = f"{CLOWDER_V1}/api/collections/topLevelCollections?superAdmin=true"
+    response = requests.get(endpoint, headers=headers)
     user_collections = response.json()
-    user_collections_ids = []
-    user_collections_ids_2 = []
-    user_collections_2 = response2.json()
-    for collection in user_collections_2:
-        id = collection['id']
-        descendants = get_collection_v1_descendants(headers, id)
-        # test_descendants = get_collection_v1_descendants(headers, "68a34b28e4b0cc7386c091a4")
-        # TODO check here if the dataset is in a descendant
-        print('got descendants')
-    for collection in user_collections:
-        user_collections_ids.append(collection['id'])
+
     for collection in user_collections:
         collection_id = collection["id"]
         collection_dataset_endpoint = (
@@ -198,9 +188,24 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
             datasets = dataset_response.json()
             for ds in datasets:
                 if ds["id"] == dataset_id:
-                    matching_collections.append(collection)
+                    if collection not in matching_collections:
+                        matching_collections.append(collection)
         except Exception as e:
             print("Exception", e)
+        if int(collection["childCollectionsCount"]) > 0:
+            collection_descendants = get_collection_v1_descendants(headers, collection_id)
+            for descendant in collection_descendants:
+                collection_dataset_endpoint = (
+                    f"{CLOWDER_V1}/api/collections/{descendant}/datasets?superAdmin=true"
+                )
+                collection_dataset_response = requests.get(
+                    collection_dataset_endpoint, headers=headers
+                )
+                collection_dataset_json = collection_dataset_response.json()
+                for ds in collection_dataset_json:
+                    if ds['id'] == dataset_id:
+                        if descendant not in matching_collections:
+                            matching_collections.append(descendant)
     return matching_collections
 
 
@@ -826,9 +831,12 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 if file_v2_id is not None:
                     add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
             # posting the collection hierarchy as metadata
-            collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
-                dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
-            )
+            try:
+                collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
+                    dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+                )
+            except Exception as e:
+                print(e)
             migration_extractor_collection_metadata = {
                 "listener": {
                     "name": "migration",
