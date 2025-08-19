@@ -142,8 +142,12 @@ def post_metadata_definition(
     )
 
     if response.status_code == 200:
+        print(
+            f"Success posting metadata definition. Metadata name:  {v2_metadata['name']}"
+        )
         return response.json().get("id")
     else:
+        print(f"Error posting metadata, definitio, name: {v2_metadata['name']}")
         print(
             f"Failed to post metadata definition. Status code: {response.status_code}"
         )
