@@ -55,7 +55,7 @@ export function downloadVisData(
 			// TODO guess extension
 			filename = `${visualizationId}.tmp`;
 		}
-		let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
+		const endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",

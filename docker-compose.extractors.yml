@@ -1,6 +1,3 @@
-version: '3.7'
-
-
 services:
   name-entity-recognition:
     image: socialmediamacroscope/name_entity_recognition_extractor:latest
@@ -47,6 +44,41 @@ services:
       - clowder2
     restart: unless-stopped
 
+  image-preview:
+    image: clowder/extractors-image-preview:latest
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  image-metadata:
+    image: clowder/extractors-image-metadata:latest
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  audio-preview:
+    image: clowder/extractors-audio-preview:latest
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  file-digest:
+    image: clowder/extractors-digest:latest
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
 
 networks:
   clowder2:

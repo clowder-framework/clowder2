@@ -1,9 +1,8 @@
 import os
 
-from fastapi.testclient import TestClient
-
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file, upload_files, generate_png
+from app.tests.utils import create_dataset, generate_png, upload_file, upload_files
+from fastapi.testclient import TestClient
 
 
 def test_create_and_delete(client: TestClient, headers: dict):
@@ -34,7 +33,7 @@ def test_get_one(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers
     )
     assert response.status_code == 200
-    result = response.json()[0]
+    result = response.json().get("data")[0]
     assert result["name"] == temp_name
     assert result["version_num"] == 1
     assert result["dataset_id"] == dataset_id

@@ -1,20 +1,19 @@
 import collections.abc
 from datetime import datetime
-from typing import Optional, List, Union
-
-from beanie import Document
-from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import HTTPException
-from pydantic import Field, validator, AnyUrl, BaseModel
+from typing import List, Optional, Union
 
 from app.models.listeners import (
     EventListenerIn,
-    LegacyEventListenerIn,
     EventListenerOut,
+    LegacyEventListenerIn,
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.search.connect import insert_record, update_record
+from beanie import Document, PydanticObjectId, View
+from elasticsearch import Elasticsearch, NotFoundError
+from fastapi import HTTPException
+from pydantic import AnyUrl, BaseModel, Field, validator
 
 # List of valid types that can be specified for metadata fields
 FIELD_TYPES = {
@@ -105,6 +104,7 @@ class MetadataDefinitionBase(BaseModel):
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
+    modified: datetime = Field(default_factory=datetime.utcnow)
 
     # TODO: Space-level requirements?
 
@@ -166,7 +166,7 @@ def validate_definition(content: dict, metadata_def: MetadataDefinitionOut):
                         for v in value:
                             typecast_list.append(t(v))
                         content[field.name] = typecast_list
-                    except:
+                    except HTTPException:
                         raise HTTPException(
                             status_code=400,
                             detail=f"{metadata_def.name} field {field.name} requires {field.config.type} for all values in list",
@@ -251,11 +251,14 @@ class MetadataDelete(BaseModel):
     extractor: Optional[LegacyEventListenerIn]
 
 
-class MetadataDB(Document, MetadataBase):
+class MetadataBaseCommon(MetadataBase):
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
+    origin_id: Optional[PydanticObjectId] = None
 
+
+class MetadataDB(Document, MetadataBaseCommon):
     class Settings:
         name = "metadata"
 
@@ -269,7 +272,20 @@ class MetadataDB(Document, MetadataBase):
         return v
 
 
-class MetadataOut(MetadataDB):
+class MetadataFreezeDB(Document, MetadataBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "metadata_freeze"
+
+    @validator("resource")
+    def resource_dbref_is_valid(cls, v):
+        if False:
+            raise ValueError("Problem with db reference.")
+        return v
+
+
+class MetadataOut(MetadataDB, MetadataFreezeDB):
     class Config:
         fields = {"id": "id"}
 
@@ -288,12 +304,14 @@ async def validate_context(
     if context is None and context_url is None and definition is None:
         raise HTTPException(
             status_code=400,
-            detail=f"Context is required",
+            detail="Context is required",
         )
     if context is not None:
-        pass
+        # TODO validate context
+        return content
     if context_url is not None:
-        pass
+        # TODO validate context
+        return content
     if definition is not None:
         if (
             md_def := await MetadataDefinitionDB.find_one(
@@ -306,7 +324,7 @@ async def validate_context(
                 status_code=400,
                 detail=f"{definition} is not valid metadata definition",
             )
-    return content
+        return content
 
 
 def deep_update(orig: dict, new: dict):
@@ -341,3 +359,33 @@ async def patch_metadata(metadata: MetadataDB, new_entries: dict, es: Elasticsea
     except Exception as e:
         raise e
     return MetadataOut(**metadata.dict())
+
+
+class MetadataDBViewList(View, MetadataBaseCommon):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
+
+    class Settings:
+        source = MetadataDB
+        name = "metadata_view"
+        pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "metadata_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5

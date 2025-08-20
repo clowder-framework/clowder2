@@ -10,7 +10,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "clowder2.name" . }}-backend
+      app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-backend
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/name: {{ include "clowder2.name" . }}-backend
+        app.kubernetes.io/name: {{ include "clowder2.fullname" . }}-backend
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -39,8 +39,7 @@ spec:
             - name: WEB_CONCURRENCY
               value: "1"
             - name: MINIO_SERVER_URL
-              value: {{ include "clowder2.name" . }}-minio:9000
-#              value: {{ include "clowder2.name" . }}-minio-headless:9000
+              value: {{ include "clowder2.releaseName" . }}-minio:9000
             - name: MINIO_EXTERNAL_SERVER_URL
               value: minio-api.{{ .Values.hostname }}
             - name: MINIO_SECURE
@@ -50,36 +49,49 @@ spec:
             - name: MINIO_ACCESS_KEY
               value: {{ .Values.minio.auth.rootUser }}
             - name: MINIO_SECRET_KEY
+              {{- if .Values.backend.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: clowder2-minio
+                  name: {{ .Values.backend.existingSecret }}
+                  key: {{ .Values.backend.existingMinioSecretKey | default "root-password" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "clowder2.releaseName" . }}-secret
                   key: root-password
+              {{- end }}
             - name: MINIO_UPLOAD_CHUNK_SIZE
               value: "10485760"
             - name: MONGODB_URL
-              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
+              value: mongodb://{{ include "clowder2.releaseName" . }}-mongodb:27017
             - name: MONGO_DATABASE
               value: {{ .Values.mongodb.database }}
             - name: CLOWDER2_URL
               value: http://{{ .Values.hostname }}
             - name: auth_base
               value: $(CLOWDER2_URL)
+            - name: auth_realm
+              value: {{ .Values.auth.realm }}
+            - name: auth_client_id
+              value: {{ .Values.auth.clientID }}
+            - name: auth_redirect_uri
+              value: $(CLOWDER2_URL)/api/v2/auth
             - name: auth_url
               value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: http://{{ include "clowder2.releaseName" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: auth_register_url
-              value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
+              value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=$(auth_redirect_uri)&scope=openid%20email
             - name: auth_token_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
+              value: http://{{ include "clowder2.releaseName" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
             - name: auth_server_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/
+              value: $(CLOWDER2_URL)/keycloak/
             - name: keycloak_base
               value: $(CLOWDER2_URL)/api
             - name: frontend_url
               value: $(CLOWDER2_URL)
             - name: elasticsearch_url
-              value: http://{{ include "clowder2.name" . }}-elasticsearch:9200
+              value: http://{{ include "clowder2.releaseName" . }}-elasticsearch:9200
             - name: elasticsearch_no_of_shards
               value: "5"
             - name: elasticsearch_no_of_replicas
@@ -87,17 +99,23 @@ spec:
             - name: RABBITMQ_USER
               value: {{ .Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
+              {{- if .Values.backend.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: clowder2-rabbitmq
+                  name: {{ .Values.backend.existingSecret }}
+                  key: {{ .Values.backend.existingRabbitMQSecretKey | default "rabbitmq-password" }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clowder2.releaseName" . }}-secret
                   key: rabbitmq-password
+              {{- end }}
             - name: RABBITMQ_HOST
-              value: {{ include "clowder2.name" .  }}-rabbitmq
+              value: {{ include "clowder2.releaseName" .  }}-rabbitmq
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
             - name: API_HOST
-#              value: $(CLOWDER2_URL)
-              value: http://{{ include "clowder2.name" . }}-backend:{{ .Values.backend.service.port }}
+              value: http://{{ include "clowder2.fullname" . }}-backend:{{ .Values.backend.service.port }}
           ports:
             - name: http
               containerPort: 80

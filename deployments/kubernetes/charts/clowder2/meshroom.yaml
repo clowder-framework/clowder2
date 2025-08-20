@@ -1,0 +1,123 @@
+hostname: &hostname meshroom.clowderframework.org
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  tls:
+    - hosts:
+        - *hostname
+      secretName: meshroom.clowderframework.org-tls
+
+minio:
+  auth:
+    rootUser: meshroom
+    existingSecret: meshroom-secret
+    rootPasswordSecretKey: root-password
+  persistence:
+    storageClass: nfs-taiga
+    size: 20Gi
+  ingress:
+    enabled: false
+  apiIngress:
+    enabled: true
+    hostname: minio-api.meshroom.clowderframework.org
+
+rabbitmq:
+  auth:
+    username: meshroom
+    existingPasswordSecret: meshroom-secret
+    existingErlangSecret: meshroom-secret
+    existingSecretPasswordKey: rabbitmq-password
+    erlangCookie: kittencookie
+  ingress:
+    enabled: false
+  persistence:
+    storageClass: csi-cinder-sc-retain
+    size: 8Gi
+
+mongodb:
+  persistence:
+    storageClass: csi-cinder-sc-retain
+    size: 8Gi
+
+elasticsearch:
+  master:
+    persistence:
+      storageClass: csi-cinder-sc-retain
+      size: 8Gi
+  data:
+    persistence:
+      storageClass: csi-cinder-sc-retain
+      size: 8Gi
+
+keycloak:
+  auth:
+    existingSecret: meshroom-secret
+    adminUser: meshroom
+  ingress:
+    hostname: *hostname
+    path: /keycloak
+    tls: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+
+  postgresql:
+    auth:
+      existingSecret: meshroom-secret
+      username: keycloak
+      database: keycloak
+    primary:
+      persistence:
+        storageClass: csi-cinder-sc-retain
+        size: 8Gi
+
+geoserver:
+  enabled: false
+
+backend:
+  image:
+    repository: clowder/clowder2-backend
+  existingSecret: meshroom-secret
+  env:
+    MINIO_SERVER_URL: meshroom-minio:9000
+    MONGODB_URL: mongodb://meshroom-mongodb:27017
+    oauth2_scheme_auth_url: http://meshroom-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+    auth_register_url: /keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=$(auth_redirect_uri)&scope=openid%20email
+    auth_token_url: http://meshroom-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
+    elasticsearch_url: http://meshroom-elasticsearch:9200
+    RABBITMQ_HOST: meshroom-rabbitmq
+    API_HOST: http://meshroom-clowder2-backend:80
+
+message:
+  image:
+    repository: clowder/clowder2-messages
+  existingSecret: meshroom-secret
+  env:
+    MONGODB_URL: mongodb://meshroom-mongodb:27017
+    RABBITMQ_HOST: meshroom-rabbitmq
+
+heartbeat:
+  image:
+    repository: clowder/clowder2-heartbeat
+  existingSecret: meshroom-secret
+  env:
+    MONGODB_URL: mongodb://meshroom-mongodb:27017
+    RABBITMQ_HOST: meshroom-rabbitmq
+
+extractors:
+  meshroom-extractor:
+    image: clowder/extractors-meshroom:latest
+    existingSecret: meshroom-secret
+    env:
+      - name: USERNAME
+        value: ccp-meshroom
+      - name: PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: meshroom-secret
+            key: extractor-password
+frontend:
+  image:
+    repository: clowder/clowder2-frontend

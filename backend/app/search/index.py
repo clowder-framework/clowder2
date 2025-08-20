@@ -1,18 +1,18 @@
-from typing import Optional, List
+from typing import List, Optional, Union
 
-from bson import ObjectId
-from elasticsearch import Elasticsearch, NotFoundError
-from beanie import PydanticObjectId
 from app.config import settings
 from app.models.authorization import AuthorizationDB
-from app.models.datasets import DatasetOut, DatasetDB
-from app.models.files import FileOut, FileDB
-from app.models.thumbnails import ThumbnailOut, ThumbnailDB
+from app.models.datasets import DatasetDB, DatasetOut
+from app.models.files import FileDB, FileOut
+from app.models.folders import FolderOut
 from app.models.metadata import MetadataDB
-from app.models.search import (
-    ElasticsearchEntry,
-)
-from app.search.connect import insert_record, update_record
+from app.models.search import ElasticsearchEntry
+from app.models.thumbnails import ThumbnailDB
+from app.search.connect import delete_document_by_id, insert_record, update_record
+from beanie import PydanticObjectId
+from bson import ObjectId
+from elasticsearch import Elasticsearch, NotFoundError
+from fastapi import HTTPException
 
 
 async def index_dataset(
@@ -27,7 +27,7 @@ async def index_dataset(
         # Get authorized users from db
         authorized_user_ids = []
         async for auth in AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset.id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset.id)
         ):
             authorized_user_ids += auth.user_ids
     else:
@@ -36,9 +36,10 @@ async def index_dataset(
     # Get full metadata from db (granular updates possible but complicated)
     metadata = []
     async for md in MetadataDB.find(
-        MetadataDB.resource.resource_id == ObjectId(dataset.id)
+        MetadataDB.resource.resource_id == PydanticObjectId(dataset.id)
     ):
         metadata.append(md.content)
+    dataset_status = dataset.status
     # Add en entry to the dataset index
     doc = ElasticsearchEntry(
         resource_type="dataset",
@@ -50,6 +51,7 @@ async def index_dataset(
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
         metadata=metadata,
+        status=dataset_status,
     ).dict()
 
     if update:
@@ -74,7 +76,7 @@ async def index_file(
         # Get authorized users from db
         authorized_user_ids = []
         async for auth in AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(file.dataset_id)
         ):
             authorized_user_ids += auth.user_ids
     else:
@@ -83,9 +85,10 @@ async def index_file(
     # Get full metadata from db (granular updates possible but complicated)
     metadata = []
     async for md in MetadataDB.find(
-        MetadataDB.resource.resource_id == ObjectId(file.id)
+        MetadataDB.resource.resource_id == PydanticObjectId(file.id)
     ):
         metadata.append(md.content)
+
     # Add en entry to the file index
     doc = ElasticsearchEntry(
         resource_type="file",
@@ -100,6 +103,7 @@ async def index_file(
         folder_id=str(file.folder_id),
         bytes=file.bytes,
         metadata=metadata,
+        status=file.status,
     ).dict()
     if update:
         try:
@@ -108,6 +112,59 @@ async def index_file(
             insert_record(es, settings.elasticsearch_index, doc, file.id)
     else:
         insert_record(es, settings.elasticsearch_index, doc, file.id)
+
+
+async def index_dataset_files(es: Elasticsearch, dataset_id: str, update: bool = False):
+    query = [
+        FileDB.dataset_id == ObjectId(dataset_id),
+    ]
+    files = await FileDB.find(*query).to_list()
+    for file in files:
+        await index_file(es, FileOut(**file.dict()), update=update)
+
+
+async def index_folder(
+    es: Elasticsearch,
+    folder: FolderOut,
+    user_ids: Optional[List[str]] = None,
+    update: bool = False,
+):
+    """Create or update an Elasticsearch entry for the folder."""
+    # find dataset this folder belongs to
+    if (
+        dataset := await DatasetDB.find_one(
+            DatasetDB.id == PydanticObjectId(folder.dataset_id)
+        )
+    ) is not None:
+        downloads = dataset.downloads
+        status = dataset.status
+    else:
+        raise HTTPException(
+            status_code=404, detail="Orphan folder doesn't belong to any dataset."
+        )
+
+    doc = ElasticsearchEntry(
+        resource_type="folder",
+        name=folder.name,
+        creator=folder.creator.email,
+        created=folder.created,
+        dataset_id=str(folder.dataset_id),
+        folder_id=str(folder.id),
+        downloads=downloads,
+        status=status,
+    ).dict()
+
+    if update:
+        try:
+            update_record(es, settings.elasticsearch_index, {"doc": doc}, folder.id)
+        except NotFoundError:
+            insert_record(es, settings.elasticsearch_index, doc, folder.id)
+    else:
+        insert_record(es, settings.elasticsearch_index, doc, folder.id)
+
+
+async def remove_folder_index(folderId: Union[str, ObjectId], es: Elasticsearch):
+    delete_document_by_id(es, settings.elasticsearch_index, str(folderId))
 
 
 async def index_thumbnail(
@@ -127,13 +184,13 @@ async def index_thumbnail(
             # Get authorized users from db
             authorized_user_ids = []
             async for auth in AuthorizationDB.find(
-                AuthorizationDB.dataset_id == ObjectId(dataset_id)
+                AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
             ):
                 authorized_user_ids += auth.user_ids
             # Get full metadata from db (granular updates possible but complicated)
             metadata = []
             async for md in MetadataDB.find(
-                MetadataDB.resource.resource_id == ObjectId(file.id)
+                MetadataDB.resource.resource_id == PydanticObjectId(file.id)
             ):
                 metadata.append(md.content)
             # Add en entry to the file index

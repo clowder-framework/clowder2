@@ -1,26 +1,25 @@
 from datetime import timedelta
 from secrets import token_urlsafe
-from typing import List
-
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from fastapi import APIRouter, HTTPException, Depends
-from itsdangerous.url_safe import URLSafeSerializer
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import (
-    UserDB,
-    UserOut,
+    ListenerAPIKeyDB,
     UserAPIKeyDB,
     UserAPIKeyOut,
-    ListenerAPIKeyDB,
+    UserDB,
+    UserOut,
 )
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
+from itsdangerous.url_safe import URLSafeSerializer
 
 router = APIRouter()
 
 
-@router.get("/keys", response_model=List[UserAPIKeyOut])
+@router.get("/keys", response_model=Paged)
 async def get_user_api_keys(
     current_user=Depends(get_current_username),
     skip: int = 0,
@@ -32,14 +31,22 @@ async def get_user_api_keys(
         skip: number of page to skip
         limit: number to limit per page
     """
-    apikeys = (
+    apikeys_and_count = (
         await UserAPIKeyDB.find(UserAPIKeyDB.user == current_user)
-        .sort(-UserAPIKeyDB.created)
-        .skip(skip)
-        .limit(limit)
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
         .to_list()
     )
-    return [key.dict() for key in apikeys]
+    page_metadata = _construct_page_metadata(apikeys_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            UserAPIKeyOut(id=item.pop("_id"), **item)
+            for item in apikeys_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.post("/keys", response_model=str)
@@ -87,46 +94,74 @@ async def delete_user_api_key(
         raise HTTPException(status_code=404, detail=f"API key {key_id} not found.")
 
 
-@router.get("", response_model=List[UserOut])
+@router.get("", response_model=Paged)
 async def get_users(skip: int = 0, limit: int = 2):
-    users = await UserDB.find({}, skip=skip, limit=limit).to_list()
-    return [user.dict() for user in users]
+    users_and_count = await UserDB.aggregate(
+        [_get_page_query(skip, limit, sort_field="email", ascending=True)],
+    ).to_list()
+    page_metadata = _construct_page_metadata(users_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
-@router.get("/search", response_model=List[UserOut])
+@router.get("/search", response_model=Paged)
 async def search_users(
     text: str,
     skip: int = 0,
     limit: int = 2,
 ):
-    users = await UserDB.find(
-        Or(
-            RegEx(field=UserDB.email, pattern=text),
-            RegEx(field=UserDB.first_name, pattern=text),
-            RegEx(field=UserDB.last_name, pattern=text),
-        ),
-        skip=skip,
-        limit=limit,
-    ).to_list()
+    users_and_count = (
+        await UserDB.find(
+            Or(
+                RegEx(field=UserDB.email, pattern=text, options="i"),
+                RegEx(field=UserDB.first_name, pattern=text, options="i"),
+                RegEx(field=UserDB.last_name, pattern=text, options="i"),
+            )
+        )
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="email", ascending=True)],
+        )
+        .to_list()
+    )
+    page_metadata = _construct_page_metadata(users_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
-    return [user.dict() for user in users]
 
-
-@router.get("/prefixSearch", response_model=List[UserOut])
-async def search_users(
+@router.get("/prefixSearch", response_model=Paged)
+async def search_users_prefix(
     prefix: str,
     skip: int = 0,
     limit: int = 2,
 ):
     query_regx = f"^{prefix}.*"
-    users = await UserDB.find(
-        Or(RegEx(field=UserDB.email, pattern=query_regx)),
-        sort=(+UserDB.email),
-        skip=skip,
-        limit=limit,
-    ).to_list()
-
-    return [user.dict() for user in users]
+    users_and_count = (
+        await UserDB.find(
+            Or(RegEx(field=UserDB.email, pattern=query_regx, options="i")),
+        )
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="email", ascending=True)],
+        )
+        .to_list()
+    )
+    page_metadata = _construct_page_metadata(users_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/profile", response_model=UserOut)

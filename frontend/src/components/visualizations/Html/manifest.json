@@ -11,9 +11,7 @@
 	"visConfig": {
 		"name": "Html",
 		"mainType": "text",
-		"mimeTypes": [
-			"text/html"
-		],
+		"mimeTypes": ["text/html"],
 		"props": {
 			"fileId": "string"
 		}

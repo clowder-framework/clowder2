@@ -72,7 +72,7 @@ export const ExtractionJobsToolbar = (props: ExtractionJobsToolbarProps) => {
 				</FormControl>
 				<LocalizationProvider dateAdapter={AdapterDateFns}>
 					<DatePicker
-						label="Submitted at"
+						label="Submitted on"
 						value={selectedCreatedTime}
 						onChange={(value) => {
 							setSelectedCreatedTime(value);

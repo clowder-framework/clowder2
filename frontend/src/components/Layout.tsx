@@ -6,7 +6,6 @@ import Drawer from "@mui/material/Drawer";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -16,20 +15,14 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import {
-	Badge,
-	Link,
-	Menu,
-	MenuItem,
-	MenuList,
-	Typography,
-} from "@mui/material";
+import { Badge, Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
 import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -42,9 +35,13 @@ import {
 	getAdminModeStatus as getAdminModeStatusAction,
 	toggleAdminMode as toggleAdminModeAction,
 } from "../actions/user";
-import { AdminPanelSettings } from "@mui/icons-material";
+import { AdminPanelSettings, SavedSearch } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import { Footer } from "./navigation/Footer";
+import BuildIcon from "@mui/icons-material/Build";
+
+import config from "../app.config";
 
 const drawerWidth = 240;
 
@@ -57,13 +54,13 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 		easing: theme.transitions.easing.sharp,
 		duration: theme.transitions.duration.leavingScreen,
 	}),
-	marginLeft: `-${drawerWidth}px`,
+	marginLeft: 0,
 	...(open && {
 		transition: theme.transitions.create("margin", {
 			easing: theme.transitions.easing.easeOut,
 			duration: theme.transitions.duration.enteringScreen,
 		}),
-		marginLeft: 0,
+		marginLeft: `${drawerWidth}px`,
 	}),
 }));
 
@@ -160,10 +157,15 @@ export default function PersistentDrawerLeft(props) {
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-
 	// @ts-ignore
 	return (
-		<Box sx={{ display: "flex" }}>
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column", // Stack children vertically
+				minHeight: "100vh", // Fill the viewport height
+			}}
+		>
 			<AppBar position="fixed" open={open}>
 				<Toolbar>
 					<IconButton
@@ -273,7 +275,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
-					<Divider orientation="horizontal" />
 					{currUserProfile.admin ? (
 						<>
 							<MenuItem onClick={() => toggleAdminMode(!adminMode)}>
@@ -293,8 +294,6 @@ export default function PersistentDrawerLeft(props) {
 									</>
 								)}
 							</MenuItem>
-
-							<Divider orientation="horizontal" />
 						</>
 					) : (
 						<></>
@@ -306,7 +305,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>API Key</ListItemText>
 					</MenuItem>
-					<Divider orientation="horizontal" />
 					<MenuItem component={RouterLink} to="/auth/logout">
 						<ListItemIcon>
 							<LogoutIcon fontSize="small" />
@@ -338,7 +336,6 @@ export default function PersistentDrawerLeft(props) {
 						)}
 					</IconButton>
 				</DrawerHeader>
-				<Divider />
 				<List>
 					<ListItem key={"explore"} disablePadding>
 						<ListItemButton component={RouterLink} to="/">
@@ -349,7 +346,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					<ListItem key={"search"} disablePadding>
 						<ListItemButton component={RouterLink} to="/search">
@@ -360,44 +356,45 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				{currUserProfile.admin ? (
-					<>
-						<List>
-							<ListItem key={"manage-user"} disablePadding>
-								<ListItemButton component={RouterLink} to="/manage-users">
-									<ListItemIcon>
-										<ManageAccountsIcon />
-									</ListItemIcon>
-									<ListItemText primary={"Manage Users"} />
-								</ListItemButton>
-							</ListItem>
-						</List>
-						<Divider />
-					</>
+					<List>
+						<ListItem key={"manage-user"} disablePadding>
+							<ListItemButton component={RouterLink} to="/manage-users">
+								<ListItemIcon>
+									<ManageAccountsIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Manage Users"} />
+							</ListItemButton>
+						</ListItem>
+					</List>
 				) : null}
-				<List>
-					<ListItem key={"groups"} disablePadding>
-						<ListItemButton component={RouterLink} to="/groups">
-							<ListItemIcon>
-								<GroupIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Groups"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"newdataset"} disablePadding>
-						<ListItemButton component={RouterLink} to="/create-dataset">
-							<ListItemIcon>
-								<AddBox />
-							</ListItemIcon>
-							<ListItemText primary={"New Dataset"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
+
+				{currUserProfile.read_only_user ? null : (
+					<List>
+						<ListItem key={"groups"} disablePadding>
+							<ListItemButton component={RouterLink} to="/groups">
+								<ListItemIcon>
+									<GroupIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Groups"} />
+							</ListItemButton>
+						</ListItem>
+					</List>
+				)}
+				{currUserProfile.read_only_user ? (
+					<></>
+				) : (
+					<List>
+						<ListItem key={"newdataset"} disablePadding>
+							<ListItemButton component={RouterLink} to="/create-dataset">
+								<ListItemIcon>
+									<AddBox />
+								</ListItemIcon>
+								<ListItemText primary={"New Dataset"} />
+							</ListItemButton>
+						</ListItem>
+					</List>
+				)}
 				<List>
 					<ListItem key={"metadataDefinition"} disablePadding>
 						<ListItemButton component={RouterLink} to="/metadata-definitions">
@@ -408,7 +405,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					<ListItem key={"extractions"} disablePadding>
 						<ListItemButton component={RouterLink} to="/extractions">
@@ -419,23 +415,65 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
+				<List>
+					<ListItem key={"listeners"} disablePadding>
+						<ListItemButton component={RouterLink} to="/listeners">
+							<ListItemIcon>
+								<BuildIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Extractors"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				{/*TODO: Need to make link dynamic */}
+				<List>
+					<ListItem key={"jupyter"} disablePadding>
+						<ListItemButton
+							component={RouterLink}
+							to={config.jupyterHubURL}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<ListItemIcon>
+								<MenuBookIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Jupyter Notebook"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<List>
+					<ListItem key={"feeds"} disablePadding>
+						<ListItemButton component={RouterLink} to="/feeds">
+							<ListItemIcon>
+								<SavedSearch />
+							</ListItemIcon>
+							<ListItemText primary={"Feeds"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
-				<Box
-					sx={{
-						position: "fixed",
-						bottom: "0px",
-						minHeight: "30px",
-						width: "100%",
-					}}
-				>
-					<Typography variant="body2" color="primary.light">
-						v2.0.0-beta.1
-					</Typography>
-				</Box>
 			</Main>
+			<Box
+				sx={{
+					mt: "auto", // Pushes the footer to the bottom
+					minHeight: "30px",
+					width: "100%",
+					marginLeft: 0,
+					...(open && {
+						width: `calc(100% - ${drawerWidth}px)`,
+						transition: theme.transitions.create("margin", {
+							easing: theme.transitions.easing.easeOut,
+							duration: theme.transitions.duration.enteringScreen,
+						}),
+						marginLeft: `${drawerWidth}px`,
+					}),
+				}}
+			>
+				<Footer />
+			</Box>
 		</Box>
 	);
 }

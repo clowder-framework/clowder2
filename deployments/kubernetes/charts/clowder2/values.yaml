@@ -1,5 +1,9 @@
 hostname: clowder2.localhost
 
+auth:
+  realm: clowder
+  clientID: clowder2-backend
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -47,7 +51,6 @@ backend:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 80
@@ -56,7 +59,7 @@ backend:
 # GEOSERVER
 # ----------------------------------------------------------------------
 geoserver:
-  enabled : true
+  enabled : false
   username: admin
   password: admin
   workspace: clowder2
@@ -83,7 +86,7 @@ minio:
   auth:
     rootUser: minioadmin
     rootPassword: minioadmin
-    
+
   # enable webui
   disableWebUI: false
 
@@ -93,12 +96,12 @@ minio:
 
   # enable ingress for webui
   ingress:
-    enabled: true
+    enabled: false
     hostname: minio.clowder2.localhost
 
   # enable ingress for api
   apiIngress:
-    enabled: true
+    enabled: false
     hostname: minio-api.clowder2.localhost
 
   # enabled distributed mode (or standalone)
@@ -116,7 +119,8 @@ minio:
     size: 20Gi
 
     # where to store data, can be network storage
-    #storageClass: nfs-taiga
+    storageClass: nfs-taiga
+
   service:
     type: ClusterIP
 
@@ -137,10 +141,10 @@ mongodb:
   # storage
   persistence:
     # storage size for database
-    #size: 8Gi
-    
+    size: 8Gi
+
     # pick fast non network storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
 # RABBITMQ
@@ -160,50 +164,55 @@ rabbitmq:
 
   # enable webfrontend
   ingress:
-    enabled: true
+    enabled: false
     hostname: rabbitmq.clowder2.localhost
 
   persistence:
     # pick fast storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
 # DEFAULT EXTRACTOR SERVICES
 # ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+# EXTRACTORS
 message:
   image:
     repository: clowder/clowder2-messages
-#    tag: main
     pullPolicy: Always
 
 heartbeat:
   image:
     repository: clowder/clowder2-heartbeat
-#    tag: main
     pullPolicy: Always
 
-
-# ----------------------------------------------------------------------
-# EXTRACTORS
-# ----------------------------------------------------------------------
 ## list of extractors to be installed. Each extractor should have the
 ## following fields:
 ## enabled      : true/false - should the extractor be installed
 ## image        : dokeer/image:tag - the extractor docker image
 ## replicaCount : number - the number of this extractor to install
 ## env          : additional environment variables to pass to extractor.
+
 extractors:
   wordcount:
+    enabled: false
     image: clowder/extractors-wordcount:latest
   image-preview:
+    enabled: false
     image: clowder/extractors-image-preview:latest
   image-metadata:
+    enabled: false
     image: clowder/extractors-image-metadata:latest
   audio-preview:
+    enabled: false
     image: clowder/extractors-audio-preview:latest
   file-digest:
+    enabled: false
     image: clowder/extractors-digest:latest
   geotiff-preview:
+    enabled: false
     image: clowder/extractors-geotiff-preview:latest
 
 # ----------------------------------------------------------------------
@@ -214,12 +223,12 @@ elasticsearch:
 
   master:
     persistence:
-      # storageClass: csi-cinder-sc-retain
-      # size: 8Gi
+       storageClass: csi-cinder-sc-retain
+       size: 8Gi
   data:
     persistence:
-      # storageClass: csi-cinder-sc-retain
-      # size: 8Gi
+       storageClass: csi-cinder-sc-retain
+       size: 8Gi
 
 # ----------------------------------------------------------------------
 # KEYCLOAK
@@ -248,8 +257,8 @@ keycloak:
 
     primary:
       persistence:
-        # storageClass: csi-cinder-sc-retain
-        # size: 8Gi
+         storageClass: csi-cinder-sc-retain
+         size: 8Gi
 
   # Mount configmap with theme and untar
   initContainers:

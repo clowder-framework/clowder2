@@ -1,6 +1,15 @@
-import React, { useState } from "react";
-import { Button, Card, CardActions, CardContent, Grid } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+	Button,
+	Card,
+	CardActions,
+	CardContent,
+	Grid,
+	IconButton,
+} from "@mui/material";
 import Collapse from "@mui/material/Collapse";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { VisualizationDataDetail } from "./VisualizationDataDetail";
 import { VisualizationDataOut } from "../../openapi/v2";
 import { VisComponentDefinitions } from "../../visualization.config";
@@ -19,7 +28,8 @@ type previewProps = {
 
 export const VisualizationCard = (props: previewProps) => {
 	const { visComponentDefinition, visualizationDataItem } = props;
-	const [expanded, setExpanded] = React.useState(false);
+	const [expandInfo, setExpandInfo] = React.useState(false);
+	const [fullscreen, setFullscreen] = React.useState(false); // Default to normal view
 	const [visShareModalOpen, setVisShareModalOpen] = useState(false);
 
 	// share visualization
@@ -33,8 +43,12 @@ export const VisualizationCard = (props: previewProps) => {
 		(state: RootState) => state.visualization.presignedUrl
 	);
 
+	useEffect(() => {
+		if (expandInfo) setFullscreen(false);
+	}, [expandInfo]);
+
 	const handleExpandClick = () => {
-		setExpanded(!expanded);
+		setExpandInfo(!expandInfo);
 	};
 
 	const handleShareLinkClick = () => {
@@ -46,37 +60,45 @@ export const VisualizationCard = (props: previewProps) => {
 		dispatch({ type: RESET_VIS_DATA_PRESIGNED_URL });
 	};
 
+	const handleFullscreenToggle = () => {
+		setFullscreen(!fullscreen);
+	};
+
 	return (
-		<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-			<Card>
+		<Grid
+			item
+			xs={12}
+			sm={fullscreen ? 12 : 4}
+			md={fullscreen ? 12 : 4}
+			lg={fullscreen ? 12 : 4}
+			xl={fullscreen ? 12 : 4}
+		>
+			<Card sx={{ height: "100%" }}>
 				<PresignedUrlShareModal
 					presignedUrl={presignedUrl}
 					presignedUrlShareModalOpen={visShareModalOpen}
 					setPresignedUrlShareModalOpen={setVisShareModalOpen}
 					setPresignedUrlShareModalClose={setVisShareModalClose}
 				/>
-				<Collapse in={!expanded} timeout="auto" unmountOnExit>
+				<Collapse in={!expandInfo} timeout="auto" unmountOnExit>
 					<CardContent>
 						{React.cloneElement(visComponentDefinition.component, {
 							visualizationId: visualizationDataItem.id,
 						})}
 					</CardContent>
 				</Collapse>
-				<CardActions sx={{ padding: "0 auto" }}>
-					{!expanded ? (
-						<Button onClick={handleExpandClick} sx={{ marginLeft: "auto" }}>
-							Learn More
+				<CardActions sx={{ display: "flex", justifyContent: "space-between" }}>
+					<div>
+						<Button onClick={handleExpandClick}>
+							{expandInfo ? "View" : "Learn More"}
 						</Button>
-					) : (
-						<Button onClick={handleExpandClick} sx={{ marginLeft: "auto" }}>
-							View
-						</Button>
-					)}
-					<Button onClick={handleShareLinkClick} sx={{ marginLeft: "auto" }}>
-						Share Link
-					</Button>
+						<Button onClick={handleShareLinkClick}>Share Link</Button>
+					</div>
+					<IconButton onClick={handleFullscreenToggle}>
+						{fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+					</IconButton>
 				</CardActions>
-				<Collapse in={expanded} timeout="auto" unmountOnExit>
+				<Collapse in={expandInfo} timeout="auto" unmountOnExit>
 					<CardContent>
 						<VisualizationDataDetail
 							visualizationDataItem={visualizationDataItem}

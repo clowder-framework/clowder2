@@ -19,6 +19,17 @@ export function createGroup(formData) {
 	};
 }
 
+export const RESET_CREATE_GROUP = "RESET_CREATE_GROUP";
+
+export function resetGroupCreation() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_GROUP,
+			receivedAt: Date.now(),
+		});
+	};
+}
+
 export const RECEIVE_GROUPS = "RECEIVE_GROUPS";
 
 export function fetchGroups(skip = 0, limit = 21) {

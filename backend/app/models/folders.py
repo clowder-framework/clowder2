@@ -1,46 +1,71 @@
 from datetime import datetime
-from typing import Optional, List
-
-from beanie import Document, View, PydanticObjectId
-from pydantic import Field, BaseModel
+from typing import List, Optional
 
 from app.models.authorization import AuthorizationDB
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from beanie import Document, PydanticObjectId, View
+from pydantic import BaseModel, Field
 
 
 class FolderBase(BaseModel):
     name: str = "N/A"
 
 
+class FolderPatch(BaseModel):
+    name: Optional[str]
+    parent_folder: Optional[PydanticObjectId]
+
+
 class FolderIn(FolderBase):
-    parent_folder: Optional[PyObjectId]
+    parent_folder: Optional[PydanticObjectId]
 
 
-class FolderDB(Document, FolderBase):
-    dataset_id: PyObjectId
-    parent_folder: Optional[PyObjectId]
+class FolderBaseCommon(FolderBase):
+    dataset_id: PydanticObjectId
+    parent_folder: Optional[PydanticObjectId] = None
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
+    object_type: str = "folder"
+    origin_id: Optional[PydanticObjectId] = None
 
+
+class FolderDB(Document, FolderBaseCommon):
     class Settings:
         name = "folders"
 
 
-class FolderDBViewList(View, FolderBase):
+class FolderFreezeDB(Document, FolderBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "folders_freeze"
+
+
+class FolderDBViewList(View, FolderBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    dataset_id: PyObjectId
-    parent_folder: Optional[PyObjectId]
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
 
     class Settings:
         source = FolderDB
         name = "folders_view"
         pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "folders_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
             {
                 "$lookup": {
                     "from": "authorization",
@@ -56,6 +81,6 @@ class FolderDBViewList(View, FolderBase):
         # cache_capacity = 5
 
 
-class FolderOut(FolderDB):
+class FolderOut(FolderDB, FolderFreezeDB):
     class Config:
         fields = {"id": "id"}

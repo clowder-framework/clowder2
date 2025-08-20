@@ -1,0 +1,61 @@
+name: Release Helm Charts
+
+defaults:
+  run:
+    working-directory: deployments/kubernetes/charts/clowder2
+
+on:
+  release:
+    types: [published]
+
+env:
+  MAIN_REPO: clowder-framework/clowder2
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get dependencies
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add ncsa https://opensource.ncsa.illinois.edu/charts
+          helm dep build
+
+      - name: Get release info
+        id: release_info
+        run: |
+          version="$(awk '/^version:/ { print $2} ' Chart.yaml)"
+          changelog="$(sed -e "1,/^### ${version}/d" -e "/^###/,\$d" -e '/^$/d' README.md)"
+          changelog="${changelog//'%'/'%25'}"
+          changelog="${changelog//$'\n'/'%0A'}"
+          changelog="${changelog//$'\r'/'%0D'}"
+          echo "version=${version}" >> $GITHUB_ENV
+          echo "changelog=${changelog}" >> $GITHUB_ENV
+          echo "version: ${version}"
+          echo "changelog: ${changelog}"
+
+      - name: Print Github Info
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.repository: ${{ github.repository }}"
+          echo "github.ref: ${{ github.ref }}"
+
+      - name: run helm template
+        run: helm template .
+
+      - name: Publish to NCSA OpenSource
+        if: |
+          github.event_name != 'pull_request'
+          && github.repository == env.MAIN_REPO
+        uses: bsord/helm-push@v4.1.0
+        with:
+          username: ${{ secrets.HELM_USERNAME }}
+          password: ${{ secrets.HELM_PASSWORD }}
+          registry-url: "https://opensource.ncsa.illinois.edu/charts"
+          chart-folder: "deployments/kubernetes/charts/clowder2"
+          force: true

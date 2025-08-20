@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { VegaLite } from "react-vega";
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
+import { downloadPublicVisData } from "../../../actions/public_visualization";
+import { filePublicDownloaded } from "../../../actions/public_file";
+
 import {
 	guessDataType,
 	parseTextToJson,
@@ -13,6 +16,7 @@ import { theme } from "../../../theme";
 type TextProps = {
 	fileId?: string;
 	visualizationId?: string;
+	publicView?: boolean | false;
 };
 
 const allowedType = [
@@ -24,7 +28,7 @@ const allowedType = [
 ];
 
 export default function VegaSpec(props: TextProps) {
-	let { fileId, visualizationId } = props;
+	const { fileId, visualizationId, publicView } = props;
 	const [data, setData] = useState();
 
 	useEffect(() => {
@@ -32,20 +36,28 @@ export default function VegaSpec(props: TextProps) {
 			try {
 				let blob;
 				if (visualizationId) {
-					blob = await downloadVisData(visualizationId);
+					if (publicView) {
+						blob = await downloadPublicVisData(visualizationId);
+					} else {
+						blob = await downloadVisData(visualizationId);
+					}
 				} else {
-					blob = await fileDownloaded(fileId, 0);
+					if (publicView) {
+						blob = await filePublicDownloaded(fileId);
+					} else {
+						blob = await fileDownloaded(fileId, 0);
+					}
 				}
 				const file = new File([blob], "text.tmp");
 				const reader = new FileReader();
 				reader.onload = function (e) {
-				  try {
-					const jsonData = JSON.parse(e.target.result);
-					setData(jsonData);
-					console.debug('JSON data from file:', jsonData);
-				  } catch (error) {
-					console.error('Error parsing JSON:', error);
-				  }
+					try {
+						const jsonData = JSON.parse(e.target.result);
+						setData(jsonData);
+						console.debug("JSON data from file:", jsonData);
+					} catch (error) {
+						console.error("Error parsing JSON:", error);
+					}
 				};
 				const text = await reader.readAsText(file);
 				console.debug(text);
@@ -57,10 +69,9 @@ export default function VegaSpec(props: TextProps) {
 		processBlob();
 	}, [visualizationId, fileId]);
 
-
 	return (
-			<Container sx={{ marginTop: "2em"}}>
-				{data && <VegaLite spec={data} />}
-			</Container>
+		<Container sx={{ marginTop: "2em" }}>
+			{data && <VegaLite spec={data} />}
+		</Container>
 	);
 }

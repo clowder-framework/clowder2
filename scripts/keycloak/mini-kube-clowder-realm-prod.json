@@ -36,7 +36,8 @@
         "web-origins",
         "roles",
         "profile",
-        "email"
+        "email",
+        "openid"
       ],
       "optionalClientScopes": [
         "address",

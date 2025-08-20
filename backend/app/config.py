@@ -1,15 +1,15 @@
 from typing import List
 
-from pydantic import BaseSettings, AnyHttpUrl
+from pydantic import AnyHttpUrl, BaseSettings
 
 
 class Settings(BaseSettings):
     APP_NAME: str = "Clowder"
-    API_HOST: str = "http://127.0.0.1:8000"
+    API_HOST: str = "http://localhost:8000"
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
-    version: str = "2.0.0-beta.1"
+    version: str = "2.0.0-beta.3"
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     MINIO_EXPIRES: int = 3600  # seconds
     MINIO_SECURE: str = "False"  # http vs https
 
+    # If AWS_IAM is set to True, the MINIO_ACCESS_KEY and MINIO_SECRET_KEY will be ignored and AWS IAM will be used
+    AWS_IAM: bool = False
+
     # Files in the listed directories can be added to Clowder without copying them elsewhere
     LOCAL_WHITELIST: List[str] = []
 
@@ -43,6 +46,7 @@ class Settings(BaseSettings):
     auth_base = "http://localhost:8080"
     auth_realm = "clowder"
     auth_client_id = "clowder2-backend"
+    auth_redirect_uri = f"{API_HOST}{API_V2_STR}/auth"
     auth_url = f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
     oauth2_scheme_auth_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
     # scope=openid email&redirect_uri=http://<domain.com>/<redirect-path>&kc_locale=<two-digit-lang-code>
@@ -66,6 +70,7 @@ class Settings(BaseSettings):
     keycloak_client_id = auth_client_id
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
+    keycloak_default_enabled = True
 
     # Elasticsearch local config
     elasticsearch_url = "http://localhost:9200"

@@ -11,9 +11,7 @@
 	"visConfig": {
 		"name": "Text",
 		"mainType": "text",
-		"mimeTypes": [
-			"text/plain"
-		],
+		"mimeTypes": ["text/plain"],
 		"fields": [
 			{
 				"name": "lineNum",

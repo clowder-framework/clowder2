@@ -1,24 +1,23 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx, GTE, LT
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
-
-from app.keycloak_auth import get_user, get_current_username
+from app.keycloak_auth import get_current_username, get_user
 from app.models.listeners import (
     EventListenerJobDB,
-    EventListenerJobUpdateDB,
-    EventListenerJobViewList,
     EventListenerJobOut,
+    EventListenerJobUpdateDB,
     EventListenerJobUpdateOut,
+    EventListenerJobViewList,
 )
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from beanie import PydanticObjectId
+from beanie.operators import GTE, LT, Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[EventListenerJobOut])
+@router.get("", response_model=Paged)
 async def get_all_job_summary(
     current_user_id=Depends(get_user),
     listener_id: Optional[str] = None,
@@ -51,7 +50,9 @@ async def get_all_job_summary(
     if listener_id is not None:
         filters.append(EventListenerJobViewList.listener_id == listener_id)
     if status is not None:
-        filters.append(RegEx(field=EventListenerJobViewList.status, pattern=status))
+        filters.append(
+            RegEx(field=EventListenerJobViewList.status, pattern=status, options="i")
+        )
     if created is not None:
         created_datetime_object = datetime.strptime(created, "%Y-%m-%d")
         filters.append(GTE(EventListenerJobViewList.created, created_datetime_object))
@@ -66,17 +67,32 @@ async def get_all_job_summary(
     if file_id is not None:
         filters.append(EventListenerJobViewList.resource_ref.collection == "files")
         filters.append(
-            EventListenerJobViewList.resource_ref.resource_id == ObjectId(file_id)
+            EventListenerJobViewList.resource_ref.resource_id
+            == PydanticObjectId(file_id)
         )
     if dataset_id is not None:
         filters.append(EventListenerJobViewList.resource_ref.collection == "datasets")
         filters.append(
-            EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
+            EventListenerJobViewList.resource_ref.resource_id
+            == PydanticObjectId(dataset_id)
         )
-    jobs = (
-        await EventListenerJobViewList.find(*filters).skip(skip).limit(limit).to_list()
+
+    jobs_and_count = (
+        await EventListenerJobViewList.find(*filters)
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
     )
-    return [job.dict() for job in jobs]
+    page_metadata = _construct_page_metadata(jobs_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            EventListenerJobOut(id=item.pop("_id"), **item)
+            for item in jobs_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/{job_id}/summary", response_model=EventListenerJobOut)
@@ -94,7 +110,7 @@ async def get_job_updates(
     job_id: str,
     user=Depends(get_current_username),
 ):
-    if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
+    if (await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
         # TODO: Should this also return the job summary data since we just queried it here?
         job_updates = await EventListenerJobUpdateDB.find(
             EventListenerJobUpdateDB.job_id == job_id

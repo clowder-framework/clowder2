@@ -1,0 +1,66 @@
+site_name: Clowder
+repo_url: https://github.com/clowder-framework/clowder2
+edit_uri: mkdocs/docs
+nav:
+  - Home: index.md
+  - Users:
+      - Overview: users/index.md
+      - Visualizations: users/visualizations.md
+  - Developers:
+      - Getting started: devs/getstarted.md
+      - Development Environment Setup: devs/devsetup.md
+      - Development Handbook: devs/devhandbook.md
+      - Architecture: devs/architecture.md
+      - Frontend:
+        - devs/frontend/lazyloading.md
+      - Keycloak: devs/keycloak.md
+      - Mongo: devs/mongo-fastapi.md
+      - PyCharm: devs/pycharm.md
+      - Elasticsearch: devs/elasticsearch.md
+      - Standalone Docker Deployment: devs/standalone-docker-deployment.md
+      - Design Docs:
+          - Listeners: devs/listeners.md
+          - Metadata: devs/metadata.md
+          - Dataset Versioning: devs/dataset-versioning.md
+      - Proposals:
+        - Storage: devs/storage.md
+  - Admins:
+      - Overview: admins/index.md
+      - Deployment:
+        - 'Docker compose': admins/dockercompose.md
+        - admins/kubernetes.md
+      - admins/config.md
+      - admins/backups.md
+  - About: about.md
+
+theme:
+  name: material
+  site_description: "Clowder v2 Documentation"
+  custom_dir: docs/overrides
+  features:
+    - navigation.tabs
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/images/favicon.png
+  logo: assets/images/cat.png
+  palette:
+    scheme: clowder
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/clowder-framework
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/orgs/clowder/repositories
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pyclowder
+    - icon: fontawesome/brands/slack
+      link: https://clowder-software.slack.com

@@ -19,10 +19,13 @@ import type { UserOut } from './UserOut';
  */
 export type FolderOut = {
     name?: string;
-    id?: string;
     dataset_id: string;
     parent_folder?: string;
     creator: UserOut;
     created?: string;
     modified?: string;
+    object_type?: string;
+    origin_id?: string;
+    id?: string;
+    frozen?: boolean;
 }

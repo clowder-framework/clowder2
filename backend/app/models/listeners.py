@@ -1,15 +1,14 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
-from pydantic import Field, BaseModel, AnyUrl
+from beanie import Document, PydanticObjectId, View
+from pydantic import AnyUrl, BaseModel, Field
 
 from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.mongomodel import MongoDBRef
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
@@ -39,6 +38,17 @@ class ExtractorInfo(BaseModel):
     categories: Optional[List[str]] = []
     parameters: Optional[dict] = None
     version: Optional[str] = "1.0"
+    unique_key: Optional[str] = None
+
+
+class AccessList(BaseModel):
+    """Container object for lists of user emails/group IDs/dataset IDs that can submit to listener.
+    The singular owner is the primary who can modify other lists."""
+
+    owner: str
+    users: List[str] = []
+    groups: List[PydanticObjectId] = []
+    datasets: List[PydanticObjectId] = []
 
 
 class EventListenerBase(BaseModel):
@@ -47,6 +57,7 @@ class EventListenerBase(BaseModel):
     name: str
     version: str = "1.0"
     description: str = ""
+    access: Optional[AccessList] = None
 
 
 class EventListenerIn(EventListenerBase):
@@ -70,7 +81,8 @@ class EventListenerDB(Document, EventListenerBase):
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
     lastAlive: datetime = None
-    alive: Optional[bool] = None  # made up field to indicate if extractor is alive
+    alive: Optional[bool] = None
+    active: bool = False
     properties: Optional[ExtractorInfo] = None
 
     class Settings:
@@ -96,7 +108,7 @@ class FeedListener(BaseModel):
     """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines
     whether the Feed will automatically send new matches to the Event Listener."""
 
-    listener_id: PyObjectId
+    listener_id: PydanticObjectId
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
@@ -177,6 +189,7 @@ class EventListenerDatasetJobMessage(BaseModel):
     id: str
     datasetId: str
     job_id: str
+    parameters: Optional[dict] = None
 
 
 class EventListenerJobUpdateBase(BaseModel):

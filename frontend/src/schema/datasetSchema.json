@@ -1,10 +1,7 @@
 {
 	"schema": {
 		"type": "object",
-		"required": [
-			"name",
-			"description"
-		],
+		"required": ["name", "description"],
 		"properties": {
 			"name": {
 				"type": "string",

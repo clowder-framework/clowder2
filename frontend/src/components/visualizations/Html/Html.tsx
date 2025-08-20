@@ -1,14 +1,17 @@
-import React, {useEffect, useRef, useState} from "react";
-import {downloadVisData, fileDownloaded,} from "../../../utils/visualization";
-import {readTextFromFile} from "../../../utils/common";
+import React, { useEffect, useRef, useState } from "react";
+import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
+import { readTextFromFile } from "../../../utils/common";
+import { downloadPublicVisData } from "../../../actions/public_visualization";
+import { filePublicDownloaded } from "../../../actions/public_file";
 
 type htmlProps = {
 	fileId?: string;
 	visualizationId?: string;
+	publicView?: boolean | false;
 };
 
 export default function Html(props: htmlProps) {
-	const {fileId, visualizationId} = props;
+	const { fileId, visualizationId, publicView } = props;
 	const divRef = useRef(null);
 	const isFirstRender = useRef(true);
 
@@ -19,9 +22,17 @@ export default function Html(props: htmlProps) {
 			try {
 				let blob;
 				if (visualizationId) {
-					blob = await downloadVisData(visualizationId);
+					if (publicView) {
+						blob = await downloadPublicVisData(visualizationId);
+					} else {
+						blob = await downloadVisData(visualizationId);
+					}
 				} else {
-					blob = await fileDownloaded(fileId, 0);
+					if (publicView) {
+						blob = await filePublicDownloaded(fileId);
+					} else {
+						blob = await fileDownloaded(fileId, 0);
+					}
 				}
 				const file = new File([blob], "text.tmp");
 				const text = await readTextFromFile(file);
@@ -43,7 +54,12 @@ export default function Html(props: htmlProps) {
 
 		if (!isFirstRender.current) return;
 		isFirstRender.current = false;
-	}, [html, divRef])
+	}, [html, divRef]);
 
-	return (<div ref={divRef} style={{width: "auto", maxHeight: "100vh", overflow: "auto"}}/>);
+	return (
+		<div
+			ref={divRef}
+			style={{ width: "auto", maxHeight: "100vh", overflow: "auto" }}
+		/>
+	);
 }

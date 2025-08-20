@@ -1,33 +1,39 @@
-import {Box, Button, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
+import React, { useEffect, useState } from "react";
+
+import {
+	Box,
+	Button,
+	ListItemIcon,
+	ListItemText,
+	Menu,
+	MenuItem,
+} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import React, {useEffect, useState} from "react";
-import {ActionModal} from "../dialog/ActionModal";
-import {datasetDeleted, fetchFilesInDataset} from "../../actions/dataset";
-import {fetchGroups} from "../../actions/group";
-import {useNavigate} from "react-router-dom";
-import {useDispatch} from "react-redux";
-import {MoreHoriz} from "@material-ui/icons";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ShareIcon from '@mui/icons-material/Share';
+import { ActionModal } from "../dialog/ActionModal";
+import { datasetDeleted } from "../../actions/dataset";
+import { fetchGroups } from "../../actions/group";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PersonIcon from "@mui/icons-material/Person";
-import ShareDatasetModal from "./ShareDatasetModal"
+import ShareDatasetModal from "./ShareDatasetModal";
 import ShareGroupDatasetModal from "./ShareGroupDatasetModal";
 
 type ActionsMenuProps = {
-	datasetId: string,
-	datasetName: string
-}
+	datasetId?: string;
+	datasetName?: string;
+};
 
 export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {datasetId, datasetName} = props;
+	const { datasetId, datasetName } = props;
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 
 	// redux
 	const dispatch = useDispatch();
-	const deleteDataset = (datasetId: string | undefined) => dispatch(datasetDeleted(datasetId));
+	const deleteDataset = (datasetId: string | undefined) =>
+		dispatch(datasetDeleted(datasetId));
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 
 	// component did mount
@@ -36,11 +42,10 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 	}, []);
 
 	// state
-	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] =
+		useState(false);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 	const [shareGroupPaneOpen, setShareGroupPaneOpen] = useState(false);
-
-
 
 	// delete dataset
 	const deleteSelectedDataset = () => {
@@ -50,7 +55,7 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 		setDeleteDatasetConfirmOpen(false);
 		// Go to Explore page
 		history("/");
-	}
+	};
 
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 
@@ -62,28 +67,44 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 		setAnchorEl(null);
 	};
 
-    const handleShareClose = () => {
-        setSharePaneOpen(false);
-    }
+	const handleShareClose = () => {
+		setSharePaneOpen(false);
+	};
 
-      const handleShareGroupClose = () => {
-        setShareGroupPaneOpen(false);
-    }
+	const handleShareGroupClose = () => {
+		setShareGroupPaneOpen(false);
+	};
 
 	return (
 		<Box>
-			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
-						 actionText="Do you really want to delete this dataset? This process cannot be undone."
-						 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
-						 handleActionCancel={() => {
-							 setDeleteDatasetConfirmOpen(false);
-						 }}/>
+			<ActionModal
+				actionOpen={deleteDatasetConfirmOpen}
+				actionTitle="Are you sure?"
+				actionText="Are you sure you want to delete this dataset? This action is irreversible. All released versions, including their associated files, folders, metadata, visualizations, and thumbnails, will be permanently deleted."
+				actionBtnName="Delete"
+				handleActionBtnClick={deleteSelectedDataset}
+				handleActionCancel={() => {
+					setDeleteDatasetConfirmOpen(false);
+				}}
+				actionLevel={"error"}
+			/>
 
- 		        <ShareDatasetModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={datasetName}/>
-			 	<ShareGroupDatasetModal open={shareGroupPaneOpen} handleClose={handleShareGroupClose} datasetName={datasetName}/>
+			<ShareDatasetModal
+				open={sharePaneOpen}
+				handleClose={handleShareClose}
+				datasetName={datasetName}
+			/>
+			<ShareGroupDatasetModal
+				open={shareGroupPaneOpen}
+				handleClose={handleShareGroupClose}
+				datasetName={datasetName}
+			/>
 
-			<Button variant="outlined" onClick={handleOptionClick}
-					endIcon={<ArrowDropDownIcon/>}>
+			<Button
+				variant="outlined"
+				onClick={handleOptionClick}
+				endIcon={<ArrowDropDownIcon />}
+			>
 				Share
 			</Button>
 			<Menu
@@ -93,28 +114,29 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 				open={Boolean(anchorEl)}
 				onClose={handleOptionClose}
 			>
-					<MenuItem
-							onClick={() => {
-								handleOptionClose();
-								setSharePaneOpen(true);
-							}
-						}>
-							<ListItemIcon>
-								<PersonIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Share with user</ListItemText>
-					</MenuItem>
-					<MenuItem
-							onClick={() => {
-								handleOptionClose();
-								setShareGroupPaneOpen(true);
-							}
-						}>
-							<ListItemIcon>
-								<GroupsIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Share with group</ListItemText>
-					</MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setSharePaneOpen(true);
+					}}
+				>
+					<ListItemIcon>
+						<PersonIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Share with user</ListItemText>
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setShareGroupPaneOpen(true);
+					}}
+				>
+					<ListItemIcon>
+						<GroupsIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Share with group</ListItemText>
+				</MenuItem>
 			</Menu>
-		</Box>)
-}
+		</Box>
+	);
+};

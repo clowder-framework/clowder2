@@ -144,7 +144,7 @@ More information see Keycloak Themes documentation http://www.keycloak.org/docs/
 [[docker-demo-image]]
 == Docker Demo Image
 
-Pull my image here 
+Pull my image here
 [source,bash]
 ----
 # Keycloak image with this theme applied
@@ -153,4 +153,4 @@ docker pull austincunningham/keycloak-raincatcher-theme
 docker run -p 8080:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin austincunningham/keycloak-raincatcher-theme:tryme
 ----
 
-See this https://austincunningham.ddns.net/2020/changekeycloakdockertheme[blog] about how to apply a theme to the Keycloak docker image. 
+See this https://austincunningham.ddns.net/2020/changekeycloakdockertheme[blog] about how to apply a theme to the Keycloak docker image.

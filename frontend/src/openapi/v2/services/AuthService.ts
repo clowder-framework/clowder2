@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserIn } from '../models/UserIn';
+import type { UserLogin } from '../models/UserLogin';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -20,12 +20,12 @@ export class AuthService {
     }
 
     /**
-     * Login
+     * Loginget
      * Redirect to keycloak login page.
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static loginApiV2AuthLoginGet(): CancelablePromise<any> {
+    public static loginGetApiV2AuthLoginGet(): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/auth/login`,
@@ -33,14 +33,14 @@ export class AuthService {
     }
 
     /**
-     * Login
+     * Loginpost
      * Client can use this to login when redirect is not available.
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static loginApiV2AuthLoginPost(
-        requestBody: UserIn,
+    public static loginPostApiV2AuthLoginPost(
+        requestBody: UserLogin,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',

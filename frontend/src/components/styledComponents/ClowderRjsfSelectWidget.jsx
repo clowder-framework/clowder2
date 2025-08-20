@@ -1,6 +1,6 @@
 import React from "react";
-import {Select, MenuItem} from "@mui/material";
-import {ClowderInputLabel} from "./ClowderInputLabel";
+import { Select, MenuItem } from "@mui/material";
+import { ClowderInputLabel } from "./ClowderInputLabel";
 
 export const ClowderRjsfSelectWidget = (item) => {
 	return (
@@ -18,7 +18,9 @@ export const ClowderRjsfSelectWidget = (item) => {
 				{item.schema.enum.map((option, i) => {
 					return (
 						<MenuItem value={option} key={option}>
-							{item.schema.enumNames ? item.schema.enumNames[i] : item.schema.enum[i]}
+							{item.schema.enumNames
+								? item.schema.enumNames[i]
+								: item.schema.enum[i]}
 						</MenuItem>
 					);
 				})}

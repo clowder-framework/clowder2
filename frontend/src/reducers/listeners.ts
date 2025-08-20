@@ -5,6 +5,7 @@ import {
 	RECEIVE_LISTENER_JOBS,
 	RECEIVE_LISTENER_LABELS,
 	RECEIVE_LISTENERS,
+	TOGGLE_ACTIVE_FLAG_LISTENER,
 	RESET_JOB_SUMMARY,
 	RESET_JOB_UPDATES,
 	SEARCH_LISTENERS,
@@ -13,12 +14,13 @@ import { SUBMIT_DATASET_EXTRACTION } from "../actions/dataset";
 import { SUBMIT_FILE_EXTRACTION } from "../actions/file";
 import { DataAction } from "../types/action";
 import { ListenerState } from "../types/data";
+import { EventListenerJobOut, Paged, PageMetadata } from "../openapi/v2";
 
 const defaultState: ListenerState = {
-	listeners: [],
+	listeners: <Paged>{ metadata: <PageMetadata>{}, data: <EventListener[]>[] },
 	categories: [],
 	labels: [],
-	jobs: [],
+	jobs: <Paged>{ metadata: <PageMetadata>{}, data: <EventListenerJobOut[]>[] },
 	currJobSummary: [],
 	currJobUpdates: [],
 	currJobId: "",
@@ -28,6 +30,25 @@ const listeners = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_LISTENERS:
 			return Object.assign({}, state, { listeners: action.listeners });
+		case TOGGLE_ACTIVE_FLAG_LISTENER:
+			// @ts-ignore
+			// eslint-disable-next-line no-case-declarations
+			const updatedListeners = state.listeners.data.map((listener) => {
+				// Check if the current listener matches the one being toggled
+				if (listener.id === action.listener.id) {
+					// Toggle the active flag of the matched item
+					action.listener.alive = listener.alive;
+					return action.listener;
+				} else return listener;
+			});
+			return Object.assign({}, state, {
+				listeners: {
+					metadata: state.listeners.metadata,
+					data: updatedListeners,
+				},
+			});
+
+		//return { ...state, listeners: updatedListeners };
 		case SEARCH_LISTENERS:
 			return Object.assign({}, state, { listeners: action.listeners });
 		case RECEIVE_LISTENER_CATEGORIES:

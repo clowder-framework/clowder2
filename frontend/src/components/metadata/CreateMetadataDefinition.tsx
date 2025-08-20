@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useEffect } from "react";
 
 import {
 	Autocomplete,
@@ -14,15 +14,20 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
-	Snackbar, Tooltip,
+	Tooltip,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ClowderInput } from "../styledComponents/ClowderInput";
-import { postMetadataDefinitions } from "../../actions/metadata";
+import {
+	postMetadataDefinition,
+	resetPostMetadataDefinitions,
+} from "../../actions/metadata";
 
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
+import { useNavigate } from "react-router-dom";
+import { RootState } from "../../types/data";
 import Typography from "@mui/material/Typography";
 
 interface SupportedInputs {
@@ -31,20 +36,22 @@ interface SupportedInputs {
 
 type CreateMetadataDefinitionProps = {
 	setCreateMetadataDefinitionOpen: any;
-	setSnackBarOpen: any;
-	setSnackBarMessage: any;
 };
 
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const { setCreateMetadataDefinitionOpen, setSnackBarOpen, setSnackBarMessage } = props;
+	const { setCreateMetadataDefinitionOpen } = props;
 
 	const dispatch = useDispatch();
+	const history = useNavigate();
+
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) =>
-		dispatch(postMetadataDefinitions(metadata));
-
+		dispatch(postMetadataDefinition(metadata));
+	const newMetadataDefintion = useSelector(
+		(state: RootState) => state.metadata.newMetadataDefinition
+	);
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
@@ -56,7 +63,7 @@ export const CreateMetadataDefinition = (
 		context: "",
 		required_for_items: {
 			datasets: false,
-			files: false
+			files: false,
 		},
 		fields: [
 			{
@@ -75,8 +82,17 @@ export const CreateMetadataDefinition = (
 		{ 0: [] }
 	);
 
+	useEffect(() => {
+		if (newMetadataDefintion.id) {
+			//reset new metadata so next creation can be done
+			dispatch(resetPostMetadataDefinitions());
+			// zoom into that newly created dataset
+			history(`/metadata-definitions/${newMetadataDefintion.id}`);
+		}
+	}, [newMetadataDefintion]);
+
 	const handleInputChange = (idx: number, key: string, value: string) => {
-		let data = { ...formInput };
+		const data = { ...formInput };
 
 		// Handle input change of name, description, context high level fields
 		if (idx == -1) {
@@ -100,7 +116,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const handleMetadataRequiredInputChange = (key: string) => {
-		let data = { ...formInput };
+		const data = { ...formInput };
 
 		if (key == "datasets")
 			data.required_for_items.datasets = !data.required_for_items.datasets;
@@ -110,7 +126,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const addNewContext = (idx: number) => {
-		let newContextMap = [...contextMap];
+		const newContextMap = [...contextMap];
 		newContextMap.splice(idx + 1, 0, { term: "", iri: "" });
 
 		setContextMap(newContextMap);
@@ -118,7 +134,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const removeContext = (idx: number) => {
-		let newContextMap = [...contextMap];
+		const newContextMap = [...contextMap];
 		newContextMap.splice(idx, 1);
 
 		setContextMap(newContextMap);
@@ -126,8 +142,8 @@ export const CreateMetadataDefinition = (
 	};
 
 	const updateContext = (idx: number, key: string, value: string | null) => {
-		let currItem = contextMap[idx];
-		let newContextMap = [...contextMap];
+		const currItem = contextMap[idx];
+		const newContextMap = [...contextMap];
 
 		if (key == "term") {
 			newContextMap.splice(idx, 1, { term: value, iri: currItem.iri }); // Replaces item with new value inserted
@@ -140,7 +156,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const constructContextJson = (newContextMap: any) => {
-		let contextJson = {};
+		const contextJson = {};
 
 		newContextMap.forEach((item, idx) => {
 			contextJson[item["term"]] = item["iri"];
@@ -156,7 +172,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const addNewField = (idx: number) => {
-		let newitem = {
+		const newitem = {
 			name: "",
 			list: false,
 			widgetType: "",
@@ -167,7 +183,7 @@ export const CreateMetadataDefinition = (
 			required: false,
 		};
 
-		let newfield = formInput["fields"];
+		const newfield = formInput["fields"];
 
 		// Add newfield to ith idx of list
 		newfield.splice(idx + 1, 0, newitem);
@@ -185,7 +201,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const removeField = (idx: number) => {
-		let data = formInput["fields"];
+		const data = formInput["fields"];
 		data.splice(idx, 1);
 
 		setFormInput({
@@ -205,7 +221,7 @@ export const CreateMetadataDefinition = (
 
 	const postMetadata = () => {
 		// Parse the context
-		let context = [JSON.parse(formInput.context)];
+		const context = [JSON.parse(formInput.context)];
 		formInput.context = context;
 
 		// Remove the options field if widgetType != enum
@@ -226,7 +242,7 @@ export const CreateMetadataDefinition = (
 	};
 
 	const parseInput = () => {
-		let data = { ...formInput };
+		const data = { ...formInput };
 
 		// Parse the context JSON
 		data.context = [JSON.parse(data.context)];
@@ -236,7 +252,7 @@ export const CreateMetadataDefinition = (
 			if (data.fields[i].config.type != "enum") {
 				delete data.fields[i].config.options;
 			} else {
-				let listOfOptions = data.fields[i].config.options.split(",");
+				const listOfOptions = data.fields[i].config.options.split(",");
 				// Remove any trailing whitespace from each list entry
 				listOfOptions.forEach(
 					(value, index, arr) => (arr[index] = value.trim())
@@ -264,7 +280,7 @@ export const CreateMetadataDefinition = (
 				});
 			}
 		} else {
-			let idx = stepNumber - 1;
+			const idx = stepNumber - 1;
 
 			if (
 				formInput.fields[idx].name !== "" &&
@@ -312,9 +328,6 @@ export const CreateMetadataDefinition = (
 		});
 
 		setContextMap([{ term: "", iri: "" }]);
-		// TODO add snackbar here
-		setSnackBarMessage("Successfully added metadata definition");
-		setSnackBarOpen(true);
 	};
 
 	const handleNext = () => {
@@ -365,33 +378,44 @@ export const CreateMetadataDefinition = (
 									}}
 								/>
 								<FormGroup row>
-								  <Tooltip title="This will make the metadata as required when creating datasets or files" arrow>
-									<Grid container alignItems="center">
-										<Typography variant="subtitle1" style={{ marginRight: '10px' }}>Required:</Typography>
-										<Grid item sm={6} md={4}>
-										  <FormControlLabel
-											control={
-											  <Checkbox
-												checked={formInput.required_for_items.datasets}
-												onChange={() => handleMetadataRequiredInputChange("datasets")}
-											  />
-											}
-											label="Datasets"
-										  />
-											<FormControlLabel
-											control={
-											  <Checkbox
-												checked={formInput.required_for_items.files}
-												onChange={() => handleMetadataRequiredInputChange("files")}
-											  />
-											}
-											label="Files"
-										  />
+									<Tooltip
+										title="This will make the metadata as required when creating datasets or files"
+										arrow
+									>
+										<Grid container alignItems="center">
+											<Typography
+												variant="subtitle1"
+												style={{ marginRight: "10px" }}
+											>
+												Required:
+											</Typography>
+											<Grid item sm={6} md={4}>
+												<FormControlLabel
+													control={
+														<Checkbox
+															checked={formInput.required_for_items.datasets}
+															onChange={() =>
+																handleMetadataRequiredInputChange("datasets")
+															}
+														/>
+													}
+													label="Datasets"
+												/>
+												<FormControlLabel
+													control={
+														<Checkbox
+															checked={formInput.required_for_items.files}
+															onChange={() =>
+																handleMetadataRequiredInputChange("files")
+															}
+														/>
+													}
+													label="Files"
+												/>
+											</Grid>
 										</Grid>
-									</Grid>
-								  </Tooltip>
+									</Tooltip>
 								</FormGroup>
-
 
 								{contextMap.map((item, idx) => {
 									return (

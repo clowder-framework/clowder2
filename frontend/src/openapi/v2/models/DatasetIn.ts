@@ -5,4 +5,5 @@
 export type DatasetIn = {
     name?: string;
     description?: string;
+    status?: string;
 }

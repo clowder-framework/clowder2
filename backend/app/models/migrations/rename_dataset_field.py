@@ -1,12 +1,10 @@
 from datetime import datetime
 
 import pymongo
-from beanie import Document
-from beanie import iterative_migration
-from pydantic import Field
-
-from app.models.datasets import DatasetBase, DatasetStatus, DatasetDB
+from app.models.datasets import DatasetBase, DatasetDB, DatasetStatus
 from app.models.users import UserOut
+from beanie import Document, iterative_migration
+from pydantic import Field
 
 
 class DatasetDBv1(Document, DatasetBase):

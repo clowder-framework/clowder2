@@ -1,0 +1,1 @@
+# Precommits and Linting

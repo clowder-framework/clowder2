@@ -150,8 +150,8 @@ export const CREATE_FILES = "CREATE_FILES";
 
 export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 	return (dispatch) => {
-		let formData = new FormData();
-		let tmp = [];
+		const formData = new FormData();
+		const tmp = [];
 		if (selectedFiles.length > 0) {
 			for (let i = 0; i < selectedFiles.length; i++) {
 				tmp.push(selectedFiles[i]);
@@ -344,11 +344,18 @@ export function generateFilePresignedUrl(
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
-export function submitFileExtractionAction(fileId, extractorName, requestBody) {
+export function submitFileExtractionAction(
+	fileId,
+	extractorName,
+	datasetId,
+	requestBody
+) {
 	return (dispatch) => {
 		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
+			null,
+			datasetId,
 			requestBody
 		)
 			.then((json) => {
@@ -362,7 +369,13 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 				dispatch(
 					handleErrors(
 						reason,
-						submitFileExtractionAction(fileId, extractorName, requestBody)
+						submitFileExtractionAction(
+							fileId,
+							extractorName,
+							null,
+							datasetId,
+							requestBody
+						)
 					)
 				);
 			});
@@ -392,3 +405,5 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 // 			document.body.removeChild(anchor);
 // 		}
 // 	});
+
+export const INCREMENT_FILE_DOWNLOADS = "INCREMENT_FILE_DOWNLOADS";

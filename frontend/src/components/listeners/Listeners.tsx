@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
-	Button,
-	ButtonGroup,
 	Divider,
 	FormControl,
 	FormControlLabel,
@@ -10,6 +8,7 @@ import {
 	InputLabel,
 	List,
 	MenuItem,
+	Pagination,
 	Paper,
 	Select,
 	Switch,
@@ -23,7 +22,6 @@ import {
 	fetchListeners,
 	queryListeners,
 } from "../../actions/listeners";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import SubmitExtraction from "./SubmitExtraction";
 import { capitalize } from "../../utils/common";
@@ -33,10 +31,11 @@ import { GenericSearchBox } from "../search/GenericSearchBox";
 type ListenerProps = {
 	fileId?: string;
 	datasetId?: string;
+	process?: string;
 };
 
 export function Listeners(props: ListenerProps) {
-	const { fileId, datasetId } = props;
+	const { fileId, datasetId, process } = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (
@@ -45,7 +44,8 @@ export function Listeners(props: ListenerProps) {
 		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
 		selectedLabel: string | null,
-		aliveOnly: boolean | undefined
+		aliveOnly: boolean | undefined,
+		process: string | undefined
 	) =>
 		dispatch(
 			fetchListeners(
@@ -54,30 +54,38 @@ export function Listeners(props: ListenerProps) {
 				heartbeatInterval,
 				selectedCategory,
 				selectedLabel,
-				aliveOnly
+				aliveOnly,
+				process,
+				datasetId
 			)
 		);
 	const searchListeners = (
 		text: string,
 		skip: number | undefined,
 		limit: number | undefined,
-		heartbeatInterval: number | undefined
-	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval));
+		heartbeatInterval: number | undefined,
+		process: string | undefined
+	) =>
+		dispatch(
+			queryListeners(text, skip, limit, heartbeatInterval, process, datasetId)
+		);
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
-	const listeners = useSelector((state: RootState) => state.listener.listeners);
+	const listeners = useSelector(
+		(state: RootState) => state.listener.listeners.data
+	);
+	const pageMetadata = useSelector(
+		(state: RootState) => state.listener.listeners.metadata
+	);
 	const categories = useSelector(
 		(state: RootState) => state.listener.categories
 	);
 	const labels = useSelector((state: RootState) => state.listener.labels);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
-	// TODO add option to determine limit number; default show 5 datasets each time
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(20);
-	const [skip, setSkip] = useState<number | undefined>();
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [limit] = useState<number>(config.defaultExtractors);
 	const [openSubmitExtraction, setOpenSubmitExtraction] =
 		useState<boolean>(false);
 	const [infoOnly, setInfoOnly] = useState<boolean>(false);
@@ -89,41 +97,44 @@ export function Listeners(props: ListenerProps) {
 
 	// component did mount
 	useEffect(() => {
-		listListeners(skip, limit, 0, null, null, aliveOnly);
+		listListeners(0, limit, 0, null, null, aliveOnly, process);
 		listAvailableCategories();
 		listAvailableLabels();
-	}, []);
-
-	// fetch extractors from each individual dataset/id calls
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (listeners.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [listeners]);
+	}, [adminMode]);
 
 	// search
 	useEffect(() => {
-		if (searchText !== "") {
-			handleListenerSearch();
-		} else {
-			listListeners(skip, limit, 0, selectedCategory, selectedLabel, aliveOnly);
-		}
-	}, [searchText]);
+		// reset page and reset category with each new search term
+		setCurrPageNum(1);
+		setSelectedCategory("");
+
+		if (searchText !== "") searchListeners(searchText, 0, limit, 0, process);
+		else
+			listListeners(
+				0,
+				limit,
+				0,
+				selectedCategory,
+				selectedLabel,
+				aliveOnly,
+				process
+			);
+	}, [searchText, adminMode]);
 
 	useEffect(() => {
+		// reset page and reset search text with each new search term
+		setCurrPageNum(1);
 		setSearchText("");
-		// flip to first page
-		setSkip(0);
-		listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly);
-	}, [aliveOnly]);
-
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, 0, null, null, aliveOnly);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategory,
+			selectedLabel,
+			aliveOnly,
+			process
+		);
+	}, [aliveOnly, adminMode]);
 
 	// any of the change triggers timer to fetch the extractor status
 	useEffect(() => {
@@ -136,35 +147,30 @@ export function Listeners(props: ListenerProps) {
 			// set the interval to fetch the job's log
 			const interval = setInterval(() => {
 				listListeners(
-					skip,
+					(currPageNum - 1) * limit,
 					limit,
 					0,
 					selectedCategory,
 					selectedLabel,
-					aliveOnly
+					aliveOnly,
+					process
 				);
 			}, config.extractorLivelihoodInterval);
 			return () => clearInterval(interval);
 		}
-	}, [searchText, listeners, skip, selectedCategory, selectedLabel, aliveOnly]);
-
-	// for pagination keep flipping until the return dataset is less than the limit
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (listeners.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
-	};
+	}, [
+		searchText,
+		listeners,
+		currPageNum,
+		selectedCategory,
+		selectedLabel,
+		aliveOnly,
+		adminMode,
+	]);
 
 	const handleListenerSearch = () => {
 		setSelectedCategory("");
-		searchListeners(searchText, skip, limit, 0);
+		searchListeners(searchText, (currPageNum - 1) * limit, limit, 0, process);
 	};
 
 	const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,12 +178,13 @@ export function Listeners(props: ListenerProps) {
 		setSelectedCategory(selectedCategoryValue);
 		setSearchText("");
 		listListeners(
-			skip,
+			0,
 			limit,
 			0,
 			selectedCategoryValue,
 			selectedLabel,
-			aliveOnly
+			aliveOnly,
+			process
 		);
 	};
 
@@ -186,13 +193,22 @@ export function Listeners(props: ListenerProps) {
 		setSelectedLabel(selectedLabelValue);
 		setSearchText("");
 		listListeners(
-			skip,
+			0,
 			limit,
 			0,
 			selectedCategory,
 			selectedLabelValue,
-			aliveOnly
+			aliveOnly,
+			process
 		);
+	};
+
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		if (searchText !== "")
+			searchListeners(searchText, newSkip, limit, 0, process);
+		else listListeners(newSkip, limit, 0, null, null, aliveOnly, process);
 	};
 
 	const handleSubmitExtractionClose = () => {
@@ -211,7 +227,7 @@ export function Listeners(props: ListenerProps) {
 						setSearchTerm={setSearchText}
 						searchTerm={searchText}
 						searchFunction={handleListenerSearch}
-						skip={skip}
+						skip={(currPageNum - 1) * limit}
 						limit={limit}
 					/>
 				</Grid>
@@ -295,6 +311,7 @@ export function Listeners(props: ListenerProps) {
 												setInfoOnly={setInfoOnly}
 												setOpenSubmitExtraction={setOpenSubmitExtraction}
 												setSelectedExtractor={setSelectedExtractor}
+												showSubmit={true}
 											/>
 											<Divider />
 										</>
@@ -305,25 +322,13 @@ export function Listeners(props: ListenerProps) {
 							)}
 						</List>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
-								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
+							<Pagination
+								count={Math.ceil(pageMetadata.total_count / limit)}
+								page={currPageNum}
+								onChange={handlePageChange}
+								shape="rounded"
+								variant="outlined"
+							/>
 						</Box>
 					</Paper>
 				</Grid>

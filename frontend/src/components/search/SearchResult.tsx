@@ -10,6 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import DatasetIcon from "@mui/icons-material/Dataset";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import FolderIcon from "@mui/icons-material/Folder";
 import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
 
@@ -77,6 +78,28 @@ function buildFileResult(item) {
 	);
 }
 
+function buildFolderResult(item) {
+	return (
+		<>
+			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
+				<FolderIcon />
+			</ListItemAvatar>
+			<Box sx={{ marginTop: "5px" }}>
+				<MuiLink
+					component={Link}
+					to={`/datasets/${item.dataset_id}?folder=${item._id}`}
+					sx={{ fontWeight: "bold", fontSize: "18px" }}
+				>
+					{parseString(item.name)}
+				</MuiLink>
+				<Typography variant="body2" color={theme.palette.info.main}>
+					Created by {parseString(item.creator)} at {parseDate(item.created)}
+				</Typography>
+			</Box>
+		</>
+	);
+}
+
 export function SearchResult(props) {
 	const { data } = props;
 
@@ -93,7 +116,11 @@ export function SearchResult(props) {
 					<ListItem alignItems="flex-start" key={item._id}>
 						{item.resource_type === "dataset"
 							? buildDatasetResult(item)
-							: buildFileResult(item)}
+							: item.resource_type === "file"
+							? buildFileResult(item)
+							: item.resource_type === "folder"
+							? buildFolderResult(item)
+							: null}
 					</ListItem>
 				))}
 			</List>

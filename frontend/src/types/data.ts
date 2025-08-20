@@ -1,35 +1,24 @@
 import {
 	AuthorizationBase,
-	DatasetOut as Dataset,
+	DatasetFreezeOut,
+	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
-	EventListenerOut as Listener,
-	FileOut as FileSummary,
+	FeedOut,
+	FileOut,
 	FileVersion,
 	FolderOut,
 	GroupOut,
+	LicenseOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
+	Paged,
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
-
-export interface Profile {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
-
-export interface Profile {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
 
 export interface Folder {
 	id: string;
@@ -132,50 +121,95 @@ export interface Thumbnail {
 }
 
 export interface DatasetState {
-	files: FileSummary[];
-	datasets: Dataset[];
-	newDataset: Dataset;
-	newFile: FileSummary;
-	about: Dataset;
+	foldersAndFiles: Paged;
+	files: Paged;
+	folders: Paged;
+	datasets: Paged;
+	myDatasets: Paged;
+	deletedDataset: DatasetOut;
+	deletedFolder: FolderOut;
+	deletedFile: FileOut;
+	newDataset: DatasetOut;
+	newFile: FileOut;
+	newFolder: FolderOut;
+	newFiles: FileOut[];
+	about: DatasetOut;
+	frozenDataset: DatasetFreezeOut;
+	deletedFrozenDataset: DatasetFreezeOut;
+	newFrozenDataset: DatasetFreezeOut;
+	frozenDatasets: Paged;
+	latestFrozenVersionNum: number;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
+	license: LicenseOut;
+}
+
+export interface PublicDatasetState {
+	publicFiles: FileOut[];
+	publicDatasets: Paged;
+	publicFrozenDatasets: Paged;
+	publicNewDataset: DatasetOut;
+	publicNewFile: FileOut;
+	publicNewFiles: FileOut[];
+	publicAbout: DatasetOut;
+	publicDatasetRole: AuthorizationBase;
+	publicRoles: DatasetRoles;
+	publicFoldersAndFiles: Paged;
+	license: LicenseOut;
 }
 
 export interface ListenerState {
-	listeners: Listener[];
+	listeners: Paged;
 	categories: string[];
 	labels: string[];
-	jobs: EventListenerJobDB[];
+	jobs: Paged;
 	currJobUpdates: EventListenerJobDB[];
 	currJobSummary: JobSummary[];
 	currJobId: string;
 }
 
 export interface GroupState {
-	groups: GroupOut[];
+	groups: Paged;
+	newGroup: GroupOut;
+	deletedGroup: GroupOut;
 	about: GroupOut;
 	role: RoleType;
-	users: UserOut[];
+	users: Paged;
 }
 
 export interface MetadataState {
-	metadataDefinitionList: MetadataDefinitionOut[];
+	metadataDefinitionList: Paged;
+	publicMetadataDefinitionList: MetadataDefinitionOut[];
 	metadataDefinition: MetadataDefinitionOut;
 	datasetMetadataList: Metadata[];
+	publicDatasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
+	newMetadataDefinition: MetadataDefinitionOut;
+	deletedMetadataDefinition: MetadataDefinitionOut;
+	publicFileMetadataList: Metadata[];
 }
 
 export interface FileState {
-	url: string;
 	blob: Blob;
-	fileSummary: FileSummary;
+	fileSummary: FileOut;
 	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRole: AuthorizationBase;
+	fileRole: RoleType;
 	presignedUrl: string;
 	selected_version_num: number;
+}
+
+export interface PublicFileState {
+	publicUrl: string;
+	publicBlob: Blob;
+	publicFileSummary: FileOut;
+	publicExtractedMetadata: ExtractedMetadata[];
+	publicMetadataJsonld: MetadataJsonld[];
+	publicPreviews: FilePreview[];
+	publicFileVersions: FileVersion[];
+	publicSelected_version_num: number;
 }
 
 export interface UserState {
@@ -184,9 +218,11 @@ export interface UserState {
 	registerSucceeded: boolean;
 	errorMsg: string;
 	hashedKey: string;
-	apiKeys: UserAPIKeyOut[];
+	apiKeys: Paged;
+	deletedApiKey: UserAPIKeyOut;
 	profile: UserOut;
 	adminMode: boolean;
+	read_only_user: boolean;
 }
 
 export interface ErrorState {
@@ -199,8 +235,11 @@ export interface ErrorState {
 }
 
 export interface FolderState {
-	folders: FolderOut[];
+	folders: Paged;
+	newFolder: FolderOut;
 	folderPath: string[];
+	publicFolders: FolderOut[];
+	publicFolderPath: string[];
 }
 
 export interface JobSummary {
@@ -217,6 +256,13 @@ export interface VisualizationState {
 	blob: Blob;
 }
 
+export interface PublicVisualizationState {
+	publicVisData: VisualizationDataOut;
+	publicVisConfig: VisualizationConfigOut[];
+	publicPresignedUrl: string;
+	publicBlob: Blob;
+}
+
 export interface EventListenerJobStatus {
 	created: string;
 	started: string;
@@ -227,14 +273,24 @@ export interface EventListenerJobStatus {
 	resubmitted: string;
 }
 
+export interface FeedState {
+	feeds: Paged;
+	feed: FeedOut;
+	deletedFeed: FeedOut;
+}
+
 export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
 	file: FileState;
+	publicFile: PublicFileState;
 	dataset: DatasetState;
+	publicDataset: PublicDatasetState;
 	listener: ListenerState;
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
 	visualization: VisualizationState;
+	publicVisualization: PublicVisualizationState;
+	feed: FeedState;
 }

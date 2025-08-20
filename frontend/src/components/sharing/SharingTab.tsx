@@ -2,13 +2,16 @@ import React, { useEffect } from "react";
 import Card from "@mui/material/Card";
 import { fetchDatasetRoles } from "../../actions/dataset";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
 import { UserAndRoleTable } from "./UserAndRoleTable";
 import { Box, CardContent } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
-export const SharingTab = (): JSX.Element => {
-	const { datasetId } = useParams<{ datasetId?: string }>();
+type SharingTabProps = {
+	datasetId: string | undefined;
+};
+
+export const SharingTab = (props: SharingTabProps): JSX.Element => {
+	const { datasetId } = props;
 
 	const dispatch = useDispatch();
 

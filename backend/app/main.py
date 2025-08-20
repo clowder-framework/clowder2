@@ -1,58 +1,82 @@
 import logging
 
 import uvicorn
-from beanie import init_beanie
-from fastapi import FastAPI, APIRouter, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseConfig
-
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.config import ConfigEntryDB
-from app.models.datasets import DatasetDB, DatasetDBViewList
+from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetFreezeDB
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
-from app.models.files import FileDB, FileVersionDB, FileDBViewList
-from app.models.folders import FolderDB, FolderDBViewList
+from app.models.files import FileDB, FileDBViewList, FileFreezeDB, FileVersionDB
+from app.models.folder_and_file import FolderFileViewList
+from app.models.folders import FolderDB, FolderDBViewList, FolderFreezeDB
 from app.models.groups import GroupDB
+from app.models.licenses import LicenseDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
     EventListenerJobUpdateDB,
-    EventListenerJobViewList,
     EventListenerJobUpdateViewList,
+    EventListenerJobViewList,
 )
-from app.models.metadata import MetadataDB, MetadataDefinitionDB
-from app.models.thumbnails import ThumbnailDB
+from app.models.metadata import (
+    MetadataDB,
+    MetadataDBViewList,
+    MetadataDefinitionDB,
+    MetadataFreezeDB,
+)
+from app.models.thumbnails import ThumbnailDB, ThumbnailDBViewList, ThumbnailFreezeDB
 from app.models.tokens import TokenDB
-from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
-from app.models.visualization_config import VisualizationConfigDB
-from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups, status
+from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
+from app.models.visualization_config import (
+    VisualizationConfigDB,
+    VisualizationConfigDBViewList,
+    VisualizationConfigFreezeDB,
+)
+from app.models.visualization_data import (
+    VisualizationDataDB,
+    VisualizationDataDBViewList,
+    VisualizationDataFreezeDB,
+)
 from app.routers import (
-    users,
-    authorization,
-    metadata,
-    files,
-    metadata_files,
-    datasets,
-    metadata_datasets,
     authentication,
-    keycloak,
+    authorization,
+    datasets,
     elasticsearch,
-    listeners,
     feeds,
+    files,
+    folders,
+    groups,
     jobs,
-    visualization,
+    keycloak,
+    licenses,
+    listeners,
+    metadata,
+    metadata_datasets,
+    metadata_files,
+    public_datasets,
+    public_elasticsearch,
+    public_files,
+    public_folders,
+    public_metadata,
+    public_thumbnails,
+    public_visualization,
+    status,
     thumbnails,
+    users,
+    visualization,
 )
 
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
+from beanie import init_beanie
+from fastapi import APIRouter, Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseConfig
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +86,7 @@ app = FastAPI(
     description="A cloud native data management framework to support any research domain. Clowder was "
     "developed to help researchers and scientists in data intensive domains manage raw data, complex "
     "metadata, and automatic data pipelines. ",
-    version="2.0.0-beta.1",
+    version="2.0.0-beta.3",
     contact={"name": "Clowder", "url": "https://clowderframework.org/"},
     license_info={
         "name": "Apache 2.0",
@@ -114,10 +138,20 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_metadata.router,
+    prefix="/public_metadata",
+    tags=["public_metadata"],
+)
+api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_files.router,
+    prefix="/public_files",
+    tags=["public_files"],
 )
 api_router.include_router(
     metadata_files.router,
@@ -132,13 +166,26 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    metadata_datasets.router, prefix="/datasets", tags=["metadata"]
+    public_datasets.router,
+    prefix="/public_datasets",
+    tags=["public_datasets"],
+)
+api_router.include_router(
+    metadata_datasets.router,
+    prefix="/datasets",
+    tags=["metadata"],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_folders.router,
+    prefix="/public_folders",
+    tags=["public_folders"],
 )
 api_router.include_router(
     listeners.router,
@@ -165,6 +212,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_elasticsearch.router,
+    prefix="/public_elasticsearch",
+    tags=["public_elasticsearch"],
+)
+api_router.include_router(
     feeds.router,
     prefix="/feeds",
     tags=["feeds"],
@@ -183,10 +235,29 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_visualization.router,
+    prefix="/public_visualizations",
+    tags=["public_visualizations"],
+)
+api_router.include_router(
     thumbnails.router,
     prefix="/thumbnails",
     tags=["thumbnails"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_thumbnails.router,
+    prefix="/public_thumbnails",
+    tags=["public_thumbnails"],
+)
+api_router.include_router(
+    licenses.router,
+    prefix="/licenses",
+    tags=["licenses"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    licenses.public_router, prefix="/public_licenses", tags=["public_licenses"]
 )
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
@@ -207,15 +278,21 @@ async def startup_beanie():
         document_models=[
             ConfigEntryDB,
             DatasetDB,
+            DatasetFreezeDB,
             DatasetDBViewList,
             AuthorizationDB,
             MetadataDB,
+            MetadataFreezeDB,
+            MetadataDBViewList,
             MetadataDefinitionDB,
             FolderDB,
+            FolderFreezeDB,
             FolderDBViewList,
             FileDB,
+            FileFreezeDB,
             FileVersionDB,
             FileDBViewList,
+            FolderFileViewList,
             FeedDB,
             EventListenerDB,
             EventListenerJobDB,
@@ -229,10 +306,19 @@ async def startup_beanie():
             TokenDB,
             ErrorDB,
             VisualizationConfigDB,
+            VisualizationConfigFreezeDB,
+            VisualizationConfigDBViewList,
             VisualizationDataDB,
+            VisualizationDataFreezeDB,
+            VisualizationDataDBViewList,
             ThumbnailDB,
+            ThumbnailFreezeDB,
+            ThumbnailDBViewList,
+            LicenseDB,
         ],
-        recreate_views=True,
+        # If view exists, will not recreate
+        # When view query changes, make sure to manually drop view and recreate
+        recreate_views=False,
     )
 
 

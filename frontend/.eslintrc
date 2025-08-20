@@ -1,10 +1,12 @@
 {
   "root": true,
+  "ignorePatterns": ["frontend/src/openapi/v2/"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
 	"plugin:react/recommended",
-	"plugin:react/jsx-runtime"
+	"plugin:react/jsx-runtime",
+    "prettier"
   ],
   "plugins": [
     "react"
@@ -23,23 +25,17 @@
     "mocha": true
   },
   "rules": {
-	"no-mixed-spaces-and-tabs": ["warn", "smart-tabs"],
 	"eqeqeq": ["warn", "smart"],
 	"no-eval": "warn",
-    "quotes": ["warn", "double"],
-    "indent": ["warn", "tab"],
     "no-console": 1,
     "no-debugger": 1,
     "no-var": "error",
-    "semi": ["warn", "always"],
     "no-trailing-spaces": 0,
-    "eol-last": "warn",
     "no-underscore-dangle": 0,
     "no-alert": 0,
     "no-lone-blocks": 0,
 	"no-unused-vars": "warn",
 	"prefer-template": "warn",
-    "jsx-quotes": 1,
 	"prefer-const": ["warn", {
 	  "destructuring": "any",
 	  "ignoreReadBeforeAssign": false
@@ -48,7 +44,6 @@
     "react/forbid-prop-types": [1, {"forbid": ["any"]}],
     "react/jsx-boolean-value": 0,
     "react/jsx-closing-bracket-location": 0,
-    "react/jsx-curly-spacing": 1,
     "react/jsx-indent-props": 0,
     "react/jsx-key": 1,
     "react/jsx-max-props-per-line": 0,
@@ -73,7 +68,6 @@
     "react/react-in-jsx-scope": 0,
     "react/self-closing-comp": 1,
     "react/sort-comp": 1,
-    "react/jsx-wrap-multilines": 1
   },
   "globals": {
   }

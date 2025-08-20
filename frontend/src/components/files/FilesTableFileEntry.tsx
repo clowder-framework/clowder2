@@ -9,24 +9,32 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
-import { generateThumbnailUrl } from "../../utils/visualization";
+import {
+	generatePublicThumbnailUrl,
+	generateThumbnailUrl,
+} from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
 	selectFile: any;
 	file: FileOut;
 	parentFolderId: any;
+	publicView: boolean | false;
 };
 
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
-	const { iconStyle, selectFile, file, parentFolderId } = props;
+	const { iconStyle, selectFile, file, parentFolderId, publicView } = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
 
 	useEffect(() => {
 		let url = "";
 		if (file.thumbnail_id) {
-			url = generateThumbnailUrl(file.thumbnail_id);
+			if (publicView) {
+				url = generatePublicThumbnailUrl(file.thumbnail_id);
+			} else {
+				url = generateThumbnailUrl(file.thumbnail_id);
+			}
 		}
 		setThumbnailUrl(url);
 	}, [file]);
@@ -52,9 +60,6 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						)}
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 					</TableCell>
-					<TableCell>
-						<VersionChip selectedVersion={selectedVersion} />
-					</TableCell>
 					<TableCell align="right">{parseDate(file.created)}</TableCell>
 					<TableCell align="right">
 						{file.bytes ? prettyBytes(file.bytes) : "NA"}
@@ -63,7 +68,11 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						{file.content_type ? file.content_type.content_type : "NA"}
 					</TableCell>
 					<TableCell align="right">
-						<FileMenu file={file} setSelectedVersion={setSelectedVersion} />
+						<FileMenu
+							file={file}
+							setSelectedVersion={setSelectedVersion}
+							publicView={publicView}
+						/>
 					</TableCell>
 				</TableRow>
 			) : (

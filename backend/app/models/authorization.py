@@ -1,10 +1,9 @@
 from datetime import datetime
 from enum import Enum
 
-from beanie import Document
+from beanie import Document, PydanticObjectId
 from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
-from app.models.pyobjectid import PyObjectId
 
 
 class RoleType(str, Enum):
@@ -34,10 +33,10 @@ class AuthorizationBase(BaseModel):
     group_ids are kept for convenience (adding/removing users in batch) but user_ids list MUST be kept current.
     """
 
-    dataset_id: PyObjectId
+    dataset_id: PydanticObjectId
     user_ids: List[EmailStr] = []
     role: RoleType
-    group_ids: List[PyObjectId] = []
+    group_ids: List[PydanticObjectId] = []
 
     class Config:
         # required for Enum to properly work
@@ -59,10 +58,10 @@ class AuthorizationOut(AuthorizationDB):
 class AuthorizationFile(BaseModel):
     # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
     #  in `routers.authorization.get_dataset_role()`.
-    file_id: PyObjectId
+    file_id: PydanticObjectId
     user_ids: List[EmailStr] = []
     role: RoleType
-    group_ids: List[PyObjectId] = []
+    group_ids: List[PydanticObjectId] = []
 
     class Config:
         # required for Enum to properly work
@@ -70,7 +69,7 @@ class AuthorizationFile(BaseModel):
 
 
 class AuthorizationMetadata(BaseModel):
-    metadata_id: PyObjectId
+    metadata_id: PydanticObjectId
     user_id: EmailStr
     role: RoleType
 

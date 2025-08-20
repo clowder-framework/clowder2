@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
 	Button,
@@ -12,8 +12,10 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 
-import { useDispatch } from "react-redux";
-import { folderAdded } from "../../actions/folder";
+import { useDispatch, useSelector } from "react-redux";
+import { folderAdded } from "../../actions/dataset";
+import { useNavigate } from "react-router-dom";
+import { RootState } from "../../types/data";
 
 type CreateFolderProps = {
 	datasetId: string | undefined;
@@ -25,6 +27,8 @@ type CreateFolderProps = {
 export const CreateFolder: React.FC<CreateFolderProps> = (
 	props: CreateFolderProps
 ) => {
+	const { datasetId, parentFolder, open, handleClose } = props;
+
 	const dispatch = useDispatch();
 
 	const addFolder = (
@@ -32,21 +36,30 @@ export const CreateFolder: React.FC<CreateFolderProps> = (
 		folderName: string,
 		parentFolder: string | null
 	) => dispatch(folderAdded(datasetId, folderName, parentFolder));
-	const { datasetId, parentFolder, open, handleClose } = props;
+	const newFolder = useSelector((state: RootState) => state.dataset.newFolder);
 
 	const [loading, setLoading] = useState(false);
 	const [name, setName] = useState("");
+
+	const history = useNavigate();
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setName(event.target.value);
 	};
 
+	useEffect(() => {
+		if (newFolder.id) {
+			// Stop spinner
+			setLoading(false);
+			setName("");
+			handleClose(true);
+			history(`/datasets/${datasetId}?folder=${newFolder.id}`);
+		}
+	}, [newFolder]);
+
 	const onSave = async () => {
 		setLoading(true);
 		addFolder(datasetId, name, parentFolder);
-		setName("");
-		setLoading(false);
-		handleClose(true);
 	};
 
 	return (

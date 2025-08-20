@@ -30,6 +30,9 @@ export function Group() {
 		dispatch(fetchGroupRole(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
+	const deletedGroupMember = useSelector(
+		(state: RootState) => state.group.deletedGroupMember
+	);
 	const role = useSelector((state: RootState) => state.group.role);
 	const groupCreatorEmail = useSelector(
 		(state: RootState) => state.group.about.creator
@@ -40,16 +43,10 @@ export function Group() {
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
-	// component did mount
 	useEffect(() => {
 		fetchGroupInfo(groupId);
 		fetchCurrentGroupRole(groupId);
-	}, []);
-
-	useEffect(() => {
-		fetchGroupInfo(groupId);
-		fetchCurrentGroupRole(groupId);
-	}, [adminMode]);
+	}, [adminMode, deletedGroupMember]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);

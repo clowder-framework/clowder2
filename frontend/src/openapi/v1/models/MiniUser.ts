@@ -2,5 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type MiniUser = {
-}
+export type MiniUser = {};

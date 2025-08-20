@@ -1,13 +1,11 @@
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
 
 import pymongo
-from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field, EmailStr
-
-from app.models.authorization import Provenance
 from app.models.listeners import FeedListener
 from app.models.search import SearchObject
+from beanie import Document
+from pydantic import BaseModel, EmailStr, Field
 
 
 class JobFeed(BaseModel):
@@ -15,12 +13,9 @@ class JobFeed(BaseModel):
     resources match the saved search criteria for the Feed."""
 
     name: str
+    description: str = ""
     search: SearchObject
     listeners: List[FeedListener] = []
-
-
-class FeedBase(JobFeed):
-    description: str = ""
 
 
 class FeedIn(JobFeed):

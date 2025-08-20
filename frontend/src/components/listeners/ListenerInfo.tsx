@@ -13,6 +13,14 @@ type ListenerInfoProps = {
 	defaultExpanded?: boolean;
 };
 
+const customStyles = {
+	authorInfo: {
+		color: theme.palette.info.main,
+		fontSize: "12px",
+		margin: "0.75em 0 0.75em 0",
+	},
+};
+
 export const ListenerInfo = (props: ListenerInfoProps) => {
 	const { selectedExtractor, defaultExpanded } = props;
 
@@ -32,18 +40,18 @@ export const ListenerInfo = (props: ListenerInfoProps) => {
 					<></>
 				)}
 			</Box>
-			{selectedExtractor && selectedExtractor["description"] ? (
-				<Typography>{selectedExtractor["description"]}</Typography>
-			) : null}
 			{selectedExtractor &&
 			selectedExtractor["created"] &&
 			selectedExtractor["properties"] &&
 			selectedExtractor["properties"]["author"] ? (
-				<ClowderFootnote style={{ color: theme.palette.info.main }}>
+				<ClowderFootnote style={customStyles.authorInfo}>
 					{`Created by ${
 						selectedExtractor["properties"]["author"]
 					} at ${parseDate(selectedExtractor["created"])}`}
 				</ClowderFootnote>
+			) : null}
+			{selectedExtractor && selectedExtractor["description"] ? (
+				<Typography>{selectedExtractor["description"]}</Typography>
 			) : null}
 			{selectedExtractor ? (
 				<ListenerInfoDetails

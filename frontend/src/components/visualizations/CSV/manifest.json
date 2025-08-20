@@ -12,10 +12,7 @@
 	"visConfig": {
 		"name": "CSV",
 		"mainType": "text",
-		"mimeTypes": [
-			"text/csv"
-		],
-		"fields": [
-		]
+		"mimeTypes": ["text/csv"],
+		"fields": []
 	}
 }

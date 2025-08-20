@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Button,
-	ButtonGroup,
 	Dialog,
 	DialogContent,
 	DialogTitle,
 	Grid,
 	IconButton,
+	Link as MuiLink,
+	Pagination,
 	Snackbar,
 } from "@mui/material";
 import { RootState } from "../../types/data";
@@ -16,7 +17,6 @@ import {
 	fetchMetadataDefinitions as fetchMetadataDefinitionsAction,
 	searchMetadataDefinitions as searchMetadataDefinitionsAction,
 } from "../../actions/metadata";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -24,7 +24,6 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
-import InfoIcon from "@mui/icons-material/Info";
 import Layout from "../Layout";
 import { ErrorModal } from "../errors/ErrorModal";
 import { CreateMetadataDefinition } from "./CreateMetadataDefinition";
@@ -32,10 +31,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import { Link } from "react-router-dom";
 import { GenericSearchBox } from "../search/GenericSearchBox";
+import { MetadataDefinitionOut } from "../../openapi/v2";
+import config from "../../app.config";
+import { fetchUserProfile } from "../../actions/user";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
 	const listMetadataDefinitions = (
 		name: string | undefined | null,
 		skip: number | undefined,
@@ -47,16 +51,19 @@ export function MetadataDefinitions() {
 		limit: number | undefined
 	) => dispatch(searchMetadataDefinitionsAction(searchTerm, skip, limit));
 	const metadataDefinitions = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
+	);
+	const pageMetadata = useSelector(
+		(state: RootState) => state.metadata.metadataDefinitionList.metadata
+	);
+	const deletedMetadataDefinition = useSelector(
+		(state: RootState) => state.metadata.deletedMetadataDefinition
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(5);
-	const [skip, setSkip] = useState<number | undefined>(0);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [limit] = useState<number>(config.defaultMetadataDefintionPerPage);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [createMetadataDefinitionOpen, setCreateMetadataDefinitionOpen] =
 		useState<boolean>(false);
@@ -71,58 +78,35 @@ export function MetadataDefinitions() {
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState("");
 
-	// for breadcrumb
-	const paths = [
-		{
-			name: "Metadata Definitions",
-			url: "/metadata-definitions",
-		},
-	];
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
 
 	// component did mount
+	// user profile
 	useEffect(() => {
-		listMetadataDefinitions(null, skip, limit);
+		listMetadataDefinitions(null, 0, limit);
+		fetchCurrUserProfile();
 	}, []);
 
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		listMetadataDefinitions(null, skip, limit);
-	}, [adminMode]);
-
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (metadataDefinitions.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [metadataDefinitions]);
+		listMetadataDefinitions(null, (currPageNum - 1) * limit, limit);
+	}, [adminMode, deletedMetadataDefinition]);
 
 	// search
 	useEffect(() => {
-		if (searchTerm !== "") searchMetadataDefinitions(searchTerm, skip, limit);
-		else listMetadataDefinitions(null, skip, limit);
+		// reset page with each new search term
+		setCurrPageNum(1);
+		if (searchTerm !== "") searchMetadataDefinitions(searchTerm, 0, limit);
+		else listMetadataDefinitions(null, 0, limit);
 	}, [searchTerm]);
 
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listMetadataDefinitions(null, skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
-
-	// Error msg dialog
-	const [errorOpen, setErrorOpen] = useState(false);
-
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (metadataDefinitions.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		if (searchTerm !== "")
+			searchMetadataDefinitions(searchTerm, newSkip, limit);
+		else listMetadataDefinitions(null, newSkip, limit);
 	};
 
 	return (
@@ -164,26 +148,28 @@ export function MetadataDefinitions() {
 				<DialogContent>
 					<CreateMetadataDefinition
 						setCreateMetadataDefinitionOpen={setCreateMetadataDefinitionOpen}
-						setSnackBarOpen={setSnackBarOpen}
-						setSnackBarMessage={setSnackBarMessage}
 					/>
 				</DialogContent>
 			</Dialog>
 			<div className="outer-container">
-				<Grid container>
-					<Grid item xs={8}></Grid>
-					<Grid item xs={4}>
-						<Button
-							variant="contained"
-							onClick={() => {
-								setCreateMetadataDefinitionOpen(true);
-							}}
-							sx={{ float: "right" }}
-						>
-							New Metadata Definition
-						</Button>
+				{currUserProfile.read_only_user ? (
+					<></>
+				) : (
+					<Grid container>
+						<Grid item xs={8} />
+						<Grid item xs={4}>
+							<Button
+								variant="contained"
+								onClick={() => {
+									setCreateMetadataDefinitionOpen(true);
+								}}
+								sx={{ float: "right" }}
+							>
+								New Metadata Definition
+							</Button>
+						</Grid>
 					</Grid>
-				</Grid>
+				)}
 				<br />
 				<Grid container spacing={2}>
 					<Grid item xs={12}>
@@ -193,7 +179,7 @@ export function MetadataDefinitions() {
 							setSearchTerm={setSearchTerm}
 							searchTerm={searchTerm}
 							searchFunction={searchMetadataDefinitions}
-							skip={skip}
+							skip={(currPageNum - 1) * limit}
 							limit={limit}
 						/>
 					</Grid>
@@ -217,11 +203,11 @@ export function MetadataDefinitions() {
 										>
 											Description
 										</TableCell>
-										<TableCell align="left"></TableCell>
+										<TableCell align="left" />
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{metadataDefinitions.map((mdd) => {
+									{metadataDefinitions.map((mdd: MetadataDefinitionOut) => {
 										return (
 											<TableRow
 												key={mdd.id}
@@ -230,12 +216,13 @@ export function MetadataDefinitions() {
 												}}
 											>
 												<TableCell scope="row" key={`${mdd.id}-name`}>
-													<Button
+													<MuiLink
 														component={Link}
 														to={`/metadata-definitions/${mdd.id}`}
+														sx={{ textDecoration: "none" }}
 													>
 														{mdd.name}
-													</Button>
+													</MuiLink>
 												</TableCell>
 												<TableCell
 													scope="row"
@@ -249,16 +236,20 @@ export function MetadataDefinitions() {
 													key={`${mdd.id}-delete`}
 													align="left"
 												>
-													<IconButton
-														aria-label="delete"
-														size="small"
-														onClick={() => {
-															setSelectedMetadataDefinition(mdd.id);
-															setDeleteMetadataDefinitionConfirmOpen(true);
-														}}
-													>
-														<DeleteIcon fontSize="small" />
-													</IconButton>
+													{currUserProfile.read_only_user ? (
+														<></>
+													) : (
+														<IconButton
+															aria-label="delete"
+															size="small"
+															onClick={() => {
+																setSelectedMetadataDefinition(mdd.id);
+																setDeleteMetadataDefinitionConfirmOpen(true);
+															}}
+														>
+															<DeleteIcon fontSize="small" />
+														</IconButton>
+													)}
 												</TableCell>
 											</TableRow>
 										);
@@ -266,25 +257,13 @@ export function MetadataDefinitions() {
 								</TableBody>
 							</Table>
 							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-								<ButtonGroup
-									variant="contained"
-									aria-label="previous next buttons"
-								>
-									<Button
-										aria-label="previous"
-										onClick={previous}
-										disabled={prevDisabled}
-									>
-										<ArrowBack /> Prev
-									</Button>
-									<Button
-										aria-label="next"
-										onClick={next}
-										disabled={nextDisabled}
-									>
-										Next <ArrowForward />
-									</Button>
-								</ButtonGroup>
+								<Pagination
+									count={Math.ceil(pageMetadata.total_count / limit)}
+									page={currPageNum}
+									onChange={handlePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
 							</Box>
 						</TableContainer>
 					</Grid>

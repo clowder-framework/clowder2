@@ -59,6 +59,7 @@ scripts/keycloak/data/*
 # ignore clowder chart deps
 deployments/kubernetes/charts/clowder2/charts
 deployments/kubernetes/charts/clowder2/*clowder2-software-dev.yaml
+*secret*.yaml
 
 # Environments
 .env
@@ -82,3 +83,4 @@ secrets.yaml
 # faker
 official.csv
 fact.png
+jupyterhub/.env-dev

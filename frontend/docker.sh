@@ -4,20 +4,20 @@
 set -e
 
 # use DEBUG=echo ./docker.sh to print all commands
-export DEBUG=${DEBUG:-""}
+export "DEBUG=${DEBUG:-""}"
 
 # Find out what branch we are on
 BRANCH=${BRANCH:-"$(git rev-parse --abbrev-ref HEAD)"}
 
 # Find out the version
 if [ "$BRANCH" = "master" ]; then
-    DEPLOY_ENV=production
+    DEPLOY_ENV="production"
     VERSION="latest"
 elif [ "${BRANCH}" = "develop" ]; then
-    DEPLOY_ENV=development
+    DEPLOY_ENV="development"
     VERSION="develop"
 else
-		DEPLOY_ENV=test
+		DEPLOY_ENV="test"
     VERSION="test"
 fi
 

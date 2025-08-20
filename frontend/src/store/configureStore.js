@@ -12,10 +12,7 @@ function configureStoreProd() {
 		thunk,
 	];
 
-	return createStore(rootReducer, compose(
-		applyMiddleware(...middlewares)
-	)
-	);
+	return createStore(rootReducer, compose(applyMiddleware(...middlewares)));
 }
 
 function configureStoreDev() {
@@ -31,10 +28,11 @@ function configureStoreDev() {
 	];
 
 	// adds support for Redux dev tools
-	const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-	const store = createStore(rootReducer, composeEnhancers(
-		applyMiddleware(...middlewares)
-	),
+	const composeEnhancers =
+		window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+	const store = createStore(
+		rootReducer,
+		composeEnhancers(applyMiddleware(...middlewares))
 		// window.devToolsExtension ? window.devToolsExtension() : f => f
 	);
 
@@ -49,6 +47,9 @@ function configureStoreDev() {
 	return store;
 }
 
-const configureStore = process.env.NODE_ENV === "production" ? configureStoreProd : configureStoreDev;
+const configureStore =
+	process.env.NODE_ENV === "production"
+		? configureStoreProd
+		: configureStoreDev;
 
 export default configureStore;

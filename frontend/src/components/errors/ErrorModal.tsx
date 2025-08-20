@@ -40,6 +40,7 @@ export const ErrorModal = (props: ErrorModalProps) => {
 				handleErrorReport(reason, stack);
 			}}
 			handleActionCancel={handleErrorCancel}
+			actionLevel={"error"}
 		/>
 	);
 };

@@ -1,32 +1,30 @@
 import os
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from bson import ObjectId
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi import Form
-
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import Authorization
-from app.keycloak_auth import get_current_user, UserOut
-from app.models.datasets import DatasetOut, DatasetDB
+from app.keycloak_auth import UserOut, get_current_user
+from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetOut
 from app.models.listeners import EventListenerDB
 from app.models.metadata import (
-    MongoDBRef,
     MetadataAgent,
-    MetadataIn,
     MetadataDB,
+    MetadataDBViewList,
+    MetadataDefinitionDB,
+    MetadataDelete,
+    MetadataIn,
     MetadataOut,
     MetadataPatch,
-    validate_context,
+    MongoDBRef,
     patch_metadata,
-    MetadataDelete,
-    MetadataDefinitionDB,
+    validate_context,
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
+from beanie import PydanticObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
 
 router = APIRouter()
 
@@ -106,13 +104,23 @@ async def add_dataset_metadata(
                     f"Metadata for {metadata_in.definition} already exists on this dataset",
                 )
 
+        # lookup json_ld context in metadata definition
+        if metadata_in.definition is not None:
+            if (
+                definition := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == metadata_in.definition
+                )
+            ) is not None:
+                metadata_in.context = definition.context
+                metadata_in.context_url = definition.context_url
+
         md = await _build_metadata_db_obj(
             metadata_in, DatasetOut(**dataset.dict()), user
         )
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_dataset(es, dataset)
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
         return md.dict()
 
 
@@ -131,7 +139,7 @@ async def replace_dataset_metadata(
         Metadata document that was updated
     """
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)]
 
         # Filter by MetadataAgent
         if metadata_in.listener is not None:
@@ -147,7 +155,7 @@ async def replace_dataset_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Listener not found")
+                raise HTTPException(status_code=404, detail="Listener not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -164,7 +172,7 @@ async def replace_dataset_metadata(
             await md.replace()
 
             # Update entry to the metadata index
-            await index_dataset(es, dataset, update=True)
+            await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
             return md.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -185,7 +193,7 @@ async def update_dataset_metadata(
         Metadata document that was updated
     """
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)]
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
@@ -223,18 +231,19 @@ async def update_dataset_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            await index_dataset(es, dataset, update=True)
-            return await patch_metadata(md, content, es)
+            patched_metadata = await patch_metadata(md, content, es)
+            await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+            return patched_metadata
         else:
             raise HTTPException(
-                status_code=404, detail=f"Metadata matching the query not found"
+                status_code=404, detail="Metadata matching the query not found"
             )
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -247,16 +256,22 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+    if (
+        await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
+        query = [
+            MetadataDBViewList.resource.resource_id == PydanticObjectId(dataset_id)
+        ]
 
         if listener_name is not None:
-            query.append(MetadataDB.agent.listener.name == listener_name)
+            query.append(MetadataDBViewList.agent.listener.name == listener_name)
         if listener_version is not None:
-            query.append(MetadataDB.agent.listener.version == listener_version)
+            query.append(MetadataDBViewList.agent.listener.version == listener_version)
 
         metadata = []
-        async for md in MetadataDB.find(*query):
+        async for md in MetadataDBViewList.find(*query):
             if md.definition is not None:
                 if (
                     md_def := await MetadataDefinitionDB.find_one(
@@ -278,14 +293,14 @@ async def delete_dataset_metadata(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # filter by metadata_id or definition
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)]
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                existing_md := await MetadataDB.find_one(
-                    MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
+                await MetadataDB.find_one(
+                    MetadataDB.metadata_id == PydanticObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
                 query.append(MetadataDB.metadata_id == metadata_in.metadata_id)
@@ -310,7 +325,7 @@ async def delete_dataset_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -326,7 +341,7 @@ async def delete_dataset_metadata(
             return md.dict()  # TODO: Do we need to return what we just deleted?
         else:
             raise HTTPException(
-                status_code=404, detail=f"No metadata found with that criteria"
+                status_code=404, detail="No metadata found with that criteria"
             )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

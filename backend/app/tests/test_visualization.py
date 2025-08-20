@@ -1,9 +1,8 @@
 import os
 
-from fastapi.testclient import TestClient
-
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file, create_apikey
+from app.tests.utils import create_apikey, create_dataset, upload_file
+from fastapi.testclient import TestClient
 
 visualization_example = "vis_upload.csv"
 visualization_content_example = "year,location,count\n2024,preview,4"
@@ -30,7 +29,7 @@ def test_visualization(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers
     )
     assert response.status_code == 200
-    result = response.json()[0]
+    result = response.json().get("data")[0]
     file_id = result["id"]
 
     # create a visualization_config for the file

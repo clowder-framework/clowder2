@@ -1,0 +1,93 @@
+{
+	"schema": {
+		"type": "object",
+		"required": ["name", "description", "search", "listeners"],
+		"properties": {
+			"name": {
+				"type": "string",
+				"title": "Name"
+			},
+			"description": {
+				"type": "string",
+				"title": "Description"
+			},
+			"search": {
+				"type": "object",
+				"title": "Match criteria",
+				"required": ["mode", "criteria"],
+				"description": "Fill out the match criteria to enable the selected extractor(s) on those specific files/datasets that match the criteria",
+				"properties": {
+					"mode": {
+						"type": "string",
+						"title": "Mode of match criterion",
+						"enum": ["or", "and"]
+					},
+					"criteria": {
+						"type": "array",
+						"title": "",
+						"items": {
+							"type": "object",
+							"required": ["field", "operator", "value"],
+							"properties": {
+								"field": {
+									"type": "string",
+									"title": "Field",
+									"examples": [
+										"content_type_main",
+										"content_type",
+										"size",
+										"creator"
+									]
+								},
+								"operator": {
+									"type": "string",
+									"title": "Operator",
+									"enum": ["==", "<", ">", "!="]
+								},
+								"value": {
+									"type": "string",
+									"title": "Value"
+								}
+							}
+						},
+						"minItems": 1
+					}
+				}
+			},
+			"listeners": {
+				"type": "array",
+				"title": "Extractors",
+				"items": {
+					"type": "object",
+					"required": ["listener_id", "automatic"],
+					"properties": {
+						"listener_id": {
+							"type": "string",
+							"title": "Extractor Id",
+							"enum": [],
+							"enumNames": []
+						},
+						"automatic": {
+							"type": "boolean",
+							"title": "Turn on for automatic extraction",
+							"default": false
+						}
+					}
+				},
+				"minItems": 1
+			}
+		}
+	},
+	"uiSchema": {
+		"search": {
+			"mode": {
+				"ui:widget": "radio"
+			},
+			"criteria": {
+				"field": {
+					"ui:options": ["example1", "example2", "example3"]
+				}
+			}
+		}
+	}
+}

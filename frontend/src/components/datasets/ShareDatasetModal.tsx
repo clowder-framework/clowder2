@@ -43,17 +43,21 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const [email, setEmail] = useState("");
 	const [role, setRole] = useState("viewer");
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-	const [options, setOptions] = useState([]);
-	const users = useSelector((state: RootState) => state.group.users);
+	const [showFailAlert, setShowFailAlert] = useState(false);
 
+	const [options, setOptions] = useState([]);
+	const users = useSelector((state: RootState) => state.group.users.data);
+	const datasetRoles = useSelector((state: RootState) => state.dataset.roles);
 	const setUserRole = async (
 		datasetId: string,
 		username: string,
 		role: string
 	) => dispatch(setDatasetUserRole(datasetId, username, role));
 
-	const getRoles = (datasetId: string | undefined) =>
+	const getRoles = async (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
+
+	const myProfile = useSelector((state: RootState) => state.user.profile);
 
 	useEffect(() => {
 		prefixSearchAllUsers("", 0, 10);
@@ -65,16 +69,24 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	}, [email]);
 
 	useEffect(() => {
+		getRoles(datasetId);
+	}, []);
+
+	useEffect(() => {
 		setOptions(
 			users.reduce((list: string[], user: UserOut) => {
-				return [...list, user.email];
+				// don't include the current user
+				if (user.email !== myProfile.email) {
+					return [...list, user.email];
+				}
+				return list;
 			}, [])
 		);
-	}, [users]);
+	}, [users, myProfile.email]);
 
 	const onShare = async () => {
 		await setUserRole(datasetId, email, role);
-		setEmail("");
+		// setGroup({ label: "", id: "" });
 		setRole("viewer");
 		setShowSuccessAlert(true);
 		getRoles(datasetId);
@@ -173,6 +185,27 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 							sx={{ mb: 2 }}
 						>
 							Successfully added role!
+						</Alert>
+					</Collapse>
+					<Collapse in={showFailAlert}>
+						<br />
+						<Alert
+							severity="error"
+							action={
+								<IconButton
+									aria-label="close"
+									color="inherit"
+									size="small"
+									onClick={() => {
+										setShowFailAlert(false);
+									}}
+								>
+									<CloseIcon fontSize="inherit" />
+								</IconButton>
+							}
+							sx={{ mb: 2 }}
+						>
+							Could not add role!
 						</Alert>
 					</Collapse>
 				</DialogContent>

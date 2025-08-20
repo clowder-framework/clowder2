@@ -1,43 +1,38 @@
 import io
 import time
 from datetime import datetime, timedelta
-from typing import Optional, List
-from typing import Union
-
-from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
-from bson import ObjectId
-from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Security,
-    File,
-    UploadFile,
-)
-from fastapi.responses import StreamingResponse, FileResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from minio import Minio
-from pika.adapters.blocking_connection import BlockingChannel
+from typing import List, Optional, Union
 
 from app import dependencies
 from app.config import settings
+from app.db.file.download import _increment_file_downloads
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
-from app.models.files import FileOut, FileVersion, FileDB, FileVersionDB, StorageType
+from app.models.files import (
+    FileDB,
+    FileDBViewList,
+    FileOut,
+    FileVersion,
+    FileVersionDB,
+    StorageType,
+)
 from app.models.metadata import MetadataDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
-from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
+from app.rabbitmq.listeners import EventListenerJobDB, submit_file_job
 from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
-from app.search.connect import (
-    delete_document_by_id,
-    insert_record,
-    update_record,
-)
+from app.search.connect import insert_record, update_record, delete_document_by_id
 from app.search.index import index_file, index_thumbnail
+from beanie import PydanticObjectId
+from beanie.odm.operators.find.logical import Or
+from bson import ObjectId
+from elasticsearch import Elasticsearch, NotFoundError
+from fastapi import APIRouter, Depends, File, HTTPException, Security, UploadFile
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from minio import Minio
+from pika.adapters.blocking_connection import BlockingChannel
 
 router = APIRouter()
 security = HTTPBearer()
@@ -61,7 +56,7 @@ async def _resubmit_file_extractors(
     """
     resubmitted_jobs = []
     async for job in EventListenerJobDB.find(
-        EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
+        EventListenerJobDB.resource_ref.resource_id == PydanticObjectId(file.id),
         EventListenerJobDB.resource_ref.version == file.version_num - 1,
     ):
         resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}
@@ -78,7 +73,7 @@ async def _resubmit_file_extractors(
             )
             resubmitted_job["status"] = "success"
             resubmitted_jobs.append(resubmitted_job)
-        except Exception as e:
+        except Exception:
             resubmitted_job["status"] = "error"
             resubmitted_jobs.append(resubmitted_job)
     return resubmitted_jobs
@@ -93,6 +88,8 @@ async def add_file_entry(
     rabbitmq_client: BlockingChannel,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
+    public: bool = False,
+    authenticated: bool = False,
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
@@ -190,8 +187,12 @@ async def remove_file_entry(
     delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         await file.delete()
-    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
-    await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
+    await MetadataDB.find(
+        MetadataDB.resource.resource_id == PydanticObjectId(file_id)
+    ).delete()
+    await FileVersionDB.find(
+        FileVersionDB.file_id == PydanticObjectId(file_id)
+    ).delete()
 
 
 async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsearch):
@@ -203,7 +204,9 @@ async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsear
         # TODO: delete from disk - should this be allowed if Clowder didn't originally write the file?
         # os.path.remove(file.storage_path)
         await file.delete()
-    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
+    await MetadataDB.find(
+        MetadataDB.resource.resource_id == PydanticObjectId(file_id)
+    ).delete()
 
 
 @router.put("/{file_id}", response_model=FileOut)
@@ -268,14 +271,17 @@ async def update_file(
 
         await new_version.insert()
         # Update entry to the file index
-        await index_file(es, FileOut(**updated_file.dict()))
+        await index_file(es, FileOut(**updated_file.dict()), update=True)
         await _resubmit_file_extractors(
-            updated_file, rabbitmq_client, user, credentials
+            FileOut(**updated_file.dict()),
+            rabbitmq_client=rabbitmq_client,
+            user=user,
+            credentials=credentials,
         )
 
         # updating metadata in elasticsearch
         metadata = await MetadataDB.find_one(
-            MetadataDB.resource.resource_id == ObjectId(updated_file.id)
+            MetadataDB.resource.resource_id == PydanticObjectId(updated_file.id)
         )
         if metadata:
             doc = {
@@ -301,22 +307,37 @@ async def download_file(
     file_id: str,
     version: Optional[int] = None,
     increment: Optional[bool] = True,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
+        # find the bytes id
+        # if it's working draft file_id == origin_id
+        # if it's published origin_id points to the raw bytes
+        bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
+
         if file.storage_type == StorageType.MINIO:
             if version is not None:
                 # Version is specified, so get the minio ID from versions table if possible
                 file_vers = await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    Or(
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == version,
                 )
                 if file_vers is not None:
                     vers = FileVersion(**file_vers.dict())
                     content = fs.get_object(
-                        settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+                        settings.MINIO_BUCKET_NAME,
+                        bytes_file_id,
+                        version_id=vers.version_id,
                     )
                 else:
                     raise HTTPException(
@@ -325,7 +346,7 @@ async def download_file(
                     )
             else:
                 # If no version specified, get latest version directly
-                content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
 
             # Get content type & open file stream
             response = StreamingResponse(
@@ -349,8 +370,11 @@ async def download_file(
 
         if response:
             if increment:
-                # Increment download count
-                await file.update(Inc({FileDB.downloads: 1}))
+                await _increment_file_downloads(file_id)
+
+                # reindex
+                await index_file(es, FileOut(**file.dict()), update=True)
+
             return response
 
     else:
@@ -362,11 +386,21 @@ async def download_file_url(
     file_id: str,
     version: Optional[int] = None,
     expires_in_seconds: Optional[int] = 3600,
+    increment: Optional[bool] = True,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     external_fs: Minio = Depends(dependencies.get_external_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
+        # find the bytes id
+        # if it's working draft file_id == origin_id
+        # if it's published origin_id points to the raw bytes
+        bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
         if expires_in_seconds is None:
             expires = timedelta(seconds=settings.MINIO_EXPIRES)
         else:
@@ -375,7 +409,10 @@ async def download_file_url(
         if version is not None:
             # Version is specified, so get the minio ID from versions table if possible
             file_vers = await FileVersionDB.find_one(
-                FileVersionDB.file_id == ObjectId(file_id),
+                Or(
+                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.file_id == file.origin_id,
+                ),
                 FileVersionDB.version_num == version,
             )
             if file_vers is not None:
@@ -383,7 +420,7 @@ async def download_file_url(
                 # If no version specified, get latest version directly
                 presigned_url = external_fs.presigned_get_object(
                     bucket_name=settings.MINIO_BUCKET_NAME,
-                    object_name=file_id,
+                    object_name=bytes_file_id,
                     version_id=vers.version_id,
                     expires=expires,
                 )
@@ -396,15 +433,21 @@ async def download_file_url(
             # If no version specified, get latest version directly
             presigned_url = external_fs.presigned_get_object(
                 bucket_name=settings.MINIO_BUCKET_NAME,
-                object_name=file_id,
+                object_name=bytes_file_id,
                 expires=expires,
             )
 
-        # Increment download count
-        await file.update(Inc({FileDB.downloads: 1}))
-
-        # return presigned url
-        return {"presigned_url": presigned_url}
+        if presigned_url is not None:
+            if increment:
+                await _increment_file_downloads(file_id)
+                # reindex
+                await index_file(es, FileOut(**file.dict()), update=True)
+                # return presigned url
+            return {"presigned_url": presigned_url}
+        else:
+            raise HTTPException(
+                status_code=500, detail="Unable to generate presigned URL"
+            )
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -431,7 +474,11 @@ async def get_file_summary(
     file_id: str,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file.views += 1
         # await file.replace()
@@ -446,10 +493,17 @@ async def get_file_version_details(
     version_num: Optional[int] = 0,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         # TODO: Incrementing too often (3x per page view)
         file_vers = await FileVersionDB.find_one(
-            FileVersionDB.file_id == ObjectId(file_id),
+            Or(
+                FileVersionDB.file_id == ObjectId(file_id),
+                FileVersionDB.file_id == file.origin_id,
+            ),
             FileVersionDB.version_num == version_num,
         )
         file_vers_dict = file_vers.dict()
@@ -469,11 +523,20 @@ async def get_file_versions(
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
             async for ver in (
-                FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                FileVersionDB.find(
+                    Or(
+                        FileVersionDB.file_id == PydanticObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    )
+                )
                 .sort(-FileVersionDB.created)
                 .skip(skip)
                 .limit(limit)
@@ -497,10 +560,8 @@ async def post_file_extract(
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
-        raise HTTPException(status_code=400, detail=f"No extractorName specified")
+        raise HTTPException(status_code=400, detail="No extractorName specified")
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        access_token = credentials.credentials
-
         # backward compatibility? Get extractor info from request (Clowder v1)
         queue = extractorName
         routing_key = queue
@@ -550,7 +611,12 @@ async def download_file_thumbnail(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
+        # TODO investigate what happens with dataset versoning and thumbnail
         if file.thumbnail_id is not None:
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.thumbnail_id))
         else:
@@ -575,9 +641,7 @@ async def add_file_thumbnail(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if (
-            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
-        ) is not None:
+        if (await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:
             # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
             file.thumbnail_id = thumbnail_id
             await file.save()

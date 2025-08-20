@@ -30,7 +30,7 @@ export const EditMetadata = (props: MetadataType) => {
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
@@ -45,6 +45,7 @@ export const EditMetadata = (props: MetadataType) => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const about = useSelector((state: RootState) => state.dataset.about);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -103,6 +104,8 @@ export const EditMetadata = (props: MetadataType) => {
 												initialReadOnly: false,
 												isRequired: field.required,
 												datasetRole: datasetRole,
+												frozen: about.frozen,
+												frozenVersionNum: about.frozen_version_num,
 											}
 										);
 									})
@@ -136,6 +139,9 @@ export const EditMetadata = (props: MetadataType) => {
 														metadataId: metadata.id ?? null,
 														isRequired: field.required,
 														key: idxx,
+														datasetRole: datasetRole,
+														frozen: about.frozen,
+														frozenVersionNum: about.frozen_version_num,
 													}
 												);
 											})

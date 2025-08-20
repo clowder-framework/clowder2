@@ -1,11 +1,10 @@
 import time
 
 import pytest as pytest
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.search.connect import connect_elasticsearch, search_index
 from app.tests.utils import create_dataset, upload_file
+from fastapi.testclient import TestClient
 
 metadata_definition = {
     "name": "LatLon",
@@ -185,7 +184,7 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
         result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
             "latitude"
         ]
-        == 24.4
+        == "24.4"
     )
 
 

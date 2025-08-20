@@ -1,0 +1,32 @@
+services:
+  jupyterhub:
+    build:
+        context: jupyterhub
+        dockerfile: Dockerfile.jupyterhub
+        args:
+              JUPYTERHUB_VERSION: 4
+    restart: always
+    networks:
+      - clowder2
+    volumes:
+      # The JupyterHub configuration file
+      - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro
+      # Bind Docker socket on the hostso we can connect to the daemon from
+      # within the container
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      # Bind Docker volume on host for JupyterHub database and cookie secrets
+      - jupyterhub_data:/data
+    env_file:
+        -   jupyterhub/.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jupyterhub.rule=PathPrefix(`/jupyterhub`)"
+      - "traefik.http.services.jupyterhub.loadbalancer.server.port=8000"
+
+    command: jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+
+    depends_on:
+      - keycloak
+
+volumes:
+    jupyterhub_data:

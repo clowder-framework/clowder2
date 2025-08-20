@@ -20,12 +20,18 @@ import type { UserOut } from './UserOut';
 export type DatasetOut = {
     name?: string;
     description?: string;
-    id?: string;
+    status?: string;
     creator: UserOut;
     created?: string;
     modified?: string;
-    status?: string;
     user_views?: number;
     downloads?: number;
     thumbnail_id?: string;
+    origin_id?: string;
+    standard_license?: boolean;
+    license_id?: string;
+    id?: string;
+    frozen?: boolean;
+    frozen_version_num?: number;
+    deleted?: boolean;
 }

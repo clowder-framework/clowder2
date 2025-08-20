@@ -12,10 +12,7 @@
 	"visConfig": {
 		"name": "VegaSpec",
 		"mainType": "application",
-		"mimeTypes": [
-			"application/json"
-		],
-		"fields": [
-		]
+		"mimeTypes": ["application/json"],
+		"fields": []
 	}
 }

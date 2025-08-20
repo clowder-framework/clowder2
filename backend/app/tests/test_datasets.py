@@ -1,15 +1,13 @@
 import os
 
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.tests.utils import (
     create_dataset,
-    create_user,
+    create_dataset_with_custom_license,
     generate_png,
-    user_example,
     user_alt,
 )
+from fastapi.testclient import TestClient
 
 
 def test_create(client: TestClient, headers: dict):
@@ -27,6 +25,14 @@ def test_get_one(client: TestClient, headers: dict):
 
 def test_delete(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
+    response = client.delete(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
+    )
+    assert response.status_code == 200
+
+
+def test_delete_with_custom_license(client: TestClient, headers: dict):
+    dataset_id = create_dataset_with_custom_license(client, headers).get("id")
     response = client.delete(
         f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
     )
@@ -72,7 +78,7 @@ def test_edit(client: TestClient, headers: dict):
 
 
 def test_list(client: TestClient, headers: dict):
-    dataset_id = create_dataset(client, headers).get("id")
+    create_dataset(client, headers).get("id")
     response = client.get(f"{settings.API_V2_STR}/datasets", headers=headers)
     assert response.status_code == 200
     # TODO: Verify the new dataset_id is actually in this list

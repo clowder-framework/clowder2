@@ -1,13 +1,11 @@
 import json
 
-from fastapi import Depends
-from fastapi.routing import APIRouter, Request
-
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.routers.authentication import get_admin
-from app.routers.authentication import get_admin_mode
+from app.routers.authentication import get_admin, get_admin_mode
 from app.search.connect import connect_elasticsearch, search_index
+from fastapi import Depends
+from fastapi.routing import APIRouter, Request
 
 router = APIRouter()
 
@@ -25,6 +23,8 @@ def _add_permissions_clause(
             "should": [
                 {"term": {"creator": username}},
                 {"term": {"user_ids": username}},
+                {"term": {"status": "authenticated"}},
+                {"term": {"status": "public"}},
             ]
         }
     }
@@ -52,6 +52,7 @@ async def search(
     query: str,
     username=Depends(get_current_username),
     admin=Depends(get_admin),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()
@@ -64,6 +65,7 @@ async def msearch(
     request: Request,
     username=Depends(get_current_username),
     admin=Depends(get_admin),
+    enable_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()

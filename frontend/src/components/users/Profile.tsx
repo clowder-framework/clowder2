@@ -29,6 +29,7 @@ export const Profile = (): JSX.Element => {
 							<TableCell>Name</TableCell>
 							<TableCell align="right">Email</TableCell>
 							<TableCell align="right">Admin</TableCell>
+							<TableCell align="right">Read Only</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -41,6 +42,9 @@ export const Profile = (): JSX.Element => {
 							<TableCell align="right">{profile.email}</TableCell>
 							<TableCell align="right">
 								{profile.admin ? "True" : "False"}
+							</TableCell>
+							<TableCell align="right">
+								{profile.read_only_user ? "True" : "False"}
 							</TableCell>
 						</TableRow>
 					</TableBody>

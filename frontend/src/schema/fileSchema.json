@@ -1,20 +1,18 @@
 {
-  "schema": {
-	"type": "object",
-	"required": [
-	  "file"
-	],
-	"properties": {
-	  "file": {
-		"type": "string",
-		"format": "data-url",
-		"title": "Add Single File"
-	  }
+	"schema": {
+		"type": "object",
+		"required": ["file"],
+		"properties": {
+			"file": {
+				"type": "string",
+				"format": "data-url",
+				"title": "Add Single File"
+			}
+		}
+	},
+	"uiSchema": {
+		"ui:options": {
+			"orderable": false
+		}
 	}
-  },
-  "uiSchema": {
-	"ui:options":{
-	  "orderable":false
-	}
-  }
 }

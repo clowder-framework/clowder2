@@ -31,6 +31,26 @@ export function getHeader() {
 	}
 }
 
+export async function downloadPublicResource(url) {
+	const authHeader = getHeader();
+	const response = await fetch(url, {
+		method: "GET",
+		mode: "cors",
+	});
+
+	if (response.status === 200) {
+		const blob = await response.blob();
+		return window.URL.createObjectURL(blob);
+	} else if (response.status === 401) {
+		// TODO handle error
+		// logout();
+		return null;
+	} else {
+		// TODO handle error
+		return null;
+	}
+}
+
 export async function downloadResource(url) {
 	const authHeader = getHeader();
 	const response = await fetch(url, {
@@ -98,6 +118,9 @@ export const getCurrEmail = () => {
 		authorization !== "" &&
 		authorization.split(" ").length > 0
 	) {
+		if (authorization === "Bearer none") {
+			return "public@clowder.org";
+		}
 		const userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
 	}
@@ -250,4 +273,48 @@ export const handleErrorReport = (reason, stack) => {
 			reason
 		)}&body=${encodeURIComponent(stack)}`
 	);
+};
+
+export const authCheck = (adminMode, currRole, allowedRoles = []) => {
+	return adminMode || (currRole && allowedRoles.includes(currRole));
+};
+
+export const frozenCheck = (frozen, frozen_version_num) => {
+	return frozen && frozen_version_num && frozen_version_num > 0;
+};
+
+export const selectedHighlightStyles = (currentId, selectedId, theme) => {
+	return {
+		color: theme.palette.primary.main,
+		pointerEvents: currentId === selectedId ? "none" : "auto",
+		textDecoration: "none",
+		fontWeight: currentId === selectedId ? "bold" : "normal",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	};
+};
+
+export const highlightLatestStyles = (
+	frozen,
+	frozenVersionNum,
+	currentId,
+	originId,
+	theme
+) => {
+	return {
+		color: theme.palette.primary.main,
+		pointerEvents:
+			(frozen === false && frozenVersionNum === -999) || currentId === originId
+				? "none"
+				: "auto",
+		textDecoration: "none",
+		fontWeight:
+			(frozen === false && frozenVersionNum === -999) || currentId === originId
+				? "bold"
+				: "normal",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	};
 };

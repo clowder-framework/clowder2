@@ -11,10 +11,7 @@
 	"visConfig": {
 		"name": "Audio",
 		"mainType": "audio",
-		"mimeTypes": [
-			"audio/mpeg",
-			"audio/wav"
-		],
+		"mimeTypes": ["audio/mpeg", "audio/wav"],
 		"fields": []
 	}
 }

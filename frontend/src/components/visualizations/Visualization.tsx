@@ -46,7 +46,6 @@ export const Visualization = (props: previewProps) => {
 			getVisConfig(datasetId);
 		}
 	}, [fileId, datasetId]);
-
 	// Check for conditions and set state only once
 	useEffect(() => {
 		const supportedMimeType = visComponentDefinitions.reduce(
@@ -108,7 +107,9 @@ export const Visualization = (props: previewProps) => {
 			{/* 1. load all the visualization components and its definition available to the frontend */}
 			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
-					<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
+					<LazyLoadErrorBoundary
+						fallback={<div>Visualization failed to load...</div>}
+					>
 						<Suspense fallback={<div>Loading...</div>}>
 							{(() => {
 								// 2. looking for visualization configuration registered for this resource

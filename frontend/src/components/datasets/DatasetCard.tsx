@@ -15,7 +15,7 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
-// import {Favorite, Share} from "@material-ui/icons";
+import Chip from "@mui/material/Chip";
 
 type DatasetCardProps = {
 	id?: string;
@@ -24,10 +24,26 @@ type DatasetCardProps = {
 	created?: string | Date;
 	description?: string;
 	thumbnailId?: string;
+	publicView?: boolean | false;
+	frozen?: boolean;
+	frozenVersionNum?: number;
+	status?: string;
 };
 
 export default function DatasetCard(props: DatasetCardProps) {
-	const { id, name, author, created, description, thumbnailId } = props;
+	const {
+		id,
+		name,
+		author,
+		created,
+		description,
+		thumbnailId,
+		publicView,
+		frozen,
+		frozenVersionNum,
+		status,
+	} = props;
+
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
@@ -47,35 +63,66 @@ export default function DatasetCard(props: DatasetCardProps) {
 			sx={{ display: "flex", flexDirection: "column", height: "100%" }}
 			variant="outlined"
 		>
-			<CardActionArea
-				component={Link}
-				to={`/datasets/${id}`}
-				sx={{ height: "100%" }}
-			>
-				<CardHeader title={name} subheader={subheader} />
-				{thumbnailId ? (
-					<CardMedia
-						component="img"
-						image={thumbnailUrl}
-						alt={`${name}_thumbnail`}
-					/>
-				) : null}
-				<CardContent sx={{ py: 0 }}>
-					<Typography
-						variant="body2"
-						sx={{
-							overflow: "hidden",
-							textOverflow: "ellipsis",
-							display: "-webkit-box",
-							WebkitLineClamp: "5",
-							WebkitBoxOrient: "vertical",
-						}}
-					>
-						{description}
-					</Typography>
-				</CardContent>
-			</CardActionArea>
-			<CardActions sx={{ pb: 0 }}>
+			{publicView ? (
+				<CardActionArea
+					component={Link}
+					to={`/public_datasets/${id}`}
+					sx={{ height: "100%" }}
+				>
+					<CardHeader title={name} subheader={subheader} />
+					{thumbnailId ? (
+						<CardMedia
+							component="img"
+							image={thumbnailUrl}
+							alt={`${name}_thumbnail`}
+						/>
+					) : null}
+					<CardContent sx={{ py: 0 }}>
+						<Typography
+							variant="body2"
+							sx={{
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								display: "-webkit-box",
+								WebkitLineClamp: "5",
+								WebkitBoxOrient: "vertical",
+							}}
+						>
+							{description}
+						</Typography>
+					</CardContent>
+				</CardActionArea>
+			) : (
+				<CardActionArea
+					component={Link}
+					to={`/datasets/${id}`}
+					sx={{ height: "100%" }}
+				>
+					<CardHeader title={name} subheader={subheader} />
+					{thumbnailId ? (
+						<CardMedia
+							component="img"
+							image={thumbnailUrl}
+							alt={`${name}_thumbnail`}
+						/>
+					) : null}
+					<CardContent sx={{ py: 0 }}>
+						<Typography
+							variant="body2"
+							sx={{
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								display: "-webkit-box",
+								WebkitLineClamp: "5",
+								WebkitBoxOrient: "vertical",
+							}}
+						>
+							{description}
+						</Typography>
+					</CardContent>
+				</CardActionArea>
+			)}
+			<CardActions sx={{ pb: 0, justifyContent: "space-between" }}>
 				<Tooltip title="Download">
 					<IconButton
 						href={`${config.hostname}/api/v2/datasets/${id}/download`}
@@ -86,16 +133,32 @@ export default function DatasetCard(props: DatasetCardProps) {
 						<Download />
 					</IconButton>
 				</Tooltip>
-				{/*<Tooltip title="Favorite">*/}
-				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
-				{/*		<Favorite/>*/}
-				{/*	</IconButton>*/}
-				{/*</Tooltip>*/}
-				{/*<Tooltip title="Share">*/}
-				{/*	<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>*/}
-				{/*		<Share/>*/}
-				{/*	</IconButton>*/}
-				{/*</Tooltip>*/}
+				{(() => {
+					switch (status) {
+						case "PUBLIC":
+							return (
+								<Tooltip title="Anyone on the internet can access this dataset">
+									<Chip
+										label={status?.toLowerCase()}
+										color="primary"
+										size="small"
+									/>
+								</Tooltip>
+							);
+						case "PRIVATE":
+							return (
+								<Tooltip title="Only users given specific permissions can access this dataset">
+									<Chip
+										label={status?.toLowerCase()}
+										color="primary"
+										size="small"
+									/>
+								</Tooltip>
+							);
+						default:
+							return null;
+					}
+				})()}
 			</CardActions>
 		</Card>
 	);

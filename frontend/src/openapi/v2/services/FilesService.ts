@@ -14,6 +14,7 @@ export class FilesService {
      * @param fileId
      * @param version
      * @param increment
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -22,6 +23,7 @@ export class FilesService {
         fileId: string,
         version?: number,
         increment: boolean = true,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
@@ -30,6 +32,7 @@ export class FilesService {
             query: {
                 'version': version,
                 'increment': increment,
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -42,6 +45,7 @@ export class FilesService {
      * Update File
      * @param fileId
      * @param formData
+     * @param enableAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -49,12 +53,14 @@ export class FilesService {
     public static updateFileApiV2FilesFileIdPut(
         fileId: string,
         formData: Body_update_file_api_v2_files__file_id__put,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             formData: formData,
@@ -68,18 +74,21 @@ export class FilesService {
     /**
      * Delete File
      * @param fileId
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteFileApiV2FilesFileIdDelete(
         fileId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -93,6 +102,8 @@ export class FilesService {
      * @param fileId
      * @param version
      * @param expiresInSeconds
+     * @param increment
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -101,6 +112,8 @@ export class FilesService {
         fileId: string,
         version?: number,
         expiresInSeconds: number = 3600,
+        increment: boolean = true,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
@@ -109,6 +122,8 @@ export class FilesService {
             query: {
                 'version': version,
                 'expires_in_seconds': expiresInSeconds,
+                'increment': increment,
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -120,18 +135,21 @@ export class FilesService {
     /**
      * Get File Summary
      * @param fileId
+     * @param enableAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getFileSummaryApiV2FilesFileIdSummaryGet(
         fileId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -144,6 +162,7 @@ export class FilesService {
      * Get File Version Details
      * @param fileId
      * @param versionNum
+     * @param enableAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -151,6 +170,7 @@ export class FilesService {
     public static getFileVersionDetailsApiV2FilesFileIdVersionDetailsGet(
         fileId: string,
         versionNum?: number,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
@@ -158,6 +178,7 @@ export class FilesService {
             path: `/api/v2/files/${fileId}/version_details`,
             query: {
                 'version_num': versionNum,
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -171,6 +192,7 @@ export class FilesService {
      * @param fileId
      * @param skip
      * @param limit
+     * @param enableAdmin
      * @param datasetId
      * @returns FileVersion Successful Response
      * @throws ApiError
@@ -179,6 +201,7 @@ export class FilesService {
         fileId: string,
         skip?: number,
         limit: number = 20,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<Array<FileVersion>> {
         return __request({
@@ -187,6 +210,7 @@ export class FilesService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -199,6 +223,7 @@ export class FilesService {
      * Post File Extract
      * @param fileId
      * @param extractorName
+     * @param enableAdmin
      * @param datasetId
      * @param requestBody
      * @returns any Successful Response
@@ -207,6 +232,7 @@ export class FilesService {
     public static postFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
         extractorName: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
         requestBody?: any,
     ): CancelablePromise<any> {
@@ -215,6 +241,7 @@ export class FilesService {
             path: `/api/v2/files/${fileId}/extract`,
             query: {
                 'extractorName': extractorName,
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -236,18 +263,21 @@ export class FilesService {
      * credentials: credentials of logged in user
      * rabbitmq_client: Rabbitmq Client
      * @param fileId
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static resubmitFileExtractionsApiV2FilesFileIdResubmitExtractPost(
         fileId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/resubmit_extract`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -259,18 +289,21 @@ export class FilesService {
     /**
      * Download File Thumbnail
      * @param fileId
+     * @param enableAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadFileThumbnailApiV2FilesFileIdThumbnailGet(
         fileId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/thumbnail`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -283,6 +316,7 @@ export class FilesService {
      * Add File Thumbnail
      * @param fileId
      * @param thumbnailId
+     * @param enableAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -290,12 +324,14 @@ export class FilesService {
     public static addFileThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
         fileId: string,
         thumbnailId: string,
+        enableAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
             query: {
+                'enable_admin': enableAdmin,
                 'dataset_id': datasetId,
             },
             errors: {

@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 export type Space = {
-    name: string;
-    description: string;
-}
+	name: string;
+	description: string;
+};

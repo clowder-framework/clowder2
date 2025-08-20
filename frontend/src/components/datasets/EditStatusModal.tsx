@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LoadingOverlay from "react-loading-overlay-ts";
 import {
 	Alert,
+	Autocomplete,
 	Button,
 	Collapse,
 	Container,
@@ -15,13 +16,15 @@ import {
 	InputLabel,
 	MenuItem,
 	Select,
+	TextField,
 	Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { updateDataset } from "../../actions/dataset";
+import { setDatasetUserRole, updateDataset } from "../../actions/dataset";
 import { useDispatch, useSelector } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
-import { DatasetIn } from "../../openapi/v2";
+import { fetchAllUsers } from "../../actions/user";
+import { DatasetIn, UserOut } from "../../openapi/v2";
 import { RootState } from "../../types/data";
 
 type EditStatusModalProps = {
@@ -88,11 +91,18 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 								>
 									<MenuItem value="PRIVATE">Private</MenuItem>
 									<MenuItem value="AUTHENTICATED">Authenticated</MenuItem>
-									{/*<MenuItem value="PUBLIC">Public</MenuItem>*/}
+									<MenuItem value="PUBLIC">Public</MenuItem>
 									{/*<MenuItem value="PUBLISHED">Published</MenuItem>*/}
 								</Select>
 							</FormControl>
 						</div>
+						<Button
+							variant="contained"
+							sx={{ marginTop: 1 }}
+							onClick={onSetStatus}
+						>
+							Change Status
+						</Button>
 						<Collapse in={showSuccessAlert}>
 							<br />
 							<Alert
@@ -116,9 +126,6 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 						</Collapse>
 					</DialogContent>
 					<DialogActions>
-						<Button variant={"contained"} onClick={onSetStatus}>
-							Update
-						</Button>
 						<Button onClick={handleClose}>Close</Button>
 					</DialogActions>
 				</Dialog>

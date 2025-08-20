@@ -4,20 +4,19 @@ import logging
 import os
 import random
 import string
-from datetime import datetime
 import time
+from datetime import datetime
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
-from bson import ObjectId
-
 from app.main import startup_beanie
 from app.models.config import ConfigEntryDB
 from app.models.listeners import (
-    EventListenerJobUpdateDB,
-    EventListenerJobStatus,
     EventListenerJobDB,
+    EventListenerJobStatus,
+    EventListenerJobUpdateDB,
 )
+from beanie import PydanticObjectId
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -105,7 +104,7 @@ async def callback(message: AbstractIncomingMessage):
 
         # Check if the job exists, and update if so
         job = await EventListenerJobDB.find_one(
-            EventListenerJobDB.id == ObjectId(job_id)
+            EventListenerJobDB.id == PydanticObjectId(job_id)
         )
         if job:
             # Update existing job with new info
@@ -227,10 +226,10 @@ if __name__ == "__main__":
     while time_ran < timeout:
         try:
             asyncio.run(listen_for_messages())
-        except Exception as e:
-            logger.info(f" Message listener failed, retry in 10 seconds...")
+        except Exception:
+            logger.info(" Message listener failed, retry in 10 seconds...")
             time.sleep(10)
             current_time = datetime.now()
             current_seconds = (current_time - start).total_seconds()
             time_ran += current_seconds
-    logger.info(f"Message listener could not connect to rabbitmq. Timeout.")
+    logger.info("Message listener could not connect to rabbitmq. Timeout.")
