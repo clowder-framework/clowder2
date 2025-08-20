@@ -44,6 +44,23 @@ export const MetadataTextField = (props) => {
 		return "null";
 	};
 
+	// Get the value for the text field
+	const getValue = () => {
+		if (readOnly) {
+			// Read-only mode: show content or "null"
+			if (content && content[fieldName] !== undefined && content[fieldName] !== null) {
+				return content[fieldName];
+			}
+			if (localContent && localContent[fieldName] !== undefined && localContent[fieldName] !== null) {
+				return localContent[fieldName];
+			}
+			return "null";
+		} else {
+			// Edit mode: show localContent value (what user is typing)
+			return localContent[fieldName] || "";
+		}
+	};
+
 
 	return (
 		<Grid container spacing={2} sx={{ alignItems: "center" }}>
@@ -55,7 +72,7 @@ export const MetadataTextField = (props) => {
 					fullWidth
 					name={widgetName}
 					required={isRequired}
-					value={getDisplayValue() || ""}
+					value={getValue()}
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 						setInputChanged(true);
 						const tempContents: { [key: string]: string | number } = {};
