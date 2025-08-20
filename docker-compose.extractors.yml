@@ -82,4 +82,4 @@ services:
 
 networks:
   clowder2:
-    external: ${EXTERNAL:-}
+    external: ${EXTERNAL:-false}

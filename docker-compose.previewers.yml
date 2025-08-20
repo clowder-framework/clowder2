@@ -39,7 +39,7 @@ services:
 
 networks:
   clowder2:
-    external: ${EXTERNAL:-}
+    external: ${EXTERNAL:-false}
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
