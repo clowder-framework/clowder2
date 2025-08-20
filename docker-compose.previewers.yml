@@ -2,6 +2,7 @@ services:
 
   geoserver:
     image: docker.osgeo.org/geoserver:2.23.0
+    platform: ${DOCKER_PLATFORM:-}
     environment:
       JAVA_OPTS: -Xmx1536M -XX:MaxPermSize=756M
       CORS_ENABLED: true
@@ -23,6 +24,7 @@ services:
   ## THIS IS INTENDED FOR LOCAL DEVELOPMENT ONLY.
   geotiff-preview:
     image: clowder/extractors-geotiff-preview
+    platform: ${DOCKER_PLATFORM:-}
     environment:
       GEOSERVER_URL: http://geoserver:8080/geoserver/
       EXTERNAL_GEOSERVER_URL: http://localhost:8085/geoserver/
@@ -37,6 +39,7 @@ services:
 
 networks:
   clowder2:
+    external: ${EXTERNAL:-}
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
