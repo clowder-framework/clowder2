@@ -26,6 +26,25 @@ export const MetadataTextField = (props) => {
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	const [inputChanged, setInputChanged] = useState(false);
 
+	// Get the display value for read-only mode
+	const getDisplayValue = () => {
+		if (!readOnly) return null;
+
+		// First check if content has the field
+		if (content && content[fieldName] !== undefined && content[fieldName] !== null) {
+			return content[fieldName];
+		}
+
+		// If not, check if localContent has it (for newly added fields)
+		if (localContent && localContent[fieldName] !== undefined && localContent[fieldName] !== null) {
+			return localContent[fieldName];
+		}
+
+		// If neither has the field, show "null"
+		return "null";
+	};
+
+
 	return (
 		<Grid container spacing={2} sx={{ alignItems: "center" }}>
 			<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
@@ -36,9 +55,7 @@ export const MetadataTextField = (props) => {
 					fullWidth
 					name={widgetName}
 					required={isRequired}
-					value={
-						readOnly && content ? content[fieldName] : localContent[fieldName]
-					}
+					value={getDisplayValue() || ""}
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 						setInputChanged(true);
 						const tempContents: { [key: string]: string | number } = {};
