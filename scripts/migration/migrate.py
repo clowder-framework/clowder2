@@ -173,6 +173,22 @@ def get_clowder_v1_user_collections(headers, user_v1):
     response = requests.get(endpoint, headers=headers)
     return [col for col in response.json() if col["authorId"] == user_v1["id"]]
 
+
+def get_clowder_v1_user_collections_top_level(headers, user_v1):
+    top_level_collections = []
+
+    endpoint = f"{CLOWDER_V1}/api/collections/topLevelCollections"
+    response = requests.get(endpoint, headers=headers)
+    response_json = response.json()
+    for col in response_json:
+        author = col["author"]
+        author_id = author.lstrip('MiniUser(')
+        author_id = author_id[:author_id.index(',')]
+        if author_id == user_v1["id"]:
+           top_level_collections.append(col)
+    return top_level_collections
+
+
 # TODO this is too slow, we need to optimize it
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
     matching_collections = []
@@ -769,6 +785,117 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     print(f"Got space and collection metadata from dataset {dataset_id}")
     return metadata
 
+def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLETIONS_MAP):
+    """Process user resources from Clowder v1 to Clowder v2."""
+
+    # get collections of the user
+
+    user_v1_datasets = get_clowder_v1_user_datasets(user_id=user_v1["id"])
+    user_v1_datasets = user_v1_datasets[:2]
+    user_v2_api_key = create_local_user(user_v1)
+    USER_MAP[user_v1["id"]] = user_v2_api_key
+    base_user_headers_v2 = {"x-api-key": user_v2_api_key}
+    user_headers_v2 = {
+        "x-api-key": user_v2_api_key,
+        "content-type": "application/json",
+        "accept": "application/json",
+    }
+
+    user_v1_collections = get_clowder_v1_user_collections_top_level(
+        headers=clowder_headers_v1, user_v1=user_v1
+    )
+
+    print(f"Got {len(user_v1_collections)} user collections in the top level")
+
+    for dataset in user_v1_datasets:
+        print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
+        # TODO: check if dataset is in toml_exclude_dataset_id
+        dataset_v1_id = dataset["id"]
+        dataset_v1_spaces = dataset["spaces"]
+        # TODO check if dataset is in toml_space_ids or exclude_space_ids
+        MIGRATE_DATASET = True
+        print(toml_exclude_dataset_ids)
+        print(toml_space_ids)
+        print(toml_exclude_space_ids)
+        # Check if dataset is in the excluded dataset list
+        if dataset_v1_id in toml_exclude_dataset_ids:
+            print(f"Skipping dataset {dataset_v1_id} as it is in the exclude list.")
+            MIGRATE_DATASET = False
+        # Check if dataset is in the specified space list
+        if toml_space_ids is not None and len(toml_space_ids) > 0:
+            if not any(
+                space_id in dataset_v1_spaces for space_id in toml_space_ids
+            ):
+                print(
+                    f"Skipping dataset {dataset_v1_id} as it is not in the specified spaces."
+                )
+                MIGRATE_DATASET = False
+        if toml_exclude_space_ids is not None and len(toml_exclude_space_ids) > 0:
+            if any(
+                space_id in dataset_v1_spaces for space_id in toml_exclude_space_ids
+            ):
+                print(
+                    f"Skipping dataset {dataset_v1_id} as it is in the excluded spaces."
+                )
+                MIGRATE_DATASET = False
+        if MIGRATE_DATASET:
+            dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
+            DATASET_MAP[dataset["id"]] = dataset_v2_id
+            add_dataset_metadata(dataset, dataset_v2_id, base_headers_v1, user_headers_v2)
+            add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
+            print("Created folders in the new dataset")
+
+            all_dataset_folders = get_folder_and_subfolders(dataset_v2_id, user_headers_v2)
+
+            # Retrieve files for the dataset in Clowder v1
+            dataset_files_endpoint = (
+                f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files?superAdmin=true"
+            )
+            files_response = requests.get(
+                dataset_files_endpoint, headers=clowder_headers_v1, verify=False
+            )
+            files_result = files_response.json()
+
+            for file in files_result:
+                file_v2_id = download_and_upload_file(
+                    file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
+                )
+                if file_v2_id is not None:
+                    add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
+            # posting the collection hierarchy as metadata
+            try:
+                collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
+                    dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+                )
+            except Exception as e:
+                print(e)
+            migration_extractor_collection_metadata = {
+                "listener": {
+                    "name": "migration",
+                    "version": "1",
+                    "description": "Migration of metadata from Clowder v1 to Clowder v2",
+                },
+                "context_url": "https://clowder.ncsa.illinois.edu/contexts/metadata.jsonld",
+                "content": collection_space_metadata_dict,
+                "contents": collection_space_metadata_dict,
+            }
+            v2_metadata_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+            response = requests.post(
+                v2_metadata_endpoint,
+                json=migration_extractor_collection_metadata,
+                headers=clowder_headers_v2,
+            )
+            if response.status_code == 200:
+                print("Successfully added collection info as metadata in v2.")
+            else:
+                print(
+                    f"Failed to add collection info as metadata in Clowder v2. Status code: {response.status_code}"
+                )
+        else:
+            print(f"Skipping dataset {dataset_v1_id} as it does not meet the criteria.")
+
+    return [USER_MAP, DATASET_MAP]
+
 
 def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
     """Process user resources from Clowder v1 to Clowder v2."""
@@ -891,6 +1018,7 @@ if __name__ == "__main__":
     # migrate users and resources
     USER_MAP = {}
     DATASET_MAP = {}
+    COLLECTIONS_MAP = {}
     users_v1 = get_clowder_v1_users()
     # TODO filter if toml users
     if toml_users is not None and len(toml_users) > 0:
@@ -905,8 +1033,8 @@ if __name__ == "__main__":
             "[Local Account]" in user_v1["identityProvider"]
             and user_v1["email"] != admin_user["email"]
         ):
-            [USER_MAP, DATASET_MAP] = process_user_and_resources(
-                user_v1, USER_MAP, DATASET_MAP
+            [USER_MAP, DATASET_MAP] = process_user_and_resources_collections(
+                user_v1, USER_MAP, DATASET_MAP, COLLECTIONS_MAP
             )
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
