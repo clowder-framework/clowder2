@@ -439,11 +439,14 @@ async def get_listeners(
 
     # Run aggregate query and return
     # Sort by name alphabetically
-    listeners_and_count = (
-        await EventListenerDB.find(*criteria_list)
-        .aggregate(aggregation_pipeline)
-        .to_list()
-    )
+    try:
+        listeners_and_count = (
+            await EventListenerDB.find(*criteria_list)
+            .aggregate(aggregation_pipeline)
+            .to_list()
+        )
+    except Exception as e:
+        print(e)
     page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
