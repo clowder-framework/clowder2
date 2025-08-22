@@ -188,6 +188,13 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
            top_level_collections.append(col)
     return top_level_collections
 
+def process_collection_descendants(collection, headers):
+    sub_collections_endpoint = ""
+    datasets_endpoint = f"{CLOWDER_V1}/api/datasets"
+
+def process_dataset_folders(dataset, headers):
+    pass
+
 def create_folder_from_dataset(dataset, dataset_v2, headers):
     pass
 
@@ -196,6 +203,23 @@ def create_folder_from_collection(collection, parent_folder, dataset_v2, headers
 
 def create_v2_dataset_from_collection(collection, user_v1, headers):
     # create the dataset
+    collection_name = collection["name"]
+    collection_description = collection["description"]
+    v2_license_id = "CC BY"
+
+    dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
+    dataset_example = {
+        "name":collection_name,
+        "description": collection_description
+    }
+    response = requests.post(
+        dataset_in_v2_endpoint, headers=headers, json=dataset_example
+    )
+
+    process_collection_descendants(collection, headers)
+
+    return response.json()["id"]
+
 
     # go through sub collections creating folders
     print("Creating v2-dataset from collection")
