@@ -188,6 +188,18 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
            top_level_collections.append(col)
     return top_level_collections
 
+def create_folder_from_dataset(dataset, dataset_v2, headers):
+    pass
+
+def create_folder_from_collection(collection, parent_folder, dataset_v2, headers):
+    pass
+
+def create_v2_dataset_from_collection(collection, user_v1, headers):
+    # create the dataset
+
+    # go through sub collections creating folders
+    print("Creating v2-dataset from collection")
+
 
 # TODO this is too slow, we need to optimize it
 def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
