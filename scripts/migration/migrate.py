@@ -189,8 +189,23 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
     return top_level_collections
 
 def process_collection_descendants(collection, headers):
-    sub_collections_endpoint = ""
+    child_collections_endpoint = f"{CLOWDER_V1}/api/getChildCollections"
     datasets_endpoint = f"{CLOWDER_V1}/api/datasets"
+
+    child_col_response = requests.get(child_collections_endpoint, headers=headers)
+    dataset_response = requests.get(datasets_endpoint, headers=headers)
+    child_col_json = child_col_response.json()
+    dataset_json = dataset_response.json()
+
+    print(f"Got child collections and datasets")
+    for child in child_col_json:
+        print(f"Make a folder for this child")
+        print(f"Call process descendants")
+        process_collection_descendants(child, headers)
+
+    for dataset in dataset_json:
+        print(f"Make a folder for this dataset")
+        print(f"Add folders and subfolders")
 
 def process_dataset_folders(dataset, headers):
     pass
