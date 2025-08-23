@@ -188,9 +188,9 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
            top_level_collections.append(col)
     return top_level_collections
 
-def process_collection_descendants(collection, headers):
-    child_collections_endpoint = f"{CLOWDER_V1}/api/getChildCollections"
-    datasets_endpoint = f"{CLOWDER_V1}/api/datasets"
+def process_collection_descendants(collection, headers, v2_parent_id, v2_parent_type, v2_dataset_id):
+    child_collections_endpoint = f"{CLOWDER_V1}/api/{collection['id']}/getChildCollections"
+    datasets_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/datasets"
 
     child_col_response = requests.get(child_collections_endpoint, headers=headers)
     dataset_response = requests.get(datasets_endpoint, headers=headers)
@@ -199,6 +199,10 @@ def process_collection_descendants(collection, headers):
 
     print(f"Got child collections and datasets")
     for child in child_col_json:
+        if v2_parent_type == "dataset":
+            print(f"Add folder to the dataset")
+        else:
+            print(f"parent was a folder")
         print(f"Make a folder for this child")
         print(f"Call process descendants")
         process_collection_descendants(child, headers)
@@ -231,7 +235,10 @@ def create_v2_dataset_from_collection(collection, user_v1, headers):
         dataset_in_v2_endpoint, headers=headers, json=dataset_example
     )
 
-    process_collection_descendants(collection, headers)
+    new_dataset_json = response.json()
+    v2_dataset_id = new_dataset_json["id"]
+
+    process_collection_descendants(collection, headers, new_dataset_json["id"], "dataset", v2_dataset_id)
 
     return response.json()["id"]
 
