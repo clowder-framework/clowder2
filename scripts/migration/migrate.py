@@ -201,15 +201,26 @@ def process_collection_descendants(collection, headers, v2_parent_id, v2_parent_
     for child in child_col_json:
         if v2_parent_type == "dataset":
             print(f"Add folder to the dataset")
+            folder_name = child["name"]
+            new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_dataset_id, headers)
+            process_collection_descendants(child, headers, new_folder['id'], 'folder', v2_dataset_id )
         else:
             print(f"parent was a folder")
-        print(f"Make a folder for this child")
-        print(f"Call process descendants")
-        process_collection_descendants(child, headers)
+            print(f"Add folder to the dataset")
+            folder_name = child["name"]
+            new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id, v2_dataset_id, headers)
+            process_collection_descendants(child, headers, new_folder['id'], 'folder', v2_dataset_id)
 
     for dataset in dataset_json:
-        print(f"Make a folder for this dataset")
-        print(f"Add folders and subfolders")
+        if v2_parent_type == "dataset":
+            print(f"Parent is a dataset")
+            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers)
+            print(f"Now we need to add the sub folders of this dataset")
+        else:
+            print(f"Parent is a folder")
+            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers)
+
+
 
 def process_dataset_folders(dataset, headers):
     pass
