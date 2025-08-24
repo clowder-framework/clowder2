@@ -221,15 +221,9 @@ def process_collection_descendants(collection, headers, v2_parent_id, v2_parent_
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers)
 
 
-
-def process_dataset_folders(dataset, headers):
+def process_dataset_folders(dataset, headers, parent_type, parent_id):
     pass
 
-def create_folder_from_dataset(dataset, dataset_v2, headers):
-    pass
-
-def create_folder_from_collection(collection, parent_folder, dataset_v2, headers):
-    pass
 
 def create_v2_dataset_from_collection(collection, user_v1, headers):
     # create the dataset
