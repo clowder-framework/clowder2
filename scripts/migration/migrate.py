@@ -188,12 +188,12 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
            top_level_collections.append(col)
     return top_level_collections
 
-def process_collection_descendants(collection, headers, v2_parent_id, v2_parent_type, v2_dataset_id):
-    child_collections_endpoint = f"{CLOWDER_V1}/api/{collection['id']}/getChildCollections"
+def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_id, v2_parent_type, v2_dataset_id):
+    child_collections_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/getChildCollections"
     datasets_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/datasets"
 
-    child_col_response = requests.get(child_collections_endpoint, headers=headers)
-    dataset_response = requests.get(datasets_endpoint, headers=headers)
+    child_col_response = requests.get(child_collections_endpoint, headers=headers_v1)
+    dataset_response = requests.get(datasets_endpoint, headers=headers_v1)
     child_col_json = child_col_response.json()
     dataset_json = dataset_response.json()
 
@@ -202,30 +202,34 @@ def process_collection_descendants(collection, headers, v2_parent_id, v2_parent_
         if v2_parent_type == "dataset":
             print(f"Add folder to the dataset")
             folder_name = child["name"]
-            new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_dataset_id, headers)
-            process_collection_descendants(child, headers, new_folder['id'], 'folder', v2_dataset_id )
+            new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_dataset_id, headers_v2)
+            process_collection_descendants(child, headers_v1,headers_v2, new_folder['id'], 'folder', v2_dataset_id )
         else:
             print(f"parent was a folder")
             print(f"Add folder to the dataset")
             folder_name = child["name"]
-            new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id, v2_dataset_id, headers)
-            process_collection_descendants(child, headers, new_folder['id'], 'folder', v2_dataset_id)
+            new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id, v2_dataset_id, headers_v2)
+            process_collection_descendants(child, headers_v1, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
 
     for dataset in dataset_json:
         if v2_parent_type == "dataset":
             print(f"Parent is a dataset")
-            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers)
+            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
             print(f"Now we need to add the sub folders of this dataset")
         else:
             print(f"Parent is a folder")
-            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers)
+            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
 
 
-def process_dataset_folders(dataset, headers, parent_type, parent_id):
-    pass
+def process_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id):
+    folder_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/folders"
+    folder_response = requests.get(folder_endpoint, headers=headers_v1)
+    folder_json = folder_response.json()
+    print(f"Got dataset folders")
 
 
-def create_v2_dataset_from_collection(collection, user_v1, headers):
+
+def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v2):
     # create the dataset
     collection_name = collection["name"]
     collection_description = collection["description"]
@@ -237,13 +241,13 @@ def create_v2_dataset_from_collection(collection, user_v1, headers):
         "description": collection_description
     }
     response = requests.post(
-        dataset_in_v2_endpoint, headers=headers, json=dataset_example
+        dataset_in_v2_endpoint, headers=headers_v2, json=dataset_example
     )
 
     new_dataset_json = response.json()
     v2_dataset_id = new_dataset_json["id"]
 
-    process_collection_descendants(collection, headers, new_dataset_json["id"], "dataset", v2_dataset_id)
+    process_collection_descendants(collection, headers_v1, headers_v2, new_dataset_json["id"], "dataset", v2_dataset_id)
 
     return response.json()["id"]
 
@@ -869,6 +873,10 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
     )
 
     print(f"Got {len(user_v1_collections)} user collections in the top level")
+
+    for top_level_col in user_v1_collections:
+        dataset_v2 = create_v2_dataset_from_collection(top_level_col, user_v1, clowder_headers_v1, user_headers_v2)
+        print('did this')
 
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
