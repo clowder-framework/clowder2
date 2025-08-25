@@ -212,13 +212,21 @@ def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_
             process_collection_descendants(child, headers_v1, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
 
     for dataset in dataset_json:
+        # TODO TODO DATASET PROCESSING
         if v2_parent_type == "dataset":
             print(f"Parent is a dataset")
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
             print(f"Now we need to add the sub folders of this dataset")
+            # TODO get DATASET FOLDERS HERE FROM v1
+            process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
+            process_dataset_files(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
         else:
             print(f"Parent is a folder")
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
+            # TODO GET DATASET FOLDERS HERE FROM v1
+            process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
+            process_dataset_files(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
+
 
 
 def process_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id):
@@ -226,6 +234,12 @@ def process_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent
     folder_response = requests.get(folder_endpoint, headers=headers_v1)
     folder_json = folder_response.json()
     print(f"Got dataset folders")
+
+def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_id):
+    files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
+    files_response = requests.get(files_endpoint, headers=headers_v1)
+    files_json = files_response.json()
+    print(f"Got dataset files")
 
 
 
@@ -518,6 +532,8 @@ def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
 
 def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
     """Create a folder if it does not exist or return the existing folder."""
+    # TODO if this is a dataset, we should create the subfolders
+    # TODO or write another method for processing datasets
     current_folders = get_folder_and_subfolders(dataset_v2, headers)
     folder_data = (
         {"name": folder, "parent_folder": parent} if parent else {"name": folder}
