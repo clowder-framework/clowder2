@@ -219,13 +219,13 @@ def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_
             print(f"Now we need to add the sub folders of this dataset")
             # TODO get DATASET FOLDERS HERE FROM v1
             process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
-            process_dataset_files(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
+            process_dataset_files(dataset, headers_v1, headers_v2, 'folder', new_folder['id'], v2_dataset_id)
         else:
             print(f"Parent is a folder")
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
             # TODO GET DATASET FOLDERS HERE FROM v1
             process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
-            process_dataset_files(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
+            process_dataset_files(dataset, headers_v1, headers_v2, 'folder', new_folder['id'], v2_dataset_id)
 
 
 
@@ -235,10 +235,40 @@ def process_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent
     folder_json = folder_response.json()
     print(f"Got dataset folders")
 
-def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_id):
+def get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id):
+    folder_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/folders"
+    folder_response = requests.get(folder_endpoint, headers=headers_v1)
+    folder_json = folder_response.json()
+    return folder_json
+
+def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_id, dataset_v2_id):
+    dataset_v1_folders = get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id)
+
+    for folder_v1 in dataset_v1_folders:
+        current_folder_hierarchy = folder_v1['name']
+        new_parent = add_folder_hierarchy_to_migration_folder(folder_hierarchy=current_folder_hierarchy,
+                                                 dataset_v2=dataset_v2_id,
+                                                 folder_id_v2=parent_id,
+                                                 headers=headers_v2
+                                                 )
+        parent_id = new_parent
+        print(f"This is the folder")
+
     files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
     files_response = requests.get(files_endpoint, headers=headers_v1)
     files_json = files_response.json()
+    for file in files_json:
+        if 'folders' in file:
+            print(f"This file is in a folder")
+            # TODO get folder
+            folder_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
+        else:
+            print(f"This file is not in a folder")
+            # TODO upload it to the folder
+            if parent_type == "dataset":
+                print(f"Upload to a dataset")
+            if parent_type == "folder":
+                print(f"Upload to a folder")
     print(f"Got dataset files")
 
 
@@ -517,6 +547,19 @@ def create_v2_group(space, headers):
     response = requests.post(group_in_v2_endpoint, json=group, headers=headers)
     return response.json()["id"]
 
+# TODO try this
+def add_folder_hierarchy_to_migration_folder(folder_hierarchy, dataset_v2, folder_id_v2, headers):
+    """Add folder hierarchy to a dataset in Clowder v2."""
+    hierarchy_parts = folder_hierarchy.split("/")
+    if hierarchy_parts[0] == '':
+        hierarchy_parts = hierarchy_parts[1:]
+    current_parent = folder_id_v2
+    for part in hierarchy_parts:
+        result = create_folder_if_not_exists_or_get(
+            part, current_parent, dataset_v2, headers
+        )
+        if result:
+            current_parent = result["id"]
 
 def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
     """Add folder hierarchy to a dataset in Clowder v2."""
