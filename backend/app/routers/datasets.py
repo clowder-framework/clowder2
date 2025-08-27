@@ -837,6 +837,40 @@ async def get_dataset_folders_and_files(
         return page.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
+@router.get("/{dataset_id}/folders", response_model=Paged)
+async def get_dataset_folders(
+    dataset_id: str,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    user_id=Depends(get_user),
+    skip: int = 0,
+    limit: int = 10,
+    admin=Depends(get_admin),
+    enable_admin: bool = False,
+    admin_mode: bool = Depends(get_admin_mode),
+    allow: bool = Depends(Authorization("viewer")),
+):
+    if (
+        await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
+            )
+        )
+    ) is not None:
+        if authenticated or public or (admin and admin_mode):
+            query = [
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
+            ]
+
+        folders = (await FolderFileViewList.find(*query).to_list())
+
+        return folders.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
 
 @router.delete("/{dataset_id}/folders/{folder_id}")
 async def delete_folder(

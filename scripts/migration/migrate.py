@@ -212,7 +212,6 @@ def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_
             process_collection_descendants(child, headers_v1, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
 
     for dataset in dataset_json:
-        # TODO TODO DATASET PROCESSING
         if v2_parent_type == "dataset":
             print(f"Parent is a dataset")
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
@@ -246,12 +245,12 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
 
     for folder_v1 in dataset_v1_folders:
         current_folder_hierarchy = folder_v1['name']
-        new_parent = add_folder_hierarchy_to_migration_folder(folder_hierarchy=current_folder_hierarchy,
+        # TODO CHECK HERE
+        add_folder_hierarchy_to_migration_folder(folder_hierarchy=current_folder_hierarchy,
                                                  dataset_v2=dataset_v2_id,
                                                  folder_id_v2=parent_id,
                                                  headers=headers_v2
                                                  )
-        parent_id = new_parent
         print(f"This is the folder")
 
     files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
@@ -575,9 +574,8 @@ def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
 
 def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
     """Create a folder if it does not exist or return the existing folder."""
-    # TODO if this is a dataset, we should create the subfolders
-    # TODO or write another method for processing datasets
     current_folders = get_folder_and_subfolders(dataset_v2, headers)
+    current_all_folders = get_all_folder_and_subfolders(dataset_v2, headers)
     folder_data = (
         {"name": folder, "parent_folder": parent} if parent else {"name": folder}
     )
@@ -592,6 +590,13 @@ def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
         headers=headers,
     )
     return response.json()
+
+def get_all_folder_and_subfolders(dataset_id, headers):
+    """Retrieve all folders and subfolders in a dataset."""
+    endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_id}/folders"
+    response = requests.get(endpoint, headers=headers)
+    folder_response = response.json()
+    return folder_response
 
 
 def get_folder_and_subfolders(dataset_id, headers):
@@ -868,7 +873,6 @@ def build_collection_metadata_for_v1_dataset(dataset_id, user_v1, headers):
     return dataset_collections
 
 
-# TODO test this method
 def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     dataset_id = dataset["id"]
     dataset_collections = []
@@ -939,10 +943,8 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
 
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
-        # TODO: check if dataset is in toml_exclude_dataset_id
         dataset_v1_id = dataset["id"]
         dataset_v1_spaces = dataset["spaces"]
-        # TODO check if dataset is in toml_space_ids or exclude_space_ids
         MIGRATE_DATASET = True
         print(toml_exclude_dataset_ids)
         print(toml_space_ids)
@@ -1042,10 +1044,8 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
 
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
-        # TODO: check if dataset is in toml_exclude_dataset_id
         dataset_v1_id = dataset["id"]
         dataset_v1_spaces = dataset["spaces"]
-        # TODO check if dataset is in toml_space_ids or exclude_space_ids
         MIGRATE_DATASET = True
         print(toml_exclude_dataset_ids)
         print(toml_space_ids)
@@ -1150,7 +1150,7 @@ if __name__ == "__main__":
     DATASET_MAP = {}
     COLLECTIONS_MAP = {}
     users_v1 = get_clowder_v1_users()
-    # TODO filter if toml users
+
     if toml_users is not None and len(toml_users) > 0:
         print(f"Using spaces from config.toml: {toml_users}")
         users_v1 = [
