@@ -245,22 +245,23 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
 
     for folder_v1 in dataset_v1_folders:
         current_folder_hierarchy = folder_v1['name']
-        # TODO CHECK HERE
         add_folder_hierarchy_to_migration_folder(folder_hierarchy=current_folder_hierarchy,
                                                  dataset_v2=dataset_v2_id,
                                                  folder_id_v2=parent_id,
                                                  headers=headers_v2
                                                  )
-        print(f"This is the folder")
 
+    all_v2_dataset_folders = get_all_folder_and_subfolders(dataset_v2_id, headers_v2)
     files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
     files_response = requests.get(files_endpoint, headers=headers_v1)
     files_json = files_response.json()
     for file in files_json:
         if 'folders' in file:
             print(f"This file is in a folder")
-            # TODO get folder
-            folder_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
+            matching_folder = None
+            for folder_v2 in all_v2_dataset_folders:
+                if folder_v2['name'] == file['folders']['name']:
+                   print(f"Upload this file to a folder")
         else:
             print(f"This file is not in a folder")
             # TODO upload it to the folder
@@ -574,13 +575,13 @@ def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
 
 def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
     """Create a folder if it does not exist or return the existing folder."""
-    current_folders = get_folder_and_subfolders(dataset_v2, headers)
+    # current_folders = get_folder_and_subfolders(dataset_v2, headers)
     current_all_folders = get_all_folder_and_subfolders(dataset_v2, headers)
     folder_data = (
         {"name": folder, "parent_folder": parent} if parent else {"name": folder}
     )
 
-    for existing_folder in current_folders:
+    for existing_folder in current_all_folders:
         if existing_folder["name"] == folder:
             return existing_folder
 
@@ -593,9 +594,9 @@ def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
 
 def get_all_folder_and_subfolders(dataset_id, headers):
     """Retrieve all folders and subfolders in a dataset."""
-    endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_id}/folders"
+    endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_id}/all_folders"
     response = requests.get(endpoint, headers=headers)
-    folder_response = response.json()
+    folder_response = response.json().get("data", [])
     return folder_response
 
 
