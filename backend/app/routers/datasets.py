@@ -663,7 +663,7 @@ async def delete_freeze_dataset_version(
     if (
         frozen_dataset := await DatasetFreezeDB.find_one(
             DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
-            DatasetFreezeDB.frozen_version_num == frozen_version_num,
+            DatasetFreezeDxB.frozen_version_num == frozen_version_num,
         )
     ) is not None:
         return await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False)
@@ -837,8 +837,8 @@ async def get_dataset_folders_and_files(
         return page.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-@router.get("/{dataset_id}/folders", response_model=Paged)
-async def get_dataset_folders(
+@router.get("/{dataset_id}/all_folders")
+async def get_dataset_folders_all(
     dataset_id: str,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     public: bool = Depends(CheckStatus("PUBLIC")),
@@ -866,7 +866,31 @@ async def get_dataset_folders(
                 FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
 
-        folders = (await FolderFileViewList.find(*query).to_list())
+        folders = (await FolderFileViewList.find(*query).aggregate(
+                [
+                    _get_page_query(
+                        skip,
+                        limit,
+                        sort_clause={
+                            "$sort": {
+                                "object_type": -1,  # folder first
+                                "created": -1,  # then sort by created descendingly
+                            }
+                        },
+                    )
+                ],
+            ).to_list())
+        page_metadata = _construct_page_metadata(folders, skip, limit)
+
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                FolderOut(id=item.pop("_id"), **item)
+                for item in folders[0]["data"]
+            ],
+        )
+
+        return page.dict()
 
         return folders.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
