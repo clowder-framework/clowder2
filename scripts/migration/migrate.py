@@ -255,13 +255,17 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
     files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
     files_response = requests.get(files_endpoint, headers=headers_v1)
     files_json = files_response.json()
+    # TODO WORK HERE
     for file in files_json:
         if 'folders' in file:
             print(f"This file is in a folder")
+            current_file_folder_name = file['folders']['name']
             matching_folder = None
             for folder_v2 in all_v2_dataset_folders:
                 if folder_v2['name'] == file['folders']['name']:
-                   print(f"Upload this file to a folder")
+                    print(f"Upload this file to a folder")
+                    matching_folder = folder_v2
+                    download_and_upload_file()
         else:
             print(f"This file is not in a folder")
             # TODO upload it to the folder
@@ -618,6 +622,48 @@ def add_dataset_folders(dataset_v1, dataset_v2, headers):
 
     for folder in folders:
         add_folder_hierarchy(folder["name"], dataset_v2, headers)
+
+
+def download_and_upload_file_to_folder(file, folder, dataset_v2_id, headers_v2):
+    """Download a file from Clowder v1 and upload it to Clowder v2."""
+    filename = file["filename"]
+    file_id = file["id"]
+    file_folder = folder
+
+    # Download the file from Clowder v1
+    v1_download_url = f"{CLOWDER_V1}/api/files/{file_id}?superAdmin=true"
+    print(f"Downloading file: {filename}")
+    download_response = requests.get(v1_download_url, headers=clowder_headers_v1)
+
+    with open(filename, "wb") as f:
+        f.write(download_response.content)
+
+    # Upload the file to Clowder v2
+    dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
+    if folder:
+        dataset_file_upload_endpoint += f"Multiple?folder_id={folder['id']}"
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files={"file": open(filename, "rb")},
+        )
+    else:
+        print(f"This file is not in a folder")
+
+    # Clean up the local file after upload
+    try:
+        os.remove(filename)
+    except Exception as e:
+        print(f"Could not delete locally downloaded file: {filename}")
+        print(e)
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+        return response.json().get("id")
+    else:
+        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
+
+    return None
 
 
 def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v2):
