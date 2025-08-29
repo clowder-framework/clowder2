@@ -640,15 +640,19 @@ def download_and_upload_file_to_folder(file, folder, dataset_v2_id, headers_v2):
 
     # Upload the file to Clowder v2
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
-    if folder:
+    if folder is not None:
+        # add folder if it is not None
         dataset_file_upload_endpoint += f"Multiple?folder_id={folder['id']}"
-        response = requests.post(
-            dataset_file_upload_endpoint,
-            headers=headers_v2,
-            files={"file": open(filename, "rb")},
-        )
+    response = requests.post(
+        dataset_file_upload_endpoint,
+        headers=headers_v2,
+        files={"file": open(filename, "rb")},
+    )
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+        return response.json().get("id")
     else:
-        print(f"This file is not in a folder")
+        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
 
     # Clean up the local file after upload
     try:
@@ -656,13 +660,6 @@ def download_and_upload_file_to_folder(file, folder, dataset_v2_id, headers_v2):
     except Exception as e:
         print(f"Could not delete locally downloaded file: {filename}")
         print(e)
-
-    if response.status_code == 200:
-        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
-        return response.json().get("id")
-    else:
-        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
-
     return None
 
 
