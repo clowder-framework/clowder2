@@ -265,7 +265,7 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
                 if folder_v2['name'] == file['folders']['name']:
                     print(f"Upload this file to a folder")
                     matching_folder = folder_v2
-                    download_and_upload_file()
+                    download_and_upload_file_to_folder_id(file, matching_folder, dataset_v2_id, headers_v2)
         else:
             print(f"This file is not in a folder")
             # TODO upload it to the folder
@@ -568,6 +568,8 @@ def add_folder_hierarchy_to_migration_folder(folder_hierarchy, dataset_v2, folde
 def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
     """Add folder hierarchy to a dataset in Clowder v2."""
     hierarchy_parts = folder_hierarchy.split("/")
+    if hierarchy_parts[0] == '':
+        hierarchy_parts = hierarchy_parts[1:]
     current_parent = None
     for part in hierarchy_parts:
         result = create_folder_if_not_exists_or_get(
@@ -642,11 +644,15 @@ def download_and_upload_file_to_folder(file, folder, dataset_v2_id, headers_v2):
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
     if folder is not None:
         # add folder if it is not None
-        dataset_file_upload_endpoint += f"Multiple?folder_id={folder['id']}"
+        folder_id = folder["id"]
+        dataset_file_upload_endpoint += f"Multiple?folder_id={folder_id}"
+    files = [
+        ("files", open(filename, "rb")),
+    ]
     response = requests.post(
         dataset_file_upload_endpoint,
         headers=headers_v2,
-        files={"file": open(filename, "rb")},
+        files=files,
     )
     if response.status_code == 200:
         print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
@@ -661,6 +667,134 @@ def download_and_upload_file_to_folder(file, folder, dataset_v2_id, headers_v2):
         print(f"Could not delete locally downloaded file: {filename}")
         print(e)
     return None
+
+def download_and_upload_file_to_folder_id(file, folder_v2, dataset_v2_id, headers_v2):
+    """Download a file from Clowder v1 and upload it to Clowder v2."""
+    filename = file["filename"]
+    file_id = file["id"]
+    file_folder = file.get("folders", None)
+
+    # Download the file from Clowder v1
+    v1_download_url = f"{CLOWDER_V1}/api/files/{file_id}?superAdmin=true"
+    print(f"Downloading file: {filename}")
+    download_response = requests.get(v1_download_url, headers=clowder_headers_v1)
+
+    with open(filename, "wb") as f:
+        f.write(download_response.content)
+
+    file_exists = os.path.exists(filename)
+    # Upload the file to Clowder v2
+    dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
+    if folder_v2 is not None:
+        dataset_file_upload_endpoint += f"?folder_id={folder_v2['id']}"
+    response = requests.post(
+        dataset_file_upload_endpoint,
+        headers=headers_v2,
+        files={"file": open(filename, "rb")},
+    )
+
+    # Clean up the local file after upload
+    # try:
+    #     os.remove(filename)
+    # except Exception as e:
+    #     print(f"Could not delete locally downloaded file: {filename}")
+    #     print(e)
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+        return response.json().get("id")
+    else:
+        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
+
+    return None
+
+# def download_and_upload_file_to_folder_id(file, folder_v2, dataset_v2_id, headers_v2):
+#     """Download a file from Clowder v1 and upload it to Clowder v2."""
+#     filename = file["filename"]
+#     file_id = file["id"]
+#
+#     # DEBUG: Print all inputs
+#     print(f"=== DEBUG START ===")
+#     print(f"File: {file}")
+#     print(f"Folder_v2: {folder_v2}")
+#     print(f"Dataset_v2_id: {dataset_v2_id}")
+#     print(f"Headers_v2 keys: {list(headers_v2.keys()) if headers_v2 else 'None'}")
+#
+#     # Download the file from Clowder v1
+#     v1_download_url = f"{CLOWDER_V1}/api/files/{file_id}?superAdmin=true"
+#     print(f"Downloading file: {filename} from {v1_download_url}")
+#     download_response = requests.get(v1_download_url, headers=clowder_headers_v1)
+#     print(f"Download status: {download_response.status_code}")
+#
+#     with open(filename, "wb") as f:
+#         f.write(download_response.content)
+#
+#     # Check file exists and has content
+#     file_size = os.path.getsize(filename)
+#     print(f"Local file size: {file_size} bytes")
+#
+#     # Upload the file to Clowder v2
+#     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
+#
+#     if folder_v2 is not None:
+#         folder_id = folder_v2['id'] if isinstance(folder_v2, dict) else folder_v2.id
+#         dataset_file_upload_endpoint += f"Multiple?folder_id={folder_id}"
+#
+#     print(f"Upload endpoint: {dataset_file_upload_endpoint}")
+#
+#     # Read file content to verify it's not corrupted
+#     with open(filename, "rb") as f:
+#         file_content = f.read()
+#         print(f"File content length: {len(file_content)}")
+#         print(f"File content starts with: {file_content[:100]}...")
+#
+#     # Make the upload request with detailed debugging
+#     with open(filename, "rb") as file_obj:
+#         files = {"file": (filename, file_obj)}
+#
+#         print(f"Final files dict: {files}")
+#         # Create headers without content-type for file uploads
+#         upload_headers = headers_v2.copy()
+#         upload_headers.pop('content-type', None)
+#         print(f"Final headers: {upload_headers}")
+#
+#         # Use a session to see raw request
+#         session = requests.Session()
+#         prepared_request = requests.Request(
+#             'POST',
+#             dataset_file_upload_endpoint,
+#             headers=upload_headers,
+#             files=files
+#         ).prepare()
+#
+#         print(f"Prepared request URL: {prepared_request.url}")
+#         print(f"Prepared request headers: {dict(prepared_request.headers)}")
+#         # Don't print body as it's binary, but we can check content-type
+#         print(f"Content-Type header: {prepared_request.headers.get('Content-Type')}")
+#
+#         response = session.send(prepared_request)
+#
+#     # DEBUG: Full response analysis
+#     print(f"Response status: {response.status_code}")
+#     print(f"Response headers: {dict(response.headers)}")
+#     print(f"Response text: {response.text}")
+#     print(f"=== DEBUG END ===")
+#
+#     # Clean up the local file after upload
+#     try:
+#         os.remove(filename)
+#     except Exception as e:
+#         print(f"Could not delete locally downloaded file: {filename}")
+#         print(e)
+#
+#     if response.status_code == 200:
+#         print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+#         return response.json().get("id")
+#     else:
+#         print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
+#
+#     return None
+
 
 
 def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v2):
@@ -693,11 +827,17 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
     if matching_folder:
         dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
-    response = requests.post(
-        dataset_file_upload_endpoint,
-        headers=headers_v2,
-        files={"file": open(filename, "rb")},
-    )
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files=[("files", (filename, open(filename, "rb")))],
+        )
+    else:
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files={"file": open(filename, "rb")},
+        )
 
     # Clean up the local file after upload
     try:
@@ -714,6 +854,78 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
 
     return None
 
+def download_and_upload_file_1(file, all_dataset_folders, dataset_v2_id, headers_v2):
+    """Download a file from Clowder v1 and upload it to Clowder v2."""
+    filename = file["filename"]
+    file_id = file["id"]
+    file_folder = file.get("folders", None)
+
+    # Download the file from Clowder v1
+    v1_download_url = f"{CLOWDER_V1}/api/files/{file_id}?superAdmin=true"
+    print(f"Downloading file: {filename}")
+    download_response = requests.get(v1_download_url, headers=clowder_headers_v1)
+
+    with open(filename, "wb") as f:
+        f.write(download_response.content)
+
+    # Determine the correct folder in Clowder v2 for the upload
+    matching_folder = None
+    if file_folder:
+        matching_folder = next(
+            (
+                folder
+                for folder in all_dataset_folders
+                if folder["name"] == file_folder["name"]
+            ),
+            None,
+        )
+
+    # Upload the file to Clowder v2
+    dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
+    if matching_folder:
+        dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
+
+    # DEBUG: Add the same debugging as the new method
+    print(f"=== WORKING METHOD DEBUG ===")
+    print(f"Upload endpoint: {dataset_file_upload_endpoint}")
+    print(f"Headers: {headers_v2}")
+
+    with open(filename, "rb") as file_obj:
+        files = {"file": (filename, file_obj)}
+
+        # Use a session to see raw request
+        session = requests.Session()
+        prepared_request = requests.Request(
+            'POST',
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files=files
+        ).prepare()
+
+        print(f"Prepared request URL: {prepared_request.url}")
+        print(f"Prepared request headers: {dict(prepared_request.headers)}")
+        print(f"Content-Type header: {prepared_request.headers.get('Content-Type')}")
+
+        response = session.send(prepared_request)
+
+    print(f"Response status: {response.status_code}")
+    print(f"Response text: {response.text}")
+    print(f"=== WORKING METHOD DEBUG END ===")
+
+    # Clean up the local file after upload
+    try:
+        os.remove(filename)
+    except Exception as e:
+        print(f"Could not delete locally downloaded file: {filename}")
+        print(e)
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+        return response.json().get("id")
+    else:
+        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
+
+    return None
 
 def add_file_metadata(file_v1, file_v2_id, headers_v1, headers_v2):
     # Get metadata from Clowder V1
@@ -1207,9 +1419,12 @@ if __name__ == "__main__":
             "[Local Account]" in user_v1["identityProvider"]
             and user_v1["email"] != admin_user["email"]
         ):
-            [USER_MAP, DATASET_MAP] = process_user_and_resources_collections(
-                user_v1, USER_MAP, DATASET_MAP, COLLECTIONS_MAP
+            [USER_MAP, DATASET_MAP] = process_user_and_resources(
+                user_v1, USER_MAP, DATASET_MAP
             )
+            # [USER_MAP, DATASET_MAP] = process_user_and_resources_collections(
+            #     user_v1, USER_MAP, DATASET_MAP, COLLECTIONS_MAP
+            # )
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
