@@ -188,7 +188,7 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
            top_level_collections.append(col)
     return top_level_collections
 
-def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_id, v2_parent_type, v2_dataset_id):
+def process_collection_descendants(collection, headers_v1, base_headers_v2, headers_v2, v2_parent_id, v2_parent_type, v2_dataset_id):
     child_collections_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/getChildCollections"
     datasets_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/datasets"
 
@@ -203,13 +203,13 @@ def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_
             print(f"Add folder to the dataset")
             folder_name = child["name"]
             new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_dataset_id, headers_v2)
-            process_collection_descendants(child, headers_v1,headers_v2, new_folder['id'], 'folder', v2_dataset_id )
+            process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id )
         else:
             print(f"parent was a folder")
             print(f"Add folder to the dataset")
             folder_name = child["name"]
             new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id, v2_dataset_id, headers_v2)
-            process_collection_descendants(child, headers_v1, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
+            process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
 
     for dataset in dataset_json:
         if v2_parent_type == "dataset":
@@ -218,13 +218,13 @@ def process_collection_descendants(collection, headers_v1,headers_v2, v2_parent_
             print(f"Now we need to add the sub folders of this dataset")
             # TODO get DATASET FOLDERS HERE FROM v1
             process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
-            process_dataset_files(dataset, headers_v1, headers_v2, 'folder', new_folder['id'], v2_dataset_id)
+            process_dataset_files(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id)
         else:
             print(f"Parent is a folder")
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
             # TODO GET DATASET FOLDERS HERE FROM v1
             process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
-            process_dataset_files(dataset, headers_v1, headers_v2, 'folder', new_folder['id'], v2_dataset_id)
+            process_dataset_files(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id)
 
 
 
@@ -265,7 +265,7 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
                 if folder_v2['name'] == file['folders']['name']:
                     print(f"Upload this file to a folder")
                     matching_folder = folder_v2
-                    download_and_upload_file_to_folder_id(file, matching_folder, dataset_v2_id, headers_v2)
+                    download_and_upload_file_to_matching_folder(file, dataset_v2_id, base_headers_v2, matching_folder)
         else:
             print(f"This file is not in a folder")
             # TODO upload it to the folder
@@ -277,7 +277,7 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
 
 
 
-def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v2):
+def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v2, base_headers_v2):
     # create the dataset
     collection_name = collection["name"]
     collection_description = collection["description"]
@@ -295,7 +295,7 @@ def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v
     new_dataset_json = response.json()
     v2_dataset_id = new_dataset_json["id"]
 
-    process_collection_descendants(collection, headers_v1, headers_v2, new_dataset_json["id"], "dataset", v2_dataset_id)
+    process_collection_descendants(collection, headers_v1, base_headers_v2, headers_v2, new_dataset_json["id"], "dataset", v2_dataset_id)
 
     return response.json()["id"]
 
@@ -685,20 +685,26 @@ def download_and_upload_file_to_folder_id(file, folder_v2, dataset_v2_id, header
     file_exists = os.path.exists(filename)
     # Upload the file to Clowder v2
     dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
-    if folder_v2 is not None:
-        dataset_file_upload_endpoint += f"?folder_id={folder_v2['id']}"
-    response = requests.post(
-        dataset_file_upload_endpoint,
-        headers=headers_v2,
-        files={"file": open(filename, "rb")},
-    )
+    if folder_v2:
+        dataset_file_upload_endpoint += f"Multiple?folder_id={folder_v2['id']}"
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files=[("files", (filename, open(filename, "rb")))],
+        )
+    else:
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files={"file": open(filename, "rb")},
+        )
 
     # Clean up the local file after upload
-    # try:
-    #     os.remove(filename)
-    # except Exception as e:
-    #     print(f"Could not delete locally downloaded file: {filename}")
-    #     print(e)
+    try:
+        os.remove(filename)
+    except Exception as e:
+        print(f"Could not delete locally downloaded file: {filename}")
+        print(e)
 
     if response.status_code == 200:
         print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
@@ -795,6 +801,56 @@ def download_and_upload_file_to_folder_id(file, folder_v2, dataset_v2_id, header
 #
 #     return None
 
+
+def download_and_upload_file_to_matching_folder(file, dataset_v2_id, headers_v2, matching_folder = None):
+    """Download a file from Clowder v1 and upload it to Clowder v2."""
+    filename = file["filename"]
+    file_id = file["id"]
+
+    # Download the file from Clowder v1
+    v1_download_url = f"{CLOWDER_V1}/api/files/{file_id}?superAdmin=true"
+    print(f"Downloading file: {filename}")
+    download_response = requests.get(v1_download_url, headers=clowder_headers_v1)
+
+    with open(filename, "wb") as f:
+        f.write(download_response.content)
+
+    # Upload the file to Clowder v2
+    dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/files"
+    if matching_folder:
+        dataset_file_upload_endpoint += f"Multiple?folder_id={matching_folder['id']}"
+
+        # DEBUG: Print the exact request details
+        print(f"DEBUG: URL: {dataset_file_upload_endpoint}")
+        print(f"DEBUG: Headers: {headers_v2}")
+        print(f"DEBUG: Folder ID: {matching_folder['id']}")
+
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files=[("files", (filename, open(filename, "rb")))],
+        )
+    else:
+        response = requests.post(
+            dataset_file_upload_endpoint,
+            headers=headers_v2,
+            files={"file": open(filename, "rb")},
+        )
+
+    # Clean up the local file after upload
+    try:
+        os.remove(filename)
+    except Exception as e:
+        print(f"Could not delete locally downloaded file: {filename}")
+        print(e)
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
+        return response.json().get("id")
+    else:
+        print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
+
+    return None
 
 
 def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v2):
@@ -1194,7 +1250,7 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
     print(f"Got {len(user_v1_collections)} user collections in the top level")
 
     for top_level_col in user_v1_collections:
-        dataset_v2 = create_v2_dataset_from_collection(top_level_col, user_v1, clowder_headers_v1, user_headers_v2)
+        dataset_v2 = create_v2_dataset_from_collection(top_level_col, user_v1, clowder_headers_v1 ,user_headers_v2, base_headers_v2)
         print('did this')
 
     for dataset in user_v1_datasets:
@@ -1245,6 +1301,21 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
             files_result = files_response.json()
 
             for file in files_result:
+                file_folder = file.get("folders", None)
+                matching_folder = None
+                if file_folder:
+                    matching_folder = next(
+                        (
+                            folder
+                            for folder in all_dataset_folders
+                            if folder["name"] == file_folder["name"]
+                        ),
+                        None,
+                    )
+                print('did we get matching folder?')
+                file_v2_id = download_and_upload_file_to_matching_folder(
+                    file, dataset_v2_id, base_user_headers_v2, matching_folder
+                )
                 file_v2_id = download_and_upload_file(
                     file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
                 )
@@ -1344,8 +1415,23 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 dataset_files_endpoint, headers=clowder_headers_v1, verify=False
             )
             files_result = files_response.json()
-
+            # TODO test folde rher
             for file in files_result:
+                file_folder = file.get("folders", None)
+                matching_folder = None
+                if file_folder:
+                    matching_folder = next(
+                        (
+                            folder
+                            for folder in all_dataset_folders
+                            if folder["name"] == file_folder["name"]
+                        ),
+                        None,
+                    )
+                print('did we get matching folder?')
+                file_v2_id = download_and_upload_file_to_matching_folder(
+                    file, dataset_v2_id, base_user_headers_v2, matching_folder
+                )
                 file_v2_id = download_and_upload_file(
                     file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
                 )
@@ -1419,12 +1505,12 @@ if __name__ == "__main__":
             "[Local Account]" in user_v1["identityProvider"]
             and user_v1["email"] != admin_user["email"]
         ):
-            [USER_MAP, DATASET_MAP] = process_user_and_resources(
-                user_v1, USER_MAP, DATASET_MAP
-            )
-            # [USER_MAP, DATASET_MAP] = process_user_and_resources_collections(
-            #     user_v1, USER_MAP, DATASET_MAP, COLLECTIONS_MAP
+            # [USER_MAP, DATASET_MAP] = process_user_and_resources(
+            #     user_v1, USER_MAP, DATASET_MAP
             # )
+            [USER_MAP, DATASET_MAP] = process_user_and_resources_collections(
+                user_v1, USER_MAP, DATASET_MAP, COLLECTIONS_MAP
+            )
             print(f"Migrated user {user_v1['email']} and associated resources.")
         else:
             print(f"Skipping user {user_v1['email']} as it is not a local account.")
