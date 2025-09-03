@@ -1248,6 +1248,8 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
         headers=clowder_headers_v1, user_v1=user_v1
     )
 
+    all_collection = get_clowder_v1_user_collections(headers=clowder_headers_v1, user_v1=user_v1)
+
     print(f"Got {len(user_v1_collections)} user collections in the top level")
 
     # filter the collections by space

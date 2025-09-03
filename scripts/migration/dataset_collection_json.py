@@ -35,3 +35,8 @@ def get_dataset_collections_map():
                 dataset_to_collection[dataset] = current_value
     return dataset_to_collection
 
+def get_datasets_in_collections():
+    map = get_dataset_collections_map()
+    datasets_in_collections = list(map.keys())
+    return datasets_in_collections
+
