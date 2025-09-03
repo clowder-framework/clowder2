@@ -565,12 +565,31 @@ def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
         hierarchy_parts = hierarchy_parts[1:]
     current_parent = None
     for part in hierarchy_parts:
-        result = create_folder_if_not_exists_or_get(
+        result = create_dataset_folder_if_not_exists_or_get(
             part, current_parent, dataset_v2, headers
         )
         if result:
             current_parent = result["id"]
 
+# for creating a folder for a dataset
+def create_dataset_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
+    """Create a folder if it does not exist or return the existing folder."""
+    # current_folders = get_folder_and_subfolders(dataset_v2, headers)
+    current_all_folders = get_all_folder_and_subfolders(dataset_v2, headers)
+    folder_data = (
+        {"name": folder, "parent_folder": parent} if parent else {"name": folder}
+    )
+
+    for existing_folder in current_all_folders:
+        if existing_folder["name"] == folder:
+            return existing_folder
+
+    response = requests.post(
+        f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2}/folders",
+        json=folder_data,
+        headers=headers,
+    )
+    return response.json()
 
 def create_folder_if_not_exists_or_get(folder, parent, parent_type, dataset_v2, headers):
     """Create a folder if it does not exist or return the existing folder."""
@@ -1307,6 +1326,7 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
         if MIGRATE_DATASET:
             dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
             DATASET_MAP[dataset["id"]] = dataset_v2_id
+            #
             add_dataset_metadata(dataset, dataset_v2_id, base_headers_v1, user_headers_v2)
             add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
             print("Created folders in the new dataset")
