@@ -216,9 +216,11 @@ def process_collection_descendants(collection, headers_v1, base_headers_v2, head
         if v2_parent_type == "dataset":
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
             process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
+            # TODO add dataset metadata to the folder
         else:
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
             process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
+            # TODO add dataset metadata to the folder
 
 
 def get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id):
