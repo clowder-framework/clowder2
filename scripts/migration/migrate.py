@@ -197,7 +197,7 @@ def process_collection_descendants(collection, headers_v1, base_headers_v2, head
     child_col_json = child_col_response.json()
     dataset_json = dataset_response.json()
 
-    print(f"Got child collections and datasets")
+    # the below handles creating folders for child collections
     for child in child_col_json:
         if v2_parent_type == "dataset":
             print(f"Add folder to the dataset")
@@ -211,20 +211,14 @@ def process_collection_descendants(collection, headers_v1, base_headers_v2, head
             new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id, v2_dataset_id, headers_v2)
             process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
 
+    # this handles uploading the datasets of the collection as folders
     for dataset in dataset_json:
         if v2_parent_type == "dataset":
-            print(f"Parent is a dataset")
-            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
-            print(f"Now we need to add the sub folders of this dataset")
-            # TODO get DATASET FOLDERS HERE FROM v1
-            process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
-            process_dataset_files(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id)
+            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
+            process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
         else:
-            print(f"Parent is a folder")
-            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_dataset_id, headers_v2)
-            # TODO GET DATASET FOLDERS HERE FROM v1
-            process_dataset_folders(dataset, headers_v1, headers_v2, new_folder['id'], v2_dataset_id)
-            process_dataset_files(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id)
+            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
+            process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
 
 
 
@@ -240,7 +234,8 @@ def get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_
     folder_json = folder_response.json()
     return folder_json
 
-def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_id, dataset_v2_id):
+# processes a dataset adds folders and
+def process_dataset_files_and_folders(dataset, headers_v1, headers_v2, parent_type, parent_id, dataset_v2_id, dataset_v2_folder):
     dataset_v1_folders = get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id)
 
     for folder_v1 in dataset_v1_folders:
@@ -255,24 +250,19 @@ def process_dataset_files(dataset, headers_v1, headers_v2, parent_type, parent_i
     files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
     files_response = requests.get(files_endpoint, headers=headers_v1)
     files_json = files_response.json()
-    # TODO WORK HERE
+    # go through files and upload them to the correct folder if they have one
     for file in files_json:
         if 'folders' in file:
-            print(f"This file is in a folder")
-            current_file_folder_name = file['folders']['name']
-            matching_folder = None
             for folder_v2 in all_v2_dataset_folders:
                 if folder_v2['name'] == file['folders']['name']:
                     print(f"Upload this file to a folder")
                     matching_folder = folder_v2
                     download_and_upload_file_to_matching_folder(file, dataset_v2_id, base_headers_v2, matching_folder)
         else:
-            print(f"This file is not in a folder")
-            # TODO upload it to the folder
             if parent_type == "dataset":
                 print(f"Upload to a dataset")
             if parent_type == "folder":
-                print(f"Upload to a folder")
+                download_and_upload_file_to_matching_folder(file, dataset_v2_id, base_headers_v2, dataset_v2_folder)
     print(f"Got dataset files")
 
 
@@ -295,7 +285,10 @@ def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v
     new_dataset_json = response.json()
     v2_dataset_id = new_dataset_json["id"]
 
-    process_collection_descendants(collection, headers_v1, base_headers_v2, headers_v2, new_dataset_json["id"], "dataset", v2_dataset_id)
+    process_collection_descendants(collection=collection, headers_v1=headers_v1,
+                                   base_headers_v2=base_headers_v2, headers_v2= headers_v2,
+                                   v2_parent_id=new_dataset_json["id"],
+                                  v2_parent_type="dataset", v2_dataset_id=v2_dataset_id)
 
     return response.json()["id"]
 
@@ -560,7 +553,7 @@ def add_folder_hierarchy_to_migration_folder(folder_hierarchy, dataset_v2, folde
     current_parent = folder_id_v2
     for part in hierarchy_parts:
         result = create_folder_if_not_exists_or_get(
-            part, current_parent, dataset_v2, headers
+            part, current_parent, 'folder', dataset_v2, headers
         )
         if result:
             current_parent = result["id"]
@@ -579,13 +572,16 @@ def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
             current_parent = result["id"]
 
 
-def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
+def create_folder_if_not_exists_or_get(folder, parent, parent_type, dataset_v2, headers):
     """Create a folder if it does not exist or return the existing folder."""
     # current_folders = get_folder_and_subfolders(dataset_v2, headers)
     current_all_folders = get_all_folder_and_subfolders(dataset_v2, headers)
-    folder_data = (
-        {"name": folder, "parent_folder": parent} if parent else {"name": folder}
-    )
+    if parent_type == 'folder':
+        folder_data = (
+            {"name": folder, "parent_folder": parent} if parent else {"name": folder}
+        )
+    else:
+        folder_data = {"name": folder}
 
     for existing_folder in current_all_folders:
         if existing_folder["name"] == folder:
@@ -838,6 +834,7 @@ def download_and_upload_file_to_matching_folder(file, dataset_v2_id, headers_v2,
         )
 
     # Clean up the local file after upload
+    print(f"Type response {type(response)}")
     try:
         os.remove(filename)
     except Exception as e:
@@ -846,7 +843,11 @@ def download_and_upload_file_to_matching_folder(file, dataset_v2_id, headers_v2,
 
     if response.status_code == 200:
         print(f"Uploaded file: {filename} to dataset {dataset_v2_id}")
-        return response.json().get("id")
+        response_json = response.json()
+        if type(response_json) == dict:
+            return response.json().get("id")
+        elif type(response_json) == list:
+            return response_json[0].get("id")
     else:
         print(f"Failed to upload file: {filename} to dataset {dataset_v2_id}")
 
@@ -1249,9 +1250,25 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
 
     print(f"Got {len(user_v1_collections)} user collections in the top level")
 
-    for top_level_col in user_v1_collections:
-        dataset_v2 = create_v2_dataset_from_collection(top_level_col, user_v1, clowder_headers_v1 ,user_headers_v2, base_headers_v2)
-        print('did this')
+    # filter the collections by space
+    migrate_top_level_collections = []
+    for col in user_v1_collections:
+        collection_spaces = col["spaces"]
+        collection_spaces = collection_spaces.lstrip('List(')
+        collection_spaces = collection_spaces.rstrip(')')
+        collection_spaces = collection_spaces.split(',')
+        for space in collection_spaces:
+            if space in toml_space_ids:
+                migrate_top_level_collections.append(col)
+                break
+
+    # create datasets from the top level collections
+    for top_level_col in migrate_top_level_collections:
+        dataset_v2 = create_v2_dataset_from_collection(collection=top_level_col, user_v1=user_v1,
+                                                       headers_v1=clowder_headers_v1 ,headers_v2=user_headers_v2,
+                                                       base_headers_v2=base_headers_v2)
+        print(f"Created dataset in v2 from collection: {top_level_col['id']} - {top_level_col['name']}")
+        COLLETIONS_MAP[top_level_col["id"]] = dataset_v2
 
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
