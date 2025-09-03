@@ -202,13 +202,13 @@ def process_collection_descendants(collection, headers_v1, base_headers_v2, head
         if v2_parent_type == "dataset":
             print(f"Add folder to the dataset")
             folder_name = child["name"]
-            new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_dataset_id, headers_v2)
+            new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_parent_type, v2_dataset_id, headers_v2)
             process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id )
         else:
             print(f"parent was a folder")
             print(f"Add folder to the dataset")
             folder_name = child["name"]
-            new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id, v2_dataset_id, headers_v2)
+            new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id,v2_parent_type, v2_dataset_id, headers_v2)
             process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
 
     # this handles uploading the datasets of the collection as folders
