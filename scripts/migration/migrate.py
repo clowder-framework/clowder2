@@ -16,7 +16,7 @@ from scripts.migration.migrate_metadata_definitions import (
     post_metadata_definition,
 )
 
-from scripts.migration.dataset_collection_json import get_dataset_collections_map
+from scripts.migration.dataset_collection_json import get_dataset_collections_map, get_datasets_in_collections
 
 DATASET_COLLECTIONS_MAP = get_dataset_collections_map()
 
@@ -1248,8 +1248,6 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
         headers=clowder_headers_v1, user_v1=user_v1
     )
 
-    all_collection = get_clowder_v1_user_collections(headers=clowder_headers_v1, user_v1=user_v1)
-
     print(f"Got {len(user_v1_collections)} user collections in the top level")
 
     # filter the collections by space
@@ -1272,6 +1270,8 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
         print(f"Created dataset in v2 from collection: {top_level_col['id']} - {top_level_col['name']}")
         COLLETIONS_MAP[top_level_col["id"]] = dataset_v2
 
+    datasets_in_collections_v1 = get_datasets_in_collections()
+
     for dataset in user_v1_datasets:
         print(f"Creating dataset in v2: {dataset['id']} - {dataset['name']}")
         dataset_v1_id = dataset["id"]
@@ -1281,6 +1281,9 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
         print(toml_space_ids)
         print(toml_exclude_space_ids)
         # Check if dataset is in the excluded dataset list
+        if dataset_v1_id in datasets_in_collections_v1:
+            print(f"Skipping dataset {dataset_v1_id} as it is was in a collection, already migrated")
+            MIGRATE_DATASET = False
         if dataset_v1_id in toml_exclude_dataset_ids:
             print(f"Skipping dataset {dataset_v1_id} as it is in the exclude list.")
             MIGRATE_DATASET = False
@@ -1334,9 +1337,6 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
                 print('did we get matching folder?')
                 file_v2_id = download_and_upload_file_to_matching_folder(
                     file, dataset_v2_id, base_user_headers_v2, matching_folder
-                )
-                file_v2_id = download_and_upload_file(
-                    file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
                 )
                 if file_v2_id is not None:
                     add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
