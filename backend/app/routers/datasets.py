@@ -837,6 +837,7 @@ async def get_dataset_folders_and_files(
         return page.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
+
 @router.get("/{dataset_id}/all_folders")
 async def get_dataset_folders_all(
     dataset_id: str,
@@ -866,7 +867,9 @@ async def get_dataset_folders_all(
                 FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
             ]
 
-        folders = (await FolderFileViewList.find(*query).aggregate(
+        folders = (
+            await FolderFileViewList.find(*query)
+            .aggregate(
                 [
                     _get_page_query(
                         skip,
@@ -879,15 +882,14 @@ async def get_dataset_folders_all(
                         },
                     )
                 ],
-            ).to_list())
+            )
+            .to_list()
+        )
         page_metadata = _construct_page_metadata(folders, skip, limit)
 
         page = Paged(
             metadata=page_metadata,
-            data=[
-                FolderOut(id=item.pop("_id"), **item)
-                for item in folders[0]["data"]
-            ],
+            data=[FolderOut(id=item.pop("_id"), **item) for item in folders[0]["data"]],
         )
 
         return page.dict()
