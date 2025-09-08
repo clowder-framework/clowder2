@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-
+import json
 import requests
 from dotenv import dotenv_values
 
@@ -217,9 +217,11 @@ def process_collection_descendants(collection, headers_v1, base_headers_v2, head
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
             process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
             # TODO add dataset metadata to the folder
+            add_dataset_metadata_to_folder(dataset, v2_dataset_id,  new_folder['id'], headers_v1, base_headers_v2)
         else:
             new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
             process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
+            add_dataset_metadata_to_folder(dataset, v2_dataset_id,  new_folder['id'], headers_v1, base_headers_v2)
             # TODO add dataset metadata to the folder
 
 
@@ -798,7 +800,6 @@ def add_file_metadata(file_v1, file_v2_id, headers_v1, headers_v2):
                         print("Successfully posted file machine metadata to V2")
                     break  # machine metadata no need to iterate through all the keys
 
-
 def add_dataset_metadata(dataset_v1, dataset_v2_id, headers_v1, headers_v2):
     # Get metadata from Clowder V1
     endpoint = (
@@ -851,6 +852,46 @@ def add_dataset_metadata(dataset_v1, dataset_v2_id, headers_v1, headers_v2):
                     else:
                         print("Successfully posted dataset machine metadata to V2")
                     break  # machine metadata no need to iterate through all the keys
+
+
+def add_dataset_metadata_to_folder(dataset_v1, dataset_v2_id, folder_v2_id, headers_v1, headers_v2):
+    # Get metadata from Clowder V1
+    endpoint = (
+        f"{CLOWDER_V1}/api/datasets/{dataset_v1['id']}/metadata.jsonld?superAdmin=true"
+    )
+    dataset_name = dataset_v1['name']
+    metadata_file_name = dataset_name + '_metadata.json'
+    metadata_v1 = requests.get(endpoint, headers=headers_v1).json()
+    with open(metadata_file_name, "w") as metadata_file:
+        json.dump(metadata_v1, metadata_file)
+
+    # upload the file to the folder in v2
+    dataset_file_upload_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/filesMultiple?folder_id={folder_v2_id}"
+
+    response = requests.post(
+        dataset_file_upload_endpoint,
+        headers=headers_v2,
+        files=[("files", (metadata_file_name, open(metadata_file_name, "rb")))],
+    )
+
+    # Clean up the local file after upload
+    print(f"Type response {type(response)}")
+    try:
+        os.remove(metadata_file_name)
+    except Exception as e:
+        print(f"Could not delete locally created metadata file: {metadata_file_name}")
+        print(e)
+
+    if response.status_code == 200:
+        print(f"Uploaded file: {metadata_file_name} to dataset {dataset_v2_id} and folder {folder_v2_id}")
+        response_json = response.json()
+        if type(response_json) == dict:
+            return response.json().get("id")
+        elif type(response_json) == list:
+            return response_json[0].get("id")
+    else:
+        print(f"Failed to upload file: {metadata_file} to dataset {dataset_v2_id} and folder {folder_v2_id}")
+    return None
 
 
 def register_migration_extractor():
