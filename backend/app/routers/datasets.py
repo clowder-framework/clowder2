@@ -663,7 +663,7 @@ async def delete_freeze_dataset_version(
     if (
         frozen_dataset := await DatasetFreezeDB.find_one(
             DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
-            DatasetFreezeDxB.frozen_version_num == frozen_version_num,
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
         )
     ) is not None:
         return await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False)
