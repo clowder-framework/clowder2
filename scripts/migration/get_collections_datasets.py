@@ -10,7 +10,6 @@ except ImportError:
     import tomli as tomllib
 
 
-
 DEFAULT_PASSWORD = "Password123&"
 
 # Get the current timestamp
@@ -18,9 +17,8 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 COLLECTIONS_FILE = "collections_ids.txt"
 
 
-
 # Load environment variables
-path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
+path_to_env = os.path.join(os.getcwd(), "scripts", "migration", ".env")
 config = dotenv_values(dotenv_path=path_to_env)
 
 
@@ -56,6 +54,7 @@ admin_user = {
     "last_name": "admin",
 }
 
+
 def get_collections_datasets(headers, collection_id):
     collection_dataset_endpoint = (
         f"{CLOWDER_V1}/api/collections/{collection_id}/datasets?superAdmin=true"
@@ -70,16 +69,16 @@ def get_collections_datasets(headers, collection_id):
 if __name__ == "__main__":
     print("Getting collections and datasets from Clowder v1...")
 
-    collection_ids =[]
+    collection_ids = []
     if os.path.exists(COLLECTIONS_FILE):
-        print('exists')
+        print("exists")
     else:
-        print('does not exist')
+        print("does not exist")
 
     with open(COLLECTIONS_FILE, "r") as outfile:
         lines = outfile.readlines()
         for line in lines:
-            collection_ids.append(line.rstrip('\n'))
+            collection_ids.append(line.rstrip("\n"))
     print(f"Found {len(collection_ids)} collections in {COLLECTIONS_FILE}")
     collection_dataset_dict = dict()
     for id in collection_ids:

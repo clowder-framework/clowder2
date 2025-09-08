@@ -24,7 +24,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_FILE = "collections_ids.txt"
 
 # Load environment variables
-path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
+path_to_env = os.path.join(os.getcwd(), "scripts", "migration", ".env")
 config = dotenv_values(dotenv_path=path_to_env)
 
 
@@ -60,11 +60,13 @@ admin_user = {
     "last_name": "admin",
 }
 
+
 def get_clowder_v1_top_level_collections(headers):
     endpoint = f"{CLOWDER_V1}/api/collections/topLevelCollections?superAdmin=true"
     response = requests.get(endpoint, headers=headers)
     user_collections = response.json()
     return user_collections
+
 
 def get_collection_v1_descendants(headers, collection_id):
     descendant_ids = []
@@ -75,16 +77,19 @@ def get_collection_v1_descendants(headers, collection_id):
     print(collection_json["child_collection_ids"])
     if int(collection_json["childCollectionsCount"]) > 0:
         child_collections_ids = collection_json["child_collection_ids"]
-        descendant_ids = child_collections_ids[5:-1].split(', ')
+        descendant_ids = child_collections_ids[5:-1].split(", ")
         for i in range(0, len(descendant_ids)):
             id = descendant_ids[i]
             descendent_endpoint = f"{CLOWDER_V1}/api/collections/{id}"
-            descendent_response = requests.get(descendent_endpoint, headers=headers, verify=False)
+            descendent_response = requests.get(
+                descendent_endpoint, headers=headers, verify=False
+            )
             descendent_json = descendent_response.json()
             if int(descendent_json["childCollectionsCount"]) > 0:
                 sub_descendants = get_collection_v1_descendants(headers, id)
                 descendant_ids.extend(sub_descendants)
     return descendant_ids
+
 
 def get_dataset_ids_in_v1_collection(headers, collection_id):
     dataset_ids = []
@@ -95,17 +100,23 @@ def get_dataset_ids_in_v1_collection(headers, collection_id):
         dataset_ids.append(dataset["id"])
     return dataset_ids
 
+
 if __name__ == "__main__":
     top_level_collections = get_clowder_v1_top_level_collections(clowder_headers_v1)
     all_v1_collections = []
     for collection in top_level_collections:
-        print(f"Getting descendents for collection {collection['name']} ({collection['id']})")
+        print(
+            f"Getting descendents for collection {collection['name']} ({collection['id']})"
+        )
         all_v1_collections.append(collection["id"])
         if int(collection["childCollectionsCount"]) > 0:
-            descendant_ids = get_collection_v1_descendants(clowder_headers_v1, collection["id"])
+            descendant_ids = get_collection_v1_descendants(
+                clowder_headers_v1, collection["id"]
+            )
             all_v1_collections.extend(descendant_ids)
-            print(f"Added descendents for collection {collection['name']} ({collection['id']})")
-
+            print(
+                f"Added descendents for collection {collection['name']} ({collection['id']})"
+            )
 
     print(f"TOTAL V1 COLLECTIONS TO MIGRATE: {len(all_v1_collections)}")
 

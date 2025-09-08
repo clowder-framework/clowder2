@@ -16,7 +16,10 @@ from scripts.migration.migrate_metadata_definitions import (
     post_metadata_definition,
 )
 
-from scripts.migration.dataset_collection_json import get_dataset_collections_map, get_datasets_in_collections
+from scripts.migration.dataset_collection_json import (
+    get_dataset_collections_map,
+    get_datasets_in_collections,
+)
 
 DATASET_COLLECTIONS_MAP = get_dataset_collections_map()
 
@@ -28,15 +31,15 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_FILE = f"migrated_new_users_{timestamp}.log"
 
 # Load environment variables
-path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
-path_to_toml = os.path.join(os.getcwd(),"scripts","migration", "config.toml")
+path_to_env = os.path.join(os.getcwd(), "scripts", "migration", ".env")
+path_to_toml = os.path.join(os.getcwd(), "scripts", "migration", "config.toml")
 config = dotenv_values(dotenv_path=path_to_env)
 
-toml_space_ids=None
-toml_exclude_space_ids=None
-toml_users=None
-toml_exclude_users=None
-toml_exclude_dataset_ids=None
+toml_space_ids = None
+toml_exclude_space_ids = None
+toml_users = None
+toml_exclude_users = None
+toml_exclude_dataset_ids = None
 
 # Load configuration from toml file
 if os.path.exists(path_to_toml):
@@ -158,15 +161,18 @@ def get_collection_v1_descendants(headers, collection_id):
     print(collection_json["child_collection_ids"])
     if int(collection_json["childCollectionsCount"]) > 0:
         child_collections_ids = collection_json["child_collection_ids"]
-        descendant_ids = child_collections_ids[5:-1].split(', ')
+        descendant_ids = child_collections_ids[5:-1].split(", ")
         for id in descendant_ids:
             descendent_endpoint = f"{CLOWDER_V1}/api/collections/{id}"
-            descendent_response = requests.get(descendent_endpoint, headers=headers, verify=False)
+            descendent_response = requests.get(
+                descendent_endpoint, headers=headers, verify=False
+            )
             descendent_json = descendent_response.json()
             if int(descendent_json["childCollectionsCount"]) > 0:
                 sub_descendants = get_collection_v1_descendants(headers, id)
                 descendant_ids.extend(sub_descendants)
     return descendant_ids
+
 
 def get_clowder_v1_user_collections(headers, user_v1):
     endpoint = f"{CLOWDER_V1}/api/collections"
@@ -182,14 +188,25 @@ def get_clowder_v1_user_collections_top_level(headers, user_v1):
     response_json = response.json()
     for col in response_json:
         author = col["author"]
-        author_id = author.lstrip('MiniUser(')
-        author_id = author_id[:author_id.index(',')]
+        author_id = author.lstrip("MiniUser(")
+        author_id = author_id[: author_id.index(",")]
         if author_id == user_v1["id"]:
-           top_level_collections.append(col)
+            top_level_collections.append(col)
     return top_level_collections
 
-def process_collection_descendants(collection, headers_v1, base_headers_v2, headers_v2, v2_parent_id, v2_parent_type, v2_dataset_id):
-    child_collections_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/getChildCollections"
+
+def process_collection_descendants(
+    collection,
+    headers_v1,
+    base_headers_v2,
+    headers_v2,
+    v2_parent_id,
+    v2_parent_type,
+    v2_dataset_id,
+):
+    child_collections_endpoint = (
+        f"{CLOWDER_V1}/api/collections/{collection['id']}/getChildCollections"
+    )
     datasets_endpoint = f"{CLOWDER_V1}/api/collections/{collection['id']}/datasets"
 
     child_col_response = requests.get(child_collections_endpoint, headers=headers_v1)
@@ -202,26 +219,70 @@ def process_collection_descendants(collection, headers_v1, base_headers_v2, head
         if v2_parent_type == "dataset":
             print(f"Add folder to the dataset")
             folder_name = child["name"]
-            new_folder = create_folder_if_not_exists_or_get(folder_name, None, v2_parent_type, v2_dataset_id, headers_v2)
-            process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id )
+            new_folder = create_folder_if_not_exists_or_get(
+                folder_name, None, v2_parent_type, v2_dataset_id, headers_v2
+            )
+            process_collection_descendants(
+                child,
+                headers_v1,
+                base_headers_v2,
+                headers_v2,
+                new_folder["id"],
+                "folder",
+                v2_dataset_id,
+            )
         else:
             print(f"parent was a folder")
             print(f"Add folder to the dataset")
             folder_name = child["name"]
-            new_folder = create_folder_if_not_exists_or_get(folder_name, v2_parent_id,v2_parent_type, v2_dataset_id, headers_v2)
-            process_collection_descendants(child, headers_v1, base_headers_v2, headers_v2, new_folder['id'], 'folder', v2_dataset_id)
+            new_folder = create_folder_if_not_exists_or_get(
+                folder_name, v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2
+            )
+            process_collection_descendants(
+                child,
+                headers_v1,
+                base_headers_v2,
+                headers_v2,
+                new_folder["id"],
+                "folder",
+                v2_dataset_id,
+            )
 
     # this handles uploading the datasets of the collection as folders
     for dataset in dataset_json:
         if v2_parent_type == "dataset":
-            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
-            process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
+            new_folder = create_folder_if_not_exists_or_get(
+                dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2
+            )
+            process_dataset_files_and_folders(
+                dataset,
+                headers_v1,
+                base_headers_v2,
+                "folder",
+                new_folder["id"],
+                v2_dataset_id,
+                new_folder,
+            )
             # TODO add dataset metadata to the folder
-            add_dataset_metadata_to_folder(dataset, v2_dataset_id,  new_folder['id'], headers_v1, base_headers_v2)
+            add_dataset_metadata_to_folder(
+                dataset, v2_dataset_id, new_folder["id"], headers_v1, base_headers_v2
+            )
         else:
-            new_folder = create_folder_if_not_exists_or_get(dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2)
-            process_dataset_files_and_folders(dataset, headers_v1, base_headers_v2, 'folder', new_folder['id'], v2_dataset_id, new_folder)
-            add_dataset_metadata_to_folder(dataset, v2_dataset_id,  new_folder['id'], headers_v1, base_headers_v2)
+            new_folder = create_folder_if_not_exists_or_get(
+                dataset["name"], v2_parent_id, v2_parent_type, v2_dataset_id, headers_v2
+            )
+            process_dataset_files_and_folders(
+                dataset,
+                headers_v1,
+                base_headers_v2,
+                "folder",
+                new_folder["id"],
+                v2_dataset_id,
+                new_folder,
+            )
+            add_dataset_metadata_to_folder(
+                dataset, v2_dataset_id, new_folder["id"], headers_v1, base_headers_v2
+            )
             # TODO add dataset metadata to the folder
 
 
@@ -231,17 +292,29 @@ def get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_
     folder_json = folder_response.json()
     return folder_json
 
+
 # processes a dataset adds folders and
-def process_dataset_files_and_folders(dataset, headers_v1, headers_v2, parent_type, parent_id, dataset_v2_id, dataset_v2_folder):
-    dataset_v1_folders = get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id)
+def process_dataset_files_and_folders(
+    dataset,
+    headers_v1,
+    headers_v2,
+    parent_type,
+    parent_id,
+    dataset_v2_id,
+    dataset_v2_folder,
+):
+    dataset_v1_folders = get_v1_dataset_folders(
+        dataset, headers_v1, headers_v2, parent_type, parent_id
+    )
 
     for folder_v1 in dataset_v1_folders:
-        current_folder_hierarchy = folder_v1['name']
-        add_folder_hierarchy_to_migration_folder(folder_hierarchy=current_folder_hierarchy,
-                                                 dataset_v2=dataset_v2_id,
-                                                 folder_id_v2=parent_id,
-                                                 headers=headers_v2
-                                                 )
+        current_folder_hierarchy = folder_v1["name"]
+        add_folder_hierarchy_to_migration_folder(
+            folder_hierarchy=current_folder_hierarchy,
+            dataset_v2=dataset_v2_id,
+            folder_id_v2=parent_id,
+            headers=headers_v2,
+        )
 
     all_v2_dataset_folders = get_all_folder_and_subfolders(dataset_v2_id, headers_v2)
     files_endpoint = f"{CLOWDER_V1}/api/datasets/{dataset['id']}/files"
@@ -249,32 +322,34 @@ def process_dataset_files_and_folders(dataset, headers_v1, headers_v2, parent_ty
     files_json = files_response.json()
     # go through files and upload them to the correct folder if they have one
     for file in files_json:
-        if 'folders' in file:
+        if "folders" in file:
             for folder_v2 in all_v2_dataset_folders:
-                if folder_v2['name'] == file['folders']['name']:
+                if folder_v2["name"] == file["folders"]["name"]:
                     print(f"Upload this file to a folder")
                     matching_folder = folder_v2
-                    download_and_upload_file_to_matching_folder(file, dataset_v2_id, base_headers_v2, matching_folder)
+                    download_and_upload_file_to_matching_folder(
+                        file, dataset_v2_id, base_headers_v2, matching_folder
+                    )
         else:
             if parent_type == "dataset":
                 print(f"Upload to a dataset")
             if parent_type == "folder":
-                download_and_upload_file_to_matching_folder(file, dataset_v2_id, base_headers_v2, dataset_v2_folder)
+                download_and_upload_file_to_matching_folder(
+                    file, dataset_v2_id, base_headers_v2, dataset_v2_folder
+                )
     print(f"Got dataset files")
 
 
-
-def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v2, base_headers_v2):
+def create_v2_dataset_from_collection(
+    collection, user_v1, headers_v1, headers_v2, base_headers_v2
+):
     # create the dataset
     collection_name = collection["name"]
     collection_description = collection["description"]
     v2_license_id = "CC BY"
 
     dataset_in_v2_endpoint = f"{CLOWDER_V2}/api/v2/datasets?license_id={v2_license_id}"
-    dataset_example = {
-        "name":collection_name,
-        "description": collection_description
-    }
+    dataset_example = {"name": collection_name, "description": collection_description}
     response = requests.post(
         dataset_in_v2_endpoint, headers=headers_v2, json=dataset_example
     )
@@ -282,13 +357,17 @@ def create_v2_dataset_from_collection(collection, user_v1, headers_v1, headers_v
     new_dataset_json = response.json()
     v2_dataset_id = new_dataset_json["id"]
 
-    process_collection_descendants(collection=collection, headers_v1=headers_v1,
-                                   base_headers_v2=base_headers_v2, headers_v2= headers_v2,
-                                   v2_parent_id=new_dataset_json["id"],
-                                  v2_parent_type="dataset", v2_dataset_id=v2_dataset_id)
+    process_collection_descendants(
+        collection=collection,
+        headers_v1=headers_v1,
+        base_headers_v2=base_headers_v2,
+        headers_v2=headers_v2,
+        v2_parent_id=new_dataset_json["id"],
+        v2_parent_type="dataset",
+        v2_dataset_id=v2_dataset_id,
+    )
 
     return response.json()["id"]
-
 
 
 # TODO this is too slow, we need to optimize it
@@ -315,17 +394,17 @@ def get_clowder_v1_dataset_collections(headers, user_v1, dataset_id):
         except Exception as e:
             print("Exception", e)
         if int(collection["childCollectionsCount"]) > 0:
-            collection_descendants = get_collection_v1_descendants(headers, collection_id)
+            collection_descendants = get_collection_v1_descendants(
+                headers, collection_id
+            )
             for descendant in collection_descendants:
-                collection_dataset_endpoint = (
-                    f"{CLOWDER_V1}/api/collections/{descendant}/datasets?superAdmin=true"
-                )
+                collection_dataset_endpoint = f"{CLOWDER_V1}/api/collections/{descendant}/datasets?superAdmin=true"
                 collection_dataset_response = requests.get(
                     collection_dataset_endpoint, headers=headers
                 )
                 collection_dataset_json = collection_dataset_response.json()
                 for ds in collection_dataset_json:
-                    if ds['id'] == dataset_id:
+                    if ds["id"] == dataset_id:
                         if descendant not in matching_collections:
                             matching_collections.append(descendant)
     return matching_collections
@@ -539,23 +618,26 @@ def create_v2_group(space, headers):
     return response.json()["id"]
 
 
-def add_folder_hierarchy_to_migration_folder(folder_hierarchy, dataset_v2, folder_id_v2, headers):
+def add_folder_hierarchy_to_migration_folder(
+    folder_hierarchy, dataset_v2, folder_id_v2, headers
+):
     """Add folder hierarchy to a dataset in Clowder v2."""
     hierarchy_parts = folder_hierarchy.split("/")
-    if hierarchy_parts[0] == '':
+    if hierarchy_parts[0] == "":
         hierarchy_parts = hierarchy_parts[1:]
     current_parent = folder_id_v2
     for part in hierarchy_parts:
         result = create_folder_if_not_exists_or_get(
-            part, current_parent, 'folder', dataset_v2, headers
+            part, current_parent, "folder", dataset_v2, headers
         )
         if result:
             current_parent = result["id"]
 
+
 def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
     """Add folder hierarchy to a dataset in Clowder v2."""
     hierarchy_parts = folder_hierarchy.split("/")
-    if hierarchy_parts[0] == '':
+    if hierarchy_parts[0] == "":
         hierarchy_parts = hierarchy_parts[1:]
     current_parent = None
     for part in hierarchy_parts:
@@ -564,6 +646,7 @@ def add_folder_hierarchy(folder_hierarchy, dataset_v2, headers):
         )
         if result:
             current_parent = result["id"]
+
 
 # for creating a folder for a dataset that is migrated to a dataset
 def create_dataset_folder_if_not_exists_or_get(folder, parent, dataset_v2, headers):
@@ -585,12 +668,15 @@ def create_dataset_folder_if_not_exists_or_get(folder, parent, dataset_v2, heade
     )
     return response.json()
 
+
 # used for creating folders and subfolders when a collection is migrated to a dataset
-def create_folder_if_not_exists_or_get(folder, parent, parent_type, dataset_v2, headers):
+def create_folder_if_not_exists_or_get(
+    folder, parent, parent_type, dataset_v2, headers
+):
     """Create a folder if it does not exist or return the existing folder."""
     # current_folders = get_folder_and_subfolders(dataset_v2, headers)
     current_all_folders = get_all_folder_and_subfolders(dataset_v2, headers)
-    if parent_type == 'folder':
+    if parent_type == "folder":
         folder_data = (
             {"name": folder, "parent_folder": parent} if parent else {"name": folder}
         )
@@ -607,6 +693,7 @@ def create_folder_if_not_exists_or_get(folder, parent, parent_type, dataset_v2, 
         headers=headers,
     )
     return response.json()
+
 
 def get_all_folder_and_subfolders(dataset_id, headers):
     """Retrieve all folders and subfolders in a dataset."""
@@ -636,7 +723,9 @@ def add_dataset_folders(dataset_v1, dataset_v2, headers):
         add_folder_hierarchy(folder["name"], dataset_v2, headers)
 
 
-def download_and_upload_file_to_matching_folder(file, dataset_v2_id, headers_v2, matching_folder = None):
+def download_and_upload_file_to_matching_folder(
+    file, dataset_v2_id, headers_v2, matching_folder=None
+):
     """Download a file from Clowder v1 and upload it to Clowder v2."""
     filename = file["filename"]
     file_id = file["id"]
@@ -749,6 +838,7 @@ def download_and_upload_file(file, all_dataset_folders, dataset_v2_id, headers_v
 
     return None
 
+
 def add_file_metadata(file_v1, file_v2_id, headers_v1, headers_v2):
     # Get metadata from Clowder V1
     endpoint = f"{CLOWDER_V1}/api/files/{file_v1['id']}/metadata.jsonld?superAdmin=true"
@@ -799,6 +889,7 @@ def add_file_metadata(file_v1, file_v2_id, headers_v1, headers_v2):
                     else:
                         print("Successfully posted file machine metadata to V2")
                     break  # machine metadata no need to iterate through all the keys
+
 
 def add_dataset_metadata(dataset_v1, dataset_v2_id, headers_v1, headers_v2):
     # Get metadata from Clowder V1
@@ -854,13 +945,15 @@ def add_dataset_metadata(dataset_v1, dataset_v2_id, headers_v1, headers_v2):
                     break  # machine metadata no need to iterate through all the keys
 
 
-def add_dataset_metadata_to_folder(dataset_v1, dataset_v2_id, folder_v2_id, headers_v1, headers_v2):
+def add_dataset_metadata_to_folder(
+    dataset_v1, dataset_v2_id, folder_v2_id, headers_v1, headers_v2
+):
     # Get metadata from Clowder V1
     endpoint = (
         f"{CLOWDER_V1}/api/datasets/{dataset_v1['id']}/metadata.jsonld?superAdmin=true"
     )
-    dataset_name = dataset_v1['name']
-    metadata_file_name = dataset_name + '_metadata.json'
+    dataset_name = dataset_v1["name"]
+    metadata_file_name = dataset_name + "_metadata.json"
     metadata_v1 = requests.get(endpoint, headers=headers_v1).json()
     with open(metadata_file_name, "w") as metadata_file:
         json.dump(metadata_v1, metadata_file)
@@ -883,14 +976,18 @@ def add_dataset_metadata_to_folder(dataset_v1, dataset_v2_id, folder_v2_id, head
         print(e)
 
     if response.status_code == 200:
-        print(f"Uploaded file: {metadata_file_name} to dataset {dataset_v2_id} and folder {folder_v2_id}")
+        print(
+            f"Uploaded file: {metadata_file_name} to dataset {dataset_v2_id} and folder {folder_v2_id}"
+        )
         response_json = response.json()
         if type(response_json) == dict:
             return response.json().get("id")
         elif type(response_json) == list:
             return response_json[0].get("id")
     else:
-        print(f"Failed to upload file: {metadata_file} to dataset {dataset_v2_id} and folder {folder_v2_id}")
+        print(
+            f"Failed to upload file: {metadata_file} to dataset {dataset_v2_id} and folder {folder_v2_id}"
+        )
     return None
 
 
@@ -1032,7 +1129,10 @@ def build_collection_space_metadata_for_v1_dataset(dataset, user_v1, headers):
     print(f"Got space and collection metadata from dataset {dataset_id}")
     return metadata
 
-def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLETIONS_MAP):
+
+def process_user_and_resources_collections(
+    user_v1, USER_MAP, DATASET_MAP, COLLETIONS_MAP
+):
     """Process user resources from Clowder v1 to Clowder v2."""
 
     # get collections of the user
@@ -1058,9 +1158,9 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
     migrate_top_level_collections = []
     for col in user_v1_collections:
         collection_spaces = col["spaces"]
-        collection_spaces = collection_spaces.lstrip('List(')
-        collection_spaces = collection_spaces.rstrip(')')
-        collection_spaces = collection_spaces.split(',')
+        collection_spaces = collection_spaces.lstrip("List(")
+        collection_spaces = collection_spaces.rstrip(")")
+        collection_spaces = collection_spaces.split(",")
         for space in collection_spaces:
             if space in toml_space_ids:
                 migrate_top_level_collections.append(col)
@@ -1068,10 +1168,16 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
 
     # create datasets from the top level collections
     for top_level_col in migrate_top_level_collections:
-        dataset_v2 = create_v2_dataset_from_collection(collection=top_level_col, user_v1=user_v1,
-                                                       headers_v1=clowder_headers_v1 ,headers_v2=user_headers_v2,
-                                                       base_headers_v2=base_headers_v2)
-        print(f"Created dataset in v2 from collection: {top_level_col['id']} - {top_level_col['name']}")
+        dataset_v2 = create_v2_dataset_from_collection(
+            collection=top_level_col,
+            user_v1=user_v1,
+            headers_v1=clowder_headers_v1,
+            headers_v2=user_headers_v2,
+            base_headers_v2=base_headers_v2,
+        )
+        print(
+            f"Created dataset in v2 from collection: {top_level_col['id']} - {top_level_col['name']}"
+        )
         COLLETIONS_MAP[top_level_col["id"]] = dataset_v2
 
     datasets_in_collections_v1 = get_datasets_in_collections()
@@ -1086,16 +1192,16 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
         print(toml_exclude_space_ids)
         # Check if dataset is in the excluded dataset list
         if dataset_v1_id in datasets_in_collections_v1:
-            print(f"Skipping dataset {dataset_v1_id} as it is was in a collection, already migrated")
+            print(
+                f"Skipping dataset {dataset_v1_id} as it is was in a collection, already migrated"
+            )
             MIGRATE_DATASET = False
         if dataset_v1_id in toml_exclude_dataset_ids:
             print(f"Skipping dataset {dataset_v1_id} as it is in the exclude list.")
             MIGRATE_DATASET = False
         # Check if dataset is in the specified space list
         if toml_space_ids is not None and len(toml_space_ids) > 0:
-            if not any(
-                space_id in dataset_v1_spaces for space_id in toml_space_ids
-            ):
+            if not any(space_id in dataset_v1_spaces for space_id in toml_space_ids):
                 print(
                     f"Skipping dataset {dataset_v1_id} as it is not in the specified spaces."
                 )
@@ -1112,11 +1218,15 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
             dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
             DATASET_MAP[dataset["id"]] = dataset_v2_id
             #
-            add_dataset_metadata(dataset, dataset_v2_id, base_headers_v1, user_headers_v2)
+            add_dataset_metadata(
+                dataset, dataset_v2_id, base_headers_v1, user_headers_v2
+            )
             add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
             print("Created folders in the new dataset")
 
-            all_dataset_folders = get_folder_and_subfolders(dataset_v2_id, user_headers_v2)
+            all_dataset_folders = get_folder_and_subfolders(
+                dataset_v2_id, user_headers_v2
+            )
 
             # Retrieve files for the dataset in Clowder v1
             dataset_files_endpoint = (
@@ -1139,16 +1249,20 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
                         ),
                         None,
                     )
-                print('did we get matching folder?')
+                print("did we get matching folder?")
                 file_v2_id = download_and_upload_file_to_matching_folder(
                     file, dataset_v2_id, base_user_headers_v2, matching_folder
                 )
                 if file_v2_id is not None:
-                    add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
+                    add_file_metadata(
+                        file, file_v2_id, clowder_headers_v1, user_headers_v2
+                    )
             # posting the collection hierarchy as metadata
             try:
-                collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
-                    dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+                collection_space_metadata_dict = (
+                    build_collection_space_metadata_for_v1_dataset(
+                        dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+                    )
                 )
             except Exception as e:
                 print(e)
@@ -1162,7 +1276,9 @@ def process_user_and_resources_collections(user_v1, USER_MAP, DATASET_MAP, COLLE
                 "content": collection_space_metadata_dict,
                 "contents": collection_space_metadata_dict,
             }
-            v2_metadata_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+            v2_metadata_endpoint = (
+                f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+            )
             response = requests.post(
                 v2_metadata_endpoint,
                 json=migration_extractor_collection_metadata,
@@ -1207,9 +1323,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
             MIGRATE_DATASET = False
         # Check if dataset is in the specified space list
         if toml_space_ids is not None and len(toml_space_ids) > 0:
-            if not any(
-                space_id in dataset_v1_spaces for space_id in toml_space_ids
-            ):
+            if not any(space_id in dataset_v1_spaces for space_id in toml_space_ids):
                 print(
                     f"Skipping dataset {dataset_v1_id} as it is not in the specified spaces."
                 )
@@ -1225,11 +1339,15 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
         if MIGRATE_DATASET:
             dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
             DATASET_MAP[dataset["id"]] = dataset_v2_id
-            add_dataset_metadata(dataset, dataset_v2_id, base_headers_v1, user_headers_v2)
+            add_dataset_metadata(
+                dataset, dataset_v2_id, base_headers_v1, user_headers_v2
+            )
             add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
             print("Created folders in the new dataset")
 
-            all_dataset_folders = get_folder_and_subfolders(dataset_v2_id, user_headers_v2)
+            all_dataset_folders = get_folder_and_subfolders(
+                dataset_v2_id, user_headers_v2
+            )
 
             # Retrieve files for the dataset in Clowder v1
             dataset_files_endpoint = (
@@ -1252,7 +1370,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                         ),
                         None,
                     )
-                print('did we get matching folder?')
+                print("did we get matching folder?")
                 file_v2_id = download_and_upload_file_to_matching_folder(
                     file, dataset_v2_id, base_user_headers_v2, matching_folder
                 )
@@ -1260,11 +1378,15 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                     file, all_dataset_folders, dataset_v2_id, base_user_headers_v2
                 )
                 if file_v2_id is not None:
-                    add_file_metadata(file, file_v2_id, clowder_headers_v1, user_headers_v2)
+                    add_file_metadata(
+                        file, file_v2_id, clowder_headers_v1, user_headers_v2
+                    )
             # posting the collection hierarchy as metadata
             try:
-                collection_space_metadata_dict = build_collection_space_metadata_for_v1_dataset(
-                    dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+                collection_space_metadata_dict = (
+                    build_collection_space_metadata_for_v1_dataset(
+                        dataset=dataset, user_v1=user_v1, headers=clowder_headers_v1
+                    )
                 )
             except Exception as e:
                 print(e)
@@ -1278,7 +1400,9 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 "content": collection_space_metadata_dict,
                 "contents": collection_space_metadata_dict,
             }
-            v2_metadata_endpoint = f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+            v2_metadata_endpoint = (
+                f"{CLOWDER_V2}/api/v2/datasets/{dataset_v2_id}/metadata"
+            )
             response = requests.post(
                 v2_metadata_endpoint,
                 json=migration_extractor_collection_metadata,
@@ -1319,9 +1443,7 @@ if __name__ == "__main__":
 
     if toml_users is not None and len(toml_users) > 0:
         print(f"Using spaces from config.toml: {toml_users}")
-        users_v1 = [
-            user for user in users_v1 if user["email"] in toml_users
-        ]
+        users_v1 = [user for user in users_v1 if user["email"] in toml_users]
     else:
         print("No spaces specified in config.toml, migrating all users.")
     for user_v1 in users_v1:

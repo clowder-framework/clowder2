@@ -4,7 +4,7 @@ from datetime import datetime
 import requests
 from dotenv import dotenv_values
 
-path_to_env = os.path.join(os.getcwd(),"scripts","migration", ".env")
+path_to_env = os.path.join(os.getcwd(), "scripts", "migration", ".env")
 if not os.path.exists(path_to_env):
     raise FileNotFoundError(
         f"Environment file not found at {path_to_env}. Please ensure it exists."
