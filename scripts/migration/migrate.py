@@ -284,6 +284,7 @@ def process_collection_descendants(
                 dataset, v2_dataset_id, new_folder["id"], headers_v1, base_headers_v2
             )
             # TODO add dataset metadata to the folder
+    print('done with collection descendants')
 
 
 def get_v1_dataset_folders(dataset, headers_v1, headers_v2, parent_type, parent_id):
@@ -340,7 +341,7 @@ def process_dataset_files_and_folders(
     print(f"Got dataset files")
 
 
-def create_v2_dataset_from_collection(
+def create_v2_dataset_from_v1_collection(
     collection, user_v1, headers_v1, headers_v2, base_headers_v2
 ):
     # create the dataset
@@ -590,7 +591,7 @@ def add_dataset_license(v1_license, headers):
     return license_id
 
 
-def create_v2_dataset(dataset, headers):
+def create_v2_dataset_from_v1_dataset(dataset, headers):
     """Create a dataset in Clowder v2."""
     # TODO: GET correct license
     print("Creating dataset license in Clowder v2.")
@@ -1168,7 +1169,7 @@ def process_user_and_resources_collections(
 
     # create datasets from the top level collections
     for top_level_col in migrate_top_level_collections:
-        dataset_v2 = create_v2_dataset_from_collection(
+        dataset_v2 = create_v2_dataset_from_v1_collection(
             collection=top_level_col,
             user_v1=user_v1,
             headers_v1=clowder_headers_v1,
@@ -1215,7 +1216,7 @@ def process_user_and_resources_collections(
                 )
                 MIGRATE_DATASET = False
         if MIGRATE_DATASET:
-            dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
+            dataset_v2_id = create_v2_dataset_from_v1_dataset(dataset, user_headers_v2)
             DATASET_MAP[dataset["id"]] = dataset_v2_id
             #
             add_dataset_metadata(
@@ -1337,7 +1338,7 @@ def process_user_and_resources(user_v1, USER_MAP, DATASET_MAP):
                 )
                 MIGRATE_DATASET = False
         if MIGRATE_DATASET:
-            dataset_v2_id = create_v2_dataset(dataset, user_headers_v2)
+            dataset_v2_id = create_v2_dataset_from_v1_dataset(dataset, user_headers_v2)
             DATASET_MAP[dataset["id"]] = dataset_v2_id
             add_dataset_metadata(
                 dataset, dataset_v2_id, base_headers_v1, user_headers_v2
