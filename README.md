@@ -66,3 +66,7 @@ This is a public forum. If you prefer email, you can contact us at [clowder@list
 ## License
 
 Clowder v2 is licensed under the [Apache 2.0 license](https://github.com/clowder-framework/clowder2/blob/main/LICENSE).
+
+## Activities
+
+![Alt](https://repobeats.axiom.co/api/embed/fbb815237a172f0099ecc61b5e0ccf5effa0f891.svg "Repobeats analytics image")
