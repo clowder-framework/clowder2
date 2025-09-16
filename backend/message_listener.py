@@ -93,6 +93,9 @@ async def callback(message: AbstractIncomingMessage):
     async with message.process():
         msg = json.loads(message.body.decode("utf-8"))
 
+        if "event_type" in msg and msg["event_type"] == "file_indexed":
+            print(f"This is an event type file indexed!")
+
         job_id = msg["job_id"]
         message_str = msg["status"]
         timestamp = datetime.strptime(
@@ -222,6 +225,7 @@ async def listen_for_messages():
 
 
 if __name__ == "__main__":
+    logger.info(" Message listener starting...")
     start = datetime.now()
     while time_ran < timeout:
         try:

@@ -2,7 +2,9 @@ import io
 import time
 from datetime import datetime, timedelta
 from typing import List, Optional, Union
-
+import json
+from json import JSONEncoder
+from aio_pika import Message
 from app import dependencies
 from app.config import settings
 from app.db.file.download import _increment_file_downloads
@@ -36,6 +38,13 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 router = APIRouter()
 security = HTTPBearer()
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, PydanticObjectId):
+            return str(obj)
+        # Handle other non-serializable types if needed
+        return super().default(obj)
 
 
 async def _resubmit_file_extractors(
@@ -135,6 +144,20 @@ async def add_file_entry(
     # Add entry to the file index
     await index_file(es, FileOut(**new_file.dict()))
 
+    # Publish a message when indexing is complete
+
+    message_body = {
+        "event_type": "file_indexed",
+        "file_data": json.loads(new_file.json()),  # This handles ObjectID serialization
+        "timestamp": datetime.now().isoformat()
+    }
+
+    rabbitmq_client.basic_publish(
+        exchange='clowder',
+        routing_key='file_indexed_events',
+        body=json.dumps(message_body).encode('utf-8')
+    )
+
     # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
     time.sleep(1)
 
@@ -163,6 +186,18 @@ async def add_local_file_entry(
 
     # Add entry to the file index
     await index_file(es, FileOut(**new_file.dict()))
+    # Publish a message when indexing is complete
+    message_body = {
+        "event_type": "file_indexed",
+        "file_data": json.loads(new_file.json()),  # This handles ObjectID serialization
+        "timestamp": datetime.now().isoformat()
+    }
+
+    rabbitmq_client.basic_publish(
+        exchange='clowder',
+        routing_key='file_indexed_events',
+        body=json.dumps(message_body).encode('utf-8')
+    )
 
     # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
     time.sleep(1)
