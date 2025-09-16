@@ -95,6 +95,15 @@ async def callback(message: AbstractIncomingMessage):
 
         if "event_type" in msg and msg["event_type"] == "file_indexed":
             logger.info(f"This is an event type file indexed!")
+            msg = json.loads(message.body.decode("utf-8"))
+
+            # Convert string IDs back to PydanticObjectId if needed
+            file_data = msg.get("file_data", {})
+            if "id" in file_data and isinstance(file_data["id"], str):
+                file_data["id"] = PydanticObjectId(file_data["id"])
+
+            # Now you can create your FileOut object
+            # file_out = FileOut(**file_data)
             # TODO - process file indexed event here
         else:
             job_id = msg["job_id"]
