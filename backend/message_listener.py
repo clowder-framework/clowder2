@@ -94,7 +94,7 @@ async def callback(message: AbstractIncomingMessage):
         msg = json.loads(message.body.decode("utf-8"))
 
         if "event_type" in msg and msg["event_type"] == "file_indexed":
-            print(f"This is an event type file indexed!")
+            logger.info(f"This is an event type file indexed!")
 
         job_id = msg["job_id"]
         message_str = msg["status"]
@@ -209,6 +209,8 @@ async def listen_for_messages():
             durable=True,
         )
         await queue.bind(exchange)
+        await queue.bind(exchange, routing_key="file_indexed_events")  # Add this line
+
 
         logger.info(f" [*] Listening to {exchange}")
         await queue.consume(
