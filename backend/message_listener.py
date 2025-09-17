@@ -6,7 +6,14 @@ import random
 import string
 import time
 from datetime import datetime
-
+from app.models.files import (
+    FileDB,
+    FileOut,
+)
+from app.models.users import (
+    UserOut,
+)
+from app.routers.feeds import check_feed_listeners
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from app.main import startup_beanie
@@ -16,6 +23,8 @@ from app.models.listeners import (
     EventListenerJobStatus,
     EventListenerJobUpdateDB,
 )
+import os
+from app.config import settings
 from beanie import PydanticObjectId
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +33,8 @@ logger.setLevel(logging.INFO)
 
 timeout = 5 * 60  # five minute timeout
 time_ran = 0
+from app.dependencies import get_elasticsearchclient, get_rabbitmq
+
 
 
 def parse_message_status(msg):
@@ -99,12 +110,27 @@ async def callback(message: AbstractIncomingMessage):
 
             # Convert string IDs back to PydanticObjectId if needed
             file_data = msg.get("file_data", {})
+            user = msg.get("user", {})
             if "id" in file_data and isinstance(file_data["id"], str):
                 file_data["id"] = PydanticObjectId(file_data["id"])
 
-            # Now you can create your FileOut object
-            # file_out = FileOut(**file_data)
-            # TODO - process file indexed event here
+            if "id" in file_data and isinstance(file_data["id"], str):
+                file_data["id"] = PydanticObjectId(file_data["id"])
+
+                # Create FileOut object
+            file_out = FileOut(**file_data)
+
+            # Create UserOut object from the user data in the message
+            user = UserOut(**user_data)
+
+            # Now call check_feed_listeners with the injected dependencies
+            await check_feed_listeners(
+                es,  # Elasticsearch client
+                file_out,
+                user,
+                rabbitmq_client,  # RabbitMQ client
+            )
+
         else:
             job_id = msg["job_id"]
             message_str = msg["status"]
@@ -179,6 +205,9 @@ async def callback(message: AbstractIncomingMessage):
 
 async def listen_for_messages():
     await startup_beanie()
+
+    # Initialize dependencies using your existing functions
+    es = await get_elasticsearchclient()
 
     # For some reason, Pydantic Settings environment variable overrides aren't being applied, so get them here.
     RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
