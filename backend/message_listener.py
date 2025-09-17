@@ -250,10 +250,14 @@ async def listen_for_messages():
         await queue.bind(exchange)
         await queue.bind(exchange, routing_key="file_indexed_events")  # Add this line
 
-
         logger.info(f" [*] Listening to {exchange}")
+
+        # Create a partial function that includes the dependencies
+        from functools import partial
+        callback_with_deps = partial(callback, es=es, rabbitmq_client=channel)
+
         await queue.consume(
-            callback=callback,
+            callback=callback_with_deps,
             no_ack=False,
         )
 
@@ -263,6 +267,7 @@ async def listen_for_messages():
             await asyncio.Future()
         finally:
             await connection.close()
+            await es.close()  # Close ES connection when done
 
 
 if __name__ == "__main__":
