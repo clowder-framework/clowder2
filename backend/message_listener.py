@@ -96,32 +96,26 @@ def parse_message_status(msg):
         return {"status": EventListenerJobStatus.PROCESSING, "cleaned_msg": msg}
 
 
-async def callback(message: AbstractIncomingMessage):
-    """This method receives messages from RabbitMQ and processes them.
-    the extractor info is parsed from the message and if the extractor is new
-    or is a later version, the db is updated.
-    """
+async def callback(message: AbstractIncomingMessage, es, rabbitmq_client):
+    """This method receives messages from RabbitMQ and processes them."""
     async with message.process():
         msg = json.loads(message.body.decode("utf-8"))
 
         if "event_type" in msg and msg["event_type"] == "file_indexed":
             logger.info(f"This is an event type file indexed!")
-            msg = json.loads(message.body.decode("utf-8"))
 
             # Convert string IDs back to PydanticObjectId if needed
             file_data = msg.get("file_data", {})
-            user = msg.get("user", {})
-            if "id" in file_data and isinstance(file_data["id"], str):
-                file_data["id"] = PydanticObjectId(file_data["id"])
+            user_data = msg.get("user", {})  # Fixed variable name
 
             if "id" in file_data and isinstance(file_data["id"], str):
                 file_data["id"] = PydanticObjectId(file_data["id"])
 
-                # Create FileOut object
+            # Create FileOut object
             file_out = FileOut(**file_data)
 
             # Create UserOut object from the user data in the message
-            user = UserOut(**user_data)
+            user = UserOut(**user_data)  # Use user_data, not user
 
             # Now call check_feed_listeners with the injected dependencies
             await check_feed_listeners(
@@ -130,6 +124,7 @@ async def callback(message: AbstractIncomingMessage):
                 user,
                 rabbitmq_client,  # RabbitMQ client
             )
+            return True
 
         else:
             job_id = msg["job_id"]

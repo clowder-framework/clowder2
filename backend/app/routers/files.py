@@ -148,7 +148,8 @@ async def add_file_entry(
 
     message_body = {
         "event_type": "file_indexed",
-        "file_data": json.loads(new_file.json()),  # This handles ObjectID serialization
+        "file_data": json.loads(new_file.json()),
+        "user": json.loads(user.json()),# This handles ObjectID serialization
         "timestamp": datetime.now().isoformat()
     }
 
@@ -189,7 +190,8 @@ async def add_local_file_entry(
     # Publish a message when indexing is complete
     message_body = {
         "event_type": "file_indexed",
-        "file_data": json.loads(new_file.json()),  # This handles ObjectID serialization
+        "file_data": json.loads(new_file.json()),
+        "user": json.loads(user.json()),# This handles ObjectID serialization
         "timestamp": datetime.now().isoformat()
     }
 
