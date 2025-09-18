@@ -83,6 +83,8 @@ def get_rabbitmq() -> BlockingChannel:
     logger.debug("Connecting to rabbitmq at %s", settings.RABBITMQ_HOST)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
+    print(f"DEBUG: get_rabbitmq() called. Returning channel of type: {type(channel)}")
+    print(f"DEBUG: Channel object: {channel}")
     return channel
 
 
