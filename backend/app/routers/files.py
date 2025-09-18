@@ -163,12 +163,12 @@ async def add_file_entry(
     time.sleep(1)
 
     # Submit file job to any qualifying feeds
-    await check_feed_listeners(
-        es,
-        FileOut(**new_file.dict()),
-        user,
-        rabbitmq_client,
-    )
+    # await check_feed_listeners(
+    #     es,
+    #     FileOut(**new_file.dict()),
+    #     user,
+    #     rabbitmq_client,
+    # )
 
 
 async def add_local_file_entry(
@@ -205,12 +205,12 @@ async def add_local_file_entry(
     time.sleep(1)
 
     # Submit file job to any qualifying feeds
-    await check_feed_listeners(
-        es,
-        FileOut(**new_file.dict()),
-        user,
-        rabbitmq_client,
-    )
+    # await check_feed_listeners(
+    #     es,
+    #     FileOut(**new_file.dict()),
+    #     user,
+    #     rabbitmq_client,
+    # )
 
 
 # TODO: Move this to MongoDB middle layer
