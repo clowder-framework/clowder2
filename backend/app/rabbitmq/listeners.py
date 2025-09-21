@@ -41,32 +41,32 @@ async def create_reply_queue(channel: AbstractChannel):
 
     return queue.name
 
-async def create_reply_queue(channel: BlockingChannel):
-    # channel: BlockingChannel = dependencies.get_rabbitmq()
-
-    if (
-        config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
-    ) is not None:
-        instance_id = config_entry.value
-    else:
-        # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
-        instance_id = "".join(
-            random.choice(
-                string.ascii_uppercase + string.ascii_lowercase + string.digits
-            )
-            for _ in range(10)
-        )
-        config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        await config_entry.insert()
-
-    queue_name = "clowder.%s" % instance_id
-    channel.exchange_declare(exchange="clowder", durable=True)
-    result = channel.queue_declare(
-        queue=queue_name, durable=True, exclusive=False, auto_delete=False
-    )
-    queue_name = result.method.queue
-    channel.queue_bind(exchange="clowder", queue=queue_name)
-    return queue_name
+# async def create_reply_queue(channel: BlockingChannel):
+#     # channel: BlockingChannel = dependencies.get_rabbitmq()
+#
+#     if (
+#         config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
+#     ) is not None:
+#         instance_id = config_entry.value
+#     else:
+#         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
+#         instance_id = "".join(
+#             random.choice(
+#                 string.ascii_uppercase + string.ascii_lowercase + string.digits
+#             )
+#             for _ in range(10)
+#         )
+#         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
+#         await config_entry.insert()
+#
+#     queue_name = "clowder.%s" % instance_id
+#     channel.exchange_declare(exchange="clowder", durable=True)
+#     result = channel.queue_declare(
+#         queue=queue_name, durable=True, exclusive=False, auto_delete=False
+#     )
+#     queue_name = result.method.queue
+#     channel.queue_bind(exchange="clowder", queue=queue_name)
+#     return queue_name
 
 
 async def submit_file_job(
@@ -76,10 +76,7 @@ async def submit_file_job(
     user: UserOut,
     rabbitmq_client: AbstractChannel,
 ):
-    # print(f"DEBUG submit_file_job: Got client of type: {type(rabbitmq_client)}")
-    # if not isinstance(rabbitmq_client, BlockingChannel):
-    #     raise TypeError(f"Expected BlockingChannel, got {type(rabbitmq_client)}. This confirms a mixing issue.")
-
+    print(f"DEBUG submit_file_job: Got client of type: {type(rabbitmq_client)}")
     # Create an entry in job history with unique ID
     job = EventListenerJobDB(
         listener_id=routing_key,
@@ -108,7 +105,7 @@ async def submit_file_job(
     exchange = await rabbitmq_client.get_exchange("clowder")
     reply_to = await create_reply_queue(rabbitmq_client)
     print("RABBITMQ_CLIENT: " + str(rabbitmq_client))
-    await exchange.publish(
+    await rabbitmq_client.default_exchange.publish(
         aio_pika.Message(
             body=json.dumps(msg_body.dict(), ensure_ascii=False).encode('utf-8'),
             content_type="application/json",
