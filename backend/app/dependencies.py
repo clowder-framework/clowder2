@@ -3,6 +3,9 @@ from typing import AsyncGenerator
 
 import boto3
 import pika
+import aio_pika
+from aio_pika.abc import AbstractChannel
+
 from app.config import settings
 from app.search.connect import connect_elasticsearch
 from minio import Minio
@@ -74,18 +77,25 @@ async def get_external_fs() -> AsyncGenerator[Minio, None]:
     yield file_system
 
 
-def get_rabbitmq() -> BlockingChannel:
+async def get_rabbitmq() -> AbstractChannel:
     """Client to connect to RabbitMQ for listeners/extractors interactions."""
-    credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
-    parameters = pika.ConnectionParameters(
-        settings.RABBITMQ_HOST, credentials=credentials
-    )
+    RABBITMQ_URL = f"amqp://{settings.RABBITMQ_USER}:{settings.RABBITMQ_PASS}@{settings.RABBITMQ_HOST}/"
+
     logger.debug("Connecting to rabbitmq at %s", settings.RABBITMQ_HOST)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
+    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    channel = await connection.channel()
+
     print(f"DEBUG: get_rabbitmq() called. Returning channel of type: {type(channel)}")
-    print(f"DEBUG: Channel object: {channel}")
     return channel
+
+
+# Keep the old function for compatibility if needed
+def get_blocking_rabbitmq() -> BlockingChannel:
+    """Legacy blocking RabbitMQ client (for extractors that need it)"""
+    credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
+    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
+    connection = pika.BlockingConnection(parameters)
+    return connection.channel()
 
 
 async def get_elasticsearchclient():

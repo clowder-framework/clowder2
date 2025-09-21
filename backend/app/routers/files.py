@@ -35,6 +35,8 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+import aio_pika
+from aio_pika.abc import AbstractChannel
 
 router = APIRouter()
 security = HTTPBearer()
@@ -49,7 +51,7 @@ class CustomJSONEncoder(JSONEncoder):
 
 async def _resubmit_file_extractors(
     file: FileOut,
-    rabbitmq_client: BlockingChannel,
+    rabbitmq_client: AbstractChannel,
     user: UserOut,
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
@@ -94,7 +96,7 @@ async def add_file_entry(
     user: UserOut,
     fs: Minio,
     es: Elasticsearch,
-    rabbitmq_client: BlockingChannel,
+    rabbitmq_client: AbstractChannel,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
     public: bool = False,
@@ -146,21 +148,27 @@ async def add_file_entry(
 
     # Publish a message when indexing is complete
 
+
+    # FIXED: Use aio_pika publishing
     message_body = {
         "event_type": "file_indexed",
         "file_data": json.loads(new_file.json()),
-        "user": json.loads(user.json()),# This handles ObjectID serialization
+        "user": json.loads(user.json()),
         "timestamp": datetime.now().isoformat()
     }
 
-    rabbitmq_client.basic_publish(
-        exchange='clowder',
-        routing_key='file_indexed_events',
-        body=json.dumps(message_body).encode('utf-8')
-    )
+    # Get the exchange first
+    exchange = await rabbitmq_client.get_exchange("clowder")
 
-    # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
-    time.sleep(1)
+    # Use aio_pika publish method
+    await exchange.publish(
+        aio_pika.Message(
+            body=json.dumps(message_body).encode('utf-8'),
+            content_type="application/json",
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+        ),
+        routing_key="file_indexed_events",
+    )
 
     # Submit file job to any qualifying feeds
     # await check_feed_listeners(
@@ -175,7 +183,7 @@ async def add_local_file_entry(
     new_file: FileDB,
     user: UserOut,
     es: Elasticsearch,
-    rabbitmq_client: BlockingChannel,
+    rabbitmq_client: AbstractChannel,
     content_type: Optional[str] = None,
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID). Bytes are not stored in DB and versioning not supported
@@ -188,21 +196,26 @@ async def add_local_file_entry(
     # Add entry to the file index
     await index_file(es, FileOut(**new_file.dict()))
     # Publish a message when indexing is complete
+
     message_body = {
         "event_type": "file_indexed",
         "file_data": json.loads(new_file.json()),
-        "user": json.loads(user.json()),# This handles ObjectID serialization
+        "user": json.loads(user.json()),
         "timestamp": datetime.now().isoformat()
     }
 
-    rabbitmq_client.basic_publish(
-        exchange='clowder',
-        routing_key='file_indexed_events',
-        body=json.dumps(message_body).encode('utf-8')
-    )
+    # Get the exchange first
+    exchange = await rabbitmq_client.get_exchange("clowder")
 
-    # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
-    time.sleep(1)
+    # Use aio_pika publish method
+    await exchange.publish(
+        aio_pika.Message(
+            body=json.dumps(message_body).encode('utf-8'),
+            content_type="application/json",
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+        ),
+        routing_key="file_indexed_events",
+    )
 
     # Submit file job to any qualifying feeds
     # await check_feed_listeners(
@@ -255,7 +268,7 @@ async def update_file(
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     # Check all connection and abort if any one of them is not available
@@ -593,7 +606,7 @@ async def post_file_extract(
     parameters: dict = None,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
@@ -620,7 +633,7 @@ async def resubmit_file_extractions(
     file_id: str,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     """This route will check metadata. We get the extractors run from metadata from extractors.
