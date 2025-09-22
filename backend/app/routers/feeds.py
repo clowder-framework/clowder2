@@ -4,7 +4,8 @@ from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx
 from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
-
+import aio_pika
+from aio_pika.abc import AbstractChannel
 from app.deps.authorization_deps import FeedAuthorization, ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
@@ -41,7 +42,7 @@ async def check_feed_listeners(
     es_client,
     file_out: FileOut,
     user: UserOut,
-    rabbitmq_client: BlockingChannel,
+    rabbitmq_client: AbstractChannel,
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
