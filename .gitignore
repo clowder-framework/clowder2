@@ -84,3 +84,7 @@ secrets.yaml
 official.csv
 fact.png
 jupyterhub/.env-dev
+
+# Node and Python Environment Management
+.nvmrc
+.python-version

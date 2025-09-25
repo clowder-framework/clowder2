@@ -13,7 +13,7 @@ WORKDIR /usr/src/app
 # copy only package for caching purposes
 COPY ["package.json", "package-lock.json*", "./"]
 COPY tools/ /usr/src/app/tools/
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # copy rest of application
 COPY .babelrc .eslintrc .istanbul.yml *.js /usr/src/app/

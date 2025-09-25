@@ -52,6 +52,14 @@ visComponentDefinitions.push({
 	component: React.createElement(registerComponent(configImage)),
 });
 
+const configWholeSlideImage = require("./components/visualizations/IIIF/manifest.json");
+visComponentDefinitions.push({
+	name: configWholeSlideImage.name,
+	mainType: configWholeSlideImage.visConfig.mainType,
+	mimeTypes: configWholeSlideImage.visConfig.mimeTypes,
+	component: React.createElement(registerComponent(configWholeSlideImage)),
+});
+
 const configText = require("./components/visualizations/Text/manifest.json");
 visComponentDefinitions.push({
 	name: configText.name,
