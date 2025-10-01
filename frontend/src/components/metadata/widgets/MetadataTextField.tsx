@@ -30,24 +30,6 @@ export const MetadataTextField = (props) => {
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	const [inputChanged, setInputChanged] = useState(false);
 
-	// Get the display value for read-only mode
-	const getDisplayValue = () => {
-		if (!readOnly) return null;
-
-		// First check if content has the field
-		if (content && content[fieldName] !== undefined && content[fieldName] !== null) {
-			return content[fieldName];
-		}
-
-		// If not, check if localContent has it (for newly added fields)
-		if (localContent && localContent[fieldName] !== undefined && localContent[fieldName] !== null) {
-			return localContent[fieldName];
-		}
-
-		// If neither has the field, show "null"
-		return "null";
-	};
-
 	const getValue = () => {
 		if (readOnly) {
 			// Read-only mode: show content or "null"
@@ -64,24 +46,6 @@ export const MetadataTextField = (props) => {
 			return localContent[fieldName] || "";
 		}
 	};
-
-	// Get the value for the text field
-	const getValue2 = () => {
-		if (readOnly) {
-			// Read-only mode: show content or "null"
-			if (content && content[fieldName] !== undefined && content[fieldName] !== null) {
-				return content[fieldName];
-			}
-			if (localContent && localContent[fieldName] !== undefined && localContent[fieldName] !== null) {
-				return localContent[fieldName];
-			}
-			return "null";
-		} else {
-			// Edit mode: show localContent value (what user is typing)
-			return localContent[fieldName] || "";
-		}
-	};
-
 
 	return (
 		<Grid container spacing={2} sx={{ alignItems: "center" }}>
