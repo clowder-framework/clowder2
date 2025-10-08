@@ -89,6 +89,27 @@ export class AuthService {
     }
 
     /**
+     * Token
+     * @param code
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static tokenApiV2AuthTokenGet(
+        code: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/auth/token`,
+            query: {
+                'code': code,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Refresh Token
      * @returns any Successful Response
      * @throws ApiError

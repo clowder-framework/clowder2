@@ -12058,6 +12058,46 @@
         }
       }
     },
+    "/api/v2/auth/token": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Token",
+        "operationId": "token_api_v2_auth_token_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Code",
+              "type": "string"
+            },
+            "name": "code",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/auth/refresh_token": {
       "get": {
         "tags": [

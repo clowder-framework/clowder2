@@ -11,8 +11,8 @@ from app.keycloak_auth import (
     retreive_refresh_token,
 )
 from app.models.tokens import TokenDB
-from app.models.users import UserDB, UserLogin
-from app.routers.utils import save_refresh_token
+from app.models.users import UserLogin
+from app.routers.utils import save_refresh_token, get_token
 from fastapi import APIRouter, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import ExpiredSignatureError, JWTError, jwt
@@ -107,55 +107,9 @@ async def loginPost(userIn: UserLogin):
 async def auth(code: str) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info("In /api/v2/auth")
-    # get token from Keycloak
-    token_body = keycloak_openid.token(
-        grant_type="authorization_code",
-        code=code,
-        redirect_uri=settings.auth_redirect_uri,
-    )
 
+    token_body = await get_token(code)
     access_token = token_body["access_token"]
-
-    # create user in db if it doesn't already exist; get the user_id
-    userinfo = keycloak_openid.userinfo(access_token)
-    keycloak_id = userinfo["sub"]
-    given_name = userinfo.get("given_name", " ")
-    family_name = userinfo.get("family_name", " ")
-    email = userinfo["email"]
-
-    # check if this is the 1st user, make it admin
-    count = await UserDB.count()
-
-    if count == 0:
-        user = UserDB(
-            email=email,
-            first_name=given_name,
-            last_name=family_name,
-            hashed_password="",
-            keycloak_id=keycloak_id,
-            admin=True,
-        )
-    else:
-        user = UserDB(
-            email=email,
-            first_name=given_name,
-            last_name=family_name,
-            hashed_password="",
-            keycloak_id=keycloak_id,
-            admin=False,
-        )
-    matched_user = await UserDB.find_one(UserDB.email == email)
-    if matched_user is None:
-        await user.insert()
-
-    # store/update refresh token and link to that userid
-    token_exist = await TokenDB.find_one(TokenDB.email == email)
-    if token_exist is not None:
-        token_exist.refresh_token = token_body["refresh_token"]
-        await token_exist.save()
-    else:
-        token_created = TokenDB(email=email, refresh_token=token_body["refresh_token"])
-        await token_created.insert()
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
@@ -166,6 +120,11 @@ async def auth(code: str) -> RedirectResponse:
     logger.info(f"Authenticated by keycloak. Redirecting to {auth_url}")
 
     return response
+
+
+@router.get("/token")
+async def token(code: str):
+    return await get_token(code)
 
 
 @router.get("/refresh_token")
