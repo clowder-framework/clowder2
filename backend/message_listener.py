@@ -36,7 +36,6 @@ time_ran = 0
 from app.dependencies import get_elasticsearchclient, get_rabbitmq
 
 
-
 def parse_message_status(msg):
     """Determine if the message corresponds to start/middle/end of job if possible. See pyclowder.utils.StatusMessage."""
     if (
@@ -171,7 +170,9 @@ async def callback(message: AbstractIncomingMessage, es, rabbitmq_client):
                 elif incoming_status == EventListenerJobStatus.STARTED:
                     field_updates[EventListenerJobDB.duration] = 0
 
-                logger.info(f"[{job_id}] {timestamp} {incoming_status.value} {cleaned_msg}")
+                logger.info(
+                    f"[{job_id}] {timestamp} {incoming_status.value} {cleaned_msg}"
+                )
 
                 # Update the job timestamps/duration depending on what status we received
                 if incoming_status == EventListenerJobStatus.STARTED:
@@ -194,7 +195,9 @@ async def callback(message: AbstractIncomingMessage, es, rabbitmq_client):
                 return True
             else:
                 # We don't know what this job is. Reject the message.
-                logger.error("Job ID %s not found in database, skipping message." % job_id)
+                logger.error(
+                    "Job ID %s not found in database, skipping message." % job_id
+                )
                 return False
 
 
@@ -249,6 +252,7 @@ async def listen_for_messages():
 
         # Create a partial function that includes the dependencies
         from functools import partial
+
         callback_with_deps = partial(callback, es=es, rabbitmq_client=channel)
 
         await queue.consume(
