@@ -22,11 +22,15 @@ from aio_pika.abc import AbstractChannel
 
 
 async def create_reply_queue(channel: AbstractChannel):
-    if (config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})) is not None:
+    if (
+        config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
+    ) is not None:
         instance_id = config_entry.value
     else:
         instance_id = "".join(
-            random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
@@ -36,7 +40,9 @@ async def create_reply_queue(channel: AbstractChannel):
 
     # Use aio_pika methods instead of pika methods
     exchange = await channel.declare_exchange("clowder", durable=True)
-    queue = await channel.declare_queue(queue_name, durable=True, exclusive=False, auto_delete=False)
+    queue = await channel.declare_queue(
+        queue_name, durable=True, exclusive=False, auto_delete=False
+    )
     await queue.bind(exchange)
 
     return queue.name
@@ -61,7 +67,6 @@ async def submit_file_job(
     )
     await job.insert()
 
-
     current_secretKey = await get_user_job_key(user.email)
     msg_body = EventListenerJobMessage(
         filename=file_out.name,
@@ -79,7 +84,7 @@ async def submit_file_job(
     print("RABBITMQ_CLIENT: " + str(rabbitmq_client))
     await rabbitmq_client.default_exchange.publish(
         aio_pika.Message(
-            body=json.dumps(msg_body.dict(), ensure_ascii=False).encode('utf-8'),
+            body=json.dumps(msg_body.dict(), ensure_ascii=False).encode("utf-8"),
             content_type="application/json",
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             reply_to=reply_to,
@@ -117,7 +122,7 @@ async def submit_dataset_job(
     reply_to = await create_reply_queue(rabbitmq_client)
     await rabbitmq_client.default_exchange.publish(
         aio_pika.Message(
-            body=json.dumps(msg_body.dict(), ensure_ascii=False).encode('utf-8'),
+            body=json.dumps(msg_body.dict(), ensure_ascii=False).encode("utf-8"),
             content_type="application/json",
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             reply_to=reply_to,

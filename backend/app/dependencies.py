@@ -93,7 +93,9 @@ async def get_rabbitmq() -> AbstractChannel:
 def get_blocking_rabbitmq() -> BlockingChannel:
     """Legacy blocking RabbitMQ client (for extractors that need it)"""
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
-    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
+    parameters = pika.ConnectionParameters(
+        settings.RABBITMQ_HOST, credentials=credentials
+    )
     connection = pika.BlockingConnection(parameters)
     return connection.channel()
 

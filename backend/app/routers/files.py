@@ -41,6 +41,7 @@ from aio_pika.abc import AbstractChannel
 router = APIRouter()
 security = HTTPBearer()
 
+
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, PydanticObjectId):
@@ -148,13 +149,12 @@ async def add_file_entry(
 
     # Publish a message when indexing is complete
 
-
     # FIXED: Use aio_pika publishing
     message_body = {
         "event_type": "file_indexed",
         "file_data": json.loads(new_file.json()),
         "user": json.loads(user.json()),
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
     # Get the exchange first
@@ -163,7 +163,7 @@ async def add_file_entry(
     # Use aio_pika publish method
     await exchange.publish(
         aio_pika.Message(
-            body=json.dumps(message_body).encode('utf-8'),
+            body=json.dumps(message_body).encode("utf-8"),
             content_type="application/json",
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
         ),
@@ -201,7 +201,7 @@ async def add_local_file_entry(
         "event_type": "file_indexed",
         "file_data": json.loads(new_file.json()),
         "user": json.loads(user.json()),
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
     # Get the exchange first
@@ -210,7 +210,7 @@ async def add_local_file_entry(
     # Use aio_pika publish method
     await exchange.publish(
         aio_pika.Message(
-            body=json.dumps(message_body).encode('utf-8'),
+            body=json.dumps(message_body).encode("utf-8"),
             content_type="application/json",
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
         ),
