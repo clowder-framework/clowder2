@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, patch
 @pytest.fixture(autouse=True)
 def mock_rabbitmq():
     """Mock RabbitMQ connections for all tests"""
-    with patch('aio_pika.connect_robust') as mock_connect:
+    with patch("aio_pika.connect_robust") as mock_connect:
         mock_channel = AsyncMock()
         mock_exchange = AsyncMock()
         mock_connection = AsyncMock()
@@ -22,6 +22,7 @@ def mock_rabbitmq():
         mock_channel.declare_exchange.return_value = mock_exchange
 
         yield mock_connect
+
 
 settings.MONGO_DATABASE = "clowder-tests"
 settings.elasticsearch_index = "clowder-tests"
