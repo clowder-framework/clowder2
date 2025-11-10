@@ -70,6 +70,8 @@ from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+import aio_pika
+from aio_pika.abc import AbstractChannel
 from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
@@ -944,7 +946,7 @@ async def save_file(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -996,7 +998,7 @@ async def save_files(
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     es=Depends(dependencies.get_elasticsearchclient),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -1056,7 +1058,7 @@ async def save_local_file(
     folder_id: Optional[str] = None,
     user=Depends(get_current_user),
     es=Depends(dependencies.get_elasticsearchclient),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -1110,7 +1112,7 @@ async def create_dataset_from_zip(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     token: str = Depends(get_token),
 ):
     if file.filename.endswith(".zip") is False:
@@ -1427,7 +1429,7 @@ async def get_dataset_extract(
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    rabbitmq_client: AbstractChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if extractorName is None:
