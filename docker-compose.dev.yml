@@ -150,6 +150,8 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER:-guest}
       - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+      - ELASTICSEARCH_HOST=elasticsearch  # ← Might be missing
+      - ELASTICSEARCH_PORT=9200
     networks:
       - clowder2
     depends_on:
