@@ -62,6 +62,28 @@ export async function fileDownloaded(fileId, fileVersionNum = 0) {
 	}
 }
 
+export async function updateFile(fileId, fileData) {
+	const endpoint = `${config.hostname}/api/v2/files/${fileId}`;
+	// console.log("fileData", fileData);
+	// Create binary file string
+	const blob = new Blob([fileData], { type: "application/octet-stream" });
+	const file = new File([blob], "file");
+	const response = await fetch(endpoint, {
+		method: "PUT",
+		mode: "cors",
+		headers: await getHeader(),
+		body: {
+			file: file,
+		},
+	});
+
+	if (response.status === 200) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 export async function publicFileDownloaded(fileId) {
 	const endpoint = `${config.hostname}/api/v2/public_files/${fileId}?increment=False`;
 	const response = await fetch(endpoint, {

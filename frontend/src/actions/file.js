@@ -231,7 +231,7 @@ export function changeSelectedVersion(fileId, selectedVersion) {
 	return (dispatch) => {
 		dispatch({
 			type: CHANGE_SELECTED_VERSION,
-			version: selectedVersion,
+			selected_version: selectedVersion,
 			receivedAt: Date.now(),
 		});
 	};
