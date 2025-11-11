@@ -105,9 +105,14 @@ export const Public = (): JSX.Element => {
 								<Box>
 									<p>
 										No public datasets available.{" "}
-										<Link href="/auth/login">Login</Link> or{" "}
-										<Link href="/auth/register">register</Link> to create
-										datasets.{" "}
+										<Link component={RouterLink} to="/auth/login">
+											Login
+										</Link>{" "}
+										or{" "}
+										<Link component={RouterLink} to="/auth/register">
+											register
+										</Link>{" "}
+										to create datasets.{" "}
 									</p>
 								</Box>
 							)}

@@ -23,9 +23,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedPublicSearch } from "./search/EmbeddedPublicSearch";
-import { AppVersion } from "./versions/AppVersion";
 import SearchDatasetIcon from "@mui/icons-material/Search";
-import { EmbeddedSearch } from "./search/EmbeddedSearch";
 import { Footer } from "./navigation/Footer";
 
 const drawerWidth = 240;
@@ -145,7 +143,7 @@ export default function PersistentDrawerLeft(props) {
 					>
 						<MenuIcon />
 					</IconButton>
-					<Link href="/">
+					<Link component={RouterLink} to="/">
 						<Box
 							component="img"
 							src="../../public/blue-clowder-logo-sm.svg"
@@ -161,10 +159,10 @@ export default function PersistentDrawerLeft(props) {
 					</PublicSearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
-						<Link href="/auth/register" sx={link}>
+						<Link component={RouterLink} to="/auth/register" sx={link}>
 							Register
 						</Link>
-						<Link href="/auth/login" sx={link}>
+						<Link component={RouterLink} to="/auth/login" sx={link}>
 							Login
 						</Link>
 					</Box>

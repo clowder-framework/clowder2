@@ -7,6 +7,7 @@ interface Config {
 	slackChannel: string;
 	documentation: string;
 	hostname: string;
+	baseUrlRoute: string;
 	apikey: string;
 	GHIssueBaseURL: string;
 	jupyterHubURL: string;
@@ -40,6 +41,8 @@ const hostname =
 	process.env.CLOWDER_REMOTE_HOSTNAME ||
 	`${window.location.protocol}//${window.location.host}`;
 
+const baseUrlRoute = process.env.BASE_URL_ROUTE || "";
+
 // TODO when add auth piece remove this env
 const apikey = process.env.APIKEY || "";
 config["appVersion"] = "v2.0.0-beta.3";
@@ -48,6 +51,7 @@ config["slackChannel"] =
 	"https://join.slack.com/t/clowder-software/shared_invite/enQtMzQzOTg0Nzk3OTUzLTYwZDlkZDI0NGI4YmI0ZjE5MTZiYmZhZTIyNWE1YzM0NWMwMzIxODNhZTA1Y2E3MTQzOTg1YThiNzkwOWQwYWE";
 config["documentation"] = "https://clowder2.readthedocs.io/en/latest/";
 config["hostname"] = hostname;
+config["baseUrlRoute"] = baseUrlRoute;
 config["apikey"] = apikey;
 
 V2.OpenAPI.BASE = config.hostname;
