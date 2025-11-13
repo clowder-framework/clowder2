@@ -37,21 +37,21 @@ sources:
 dependencies:
   - name: mongodb
     version: ~12
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
     condition: mongodb.enabled
   - name: minio
     version: ~12
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
     condition: minio.enabled
   - name: rabbitmq
     version: ~10
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
     condition: rabbitmq.enabled
   - name: elasticsearch
     version: ~19
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
     condition: elasticsearch.enabled
   - name: keycloak
     version: ~13
-    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
     condition: keycloak.enabled

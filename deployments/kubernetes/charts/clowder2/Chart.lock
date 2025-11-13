@@ -1,0 +1,18 @@
+dependencies:
+- name: mongodb
+  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
+  version: 12.1.31
+- name: minio
+  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
+  version: 12.13.2
+- name: rabbitmq
+  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
+  version: 10.3.9
+- name: elasticsearch
+  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
+  version: 19.21.2
+- name: keycloak
+  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
+  version: 13.4.1
+digest: sha256:21d18d2cca8db612841c7d9ee1bade697171d353524ed5cab6f24c91cc774e2f
+generated: "2025-11-13T15:27:27.006227-06:00"
