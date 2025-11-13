@@ -3,8 +3,8 @@
 Helm charts depend on some subcharts, make sure to have them installed if you plan on modifying the helm chart:
 
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm dep build
+helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+helm dependency update
 ```
 
 The chart has some common values; you can overwrite with your own values following below examples:
