@@ -35,7 +35,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   backend:
-    image: 'clowder/clowder2-backend:2.0.0-beta.3'
+    image: 'clowder/clowder2-backend:2.0.0-beta.4'
     restart: unless-stopped
     build:
       dockerfile: backend/Dockerfile
@@ -80,7 +80,7 @@ services:
       - "traefik.http.routers.backend.priority=5"
 
   frontend:
-    image: "clowder/clowder2-frontend:2.0.0-beta.3"
+    image: "clowder/clowder2-frontend:2.0.0-beta.4"
     restart: unless-stopped
     build:
       context: ./frontend
