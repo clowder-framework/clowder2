@@ -20,11 +20,32 @@ export const MetadataTextField = (props) => {
 		frozen,
 		frozenVersionNum,
 	} = props;
-	const [localContent, setLocalContent] = useState(
-		content && content[fieldName] ? content : {}
-	);
+	// FIX: Properly initialize localContent to always have the field
+	const [localContent, setLocalContent] = useState(() => {
+		if (content && content[fieldName] !== undefined) {
+			return content;
+		}
+		return { [fieldName]: "" }; // Ensure the field always exists
+	});
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	const [inputChanged, setInputChanged] = useState(false);
+
+	const getValue = () => {
+		if (readOnly) {
+			// Read-only mode: show content or "null"
+			if (content && content[fieldName] !== undefined && content[fieldName] !== null) {
+				return content[fieldName];
+			}
+			if (localContent && localContent[fieldName] !== undefined && localContent[fieldName] !== null) {
+				return localContent[fieldName];
+			}
+			return "null";
+		} else {
+			// Edit mode: show localContent value (what user is typing)
+			// FIX: This will now always return a string, never undefined
+			return localContent[fieldName] || "";
+		}
+	};
 
 	return (
 		<Grid container spacing={2} sx={{ alignItems: "center" }}>
@@ -36,9 +57,7 @@ export const MetadataTextField = (props) => {
 					fullWidth
 					name={widgetName}
 					required={isRequired}
-					value={
-						readOnly && content ? content[fieldName] : localContent[fieldName]
-					}
+					value={getValue()}
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 						setInputChanged(true);
 						const tempContents: { [key: string]: string | number } = {};
