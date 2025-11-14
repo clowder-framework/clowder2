@@ -22,9 +22,10 @@ jobs:
 
       - name: Get dependencies
         run: |
+          helm repo add bitnami-legacy https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add ncsa https://opensource.ncsa.illinois.edu/charts
-          helm dep build
+          helm dep update
 
       - name: Get release info
         id: release_info
