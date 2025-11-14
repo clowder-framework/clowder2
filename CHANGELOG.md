@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v2.0.0-beta.4] - 2025-11-13
+
+### Added
+
+- Added new get access token endpoint
+- Introduced ruff linter and initial linting configuration.
+- Added simple uv setup for development.
+
+### Changed
+
+- Replaced Bitnami container images with updated alternatives
+- Implemented full AWS IAM authentication for S3 upload/download operations.
+- Ensures actual IAM-based connections are used instead of only presigned URL dependency updates.
+- Removed docker-compose version pinning and updated PostgreSQL to version 16.
+- Standardized Docker build context to the repository root.
+- Several CI pipeline improvements for code generation and uv-based workflows.
+
+### Fixed
+
+- Downgraded httpx to resolve pytest failures.
+- Added missing httpx to dev dependencies.
+- Multiple fixes for GitHub Action code generation workflows.
+- Pytest GitHub Action improvements and stability fixes.
+
 ## [v2.0.0-beta.3] - 2024-07-29
 
 ### Added

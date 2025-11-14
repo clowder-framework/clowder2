@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
-    version: str = "2.0.0-beta.3"
+    version: str = "2.0.0-beta.4"
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
