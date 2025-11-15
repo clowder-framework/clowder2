@@ -1,36 +1,41 @@
-name: Release Helm Charts
+name: Manual Publish Helm Chart
 
 defaults:
   run:
     working-directory: deployments/kubernetes/charts/clowder2
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force push the chart even if it already exists (true/false)"
+        type: boolean
+        default: true
 
 env:
   MAIN_REPO: clowder-framework/clowder2
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get dependencies
+      - name: Setup Helm Repositories
         run: |
           helm repo add bitnami-legacy https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
           helm repo add ncsa https://opensource.ncsa.illinois.edu/charts
           helm repo update
           helm dep update
 
-      - name: Get release info
+      - name: Determine Chart Version & Changelog
         id: release_info
         run: |
-          version="$(awk '/^version:/ { print $2} ' Chart.yaml)"
+          version="$(awk '/^version:/ { print $2 }' Chart.yaml)"
           changelog="$(sed -e "1,/^### ${version}/d" -e "/^###/,\$d" -e '/^$/d' README.md)"
           changelog="${changelog//'%'/'%25'}"
           changelog="${changelog//$'\n'/'%0A'}"
@@ -40,23 +45,21 @@ jobs:
           echo "version: ${version}"
           echo "changelog: ${changelog}"
 
-      - name: Print Github Info
+      - name: Debug GitHub Metadata
         run: |
-          echo "github.event_name: ${{ github.event_name }}"
+          echo "Manual dispatch workflow triggered"
           echo "github.repository: ${{ github.repository }}"
-          echo "github.ref: ${{ github.ref }}"
+          echo "chart version: ${{ env.version }}"
 
-      - name: run helm template
+      - name: Validate Helm Template
         run: helm template .
 
-      - name: Publish to NCSA OpenSource
-        if: |
-          github.event_name != 'pull_request'
-          && github.repository == env.MAIN_REPO
+      - name: Publish Helm Chart to NCSA OpenSource
+        if: github.repository == env.MAIN_REPO
         uses: bsord/helm-push@v4.1.0
         with:
           username: ${{ secrets.HELM_USERNAME }}
           password: ${{ secrets.HELM_PASSWORD }}
           registry-url: "https://opensource.ncsa.illinois.edu/charts"
           chart-folder: "deployments/kubernetes/charts/clowder2"
-          force: true
+          force: ${{ github.event.inputs.force }}
