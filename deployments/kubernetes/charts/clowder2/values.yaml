@@ -278,7 +278,7 @@ keycloak:
     image:
       registry: docker.io
       repository: bitnamilegacy/postgresql
-      tag: "16.4.0"
+      tag: "15.5.0"
     auth:
       username: keycloak
       password: password
