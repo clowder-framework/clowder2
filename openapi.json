@@ -12074,6 +12074,24 @@
             },
             "name": "code",
             "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Client Id",
+              "type": "string"
+            },
+            "name": "client_id",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Auth Redirect Uri",
+              "type": "string"
+            },
+            "name": "auth_redirect_uri",
+            "in": "query"
           }
         ],
         "responses": {
