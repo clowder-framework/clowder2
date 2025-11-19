@@ -150,6 +150,8 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER:-guest}
       - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+      - ELASTICSEARCH_HOST=elasticsearch  # ← Might be missing
+      - ELASTICSEARCH_PORT=9200
     networks:
       - clowder2
     depends_on:
@@ -157,7 +159,7 @@ services:
       - rabbitmq
 
   extractors-messages:
-    image: "clowder/clowder2-messages:latest"
+    image: "clowder2-messages:test"
     build:
       dockerfile: backend/messages.Dockerfile
     environment:

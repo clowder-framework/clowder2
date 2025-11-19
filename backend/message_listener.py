@@ -6,7 +6,14 @@ import random
 import string
 import time
 from datetime import datetime
-
+from app.models.files import (
+    FileDB,
+    FileOut,
+)
+from app.models.users import (
+    UserOut,
+)
+from app.routers.feeds import check_feed_listeners
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from app.main import startup_beanie
@@ -16,6 +23,8 @@ from app.models.listeners import (
     EventListenerJobStatus,
     EventListenerJobUpdateDB,
 )
+import os
+from app.config import settings
 from beanie import PydanticObjectId
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +33,7 @@ logger.setLevel(logging.INFO)
 
 timeout = 5 * 60  # five minute timeout
 time_ran = 0
+from app.dependencies import get_elasticsearchclient, get_rabbitmq
 
 
 def parse_message_status(msg):
@@ -85,87 +95,117 @@ def parse_message_status(msg):
         return {"status": EventListenerJobStatus.PROCESSING, "cleaned_msg": msg}
 
 
-async def callback(message: AbstractIncomingMessage):
-    """This method receives messages from RabbitMQ and processes them.
-    the extractor info is parsed from the message and if the extractor is new
-    or is a later version, the db is updated.
-    """
+async def callback(message: AbstractIncomingMessage, es, rabbitmq_client):
+    """This method receives messages from RabbitMQ and processes them."""
     async with message.process():
         msg = json.loads(message.body.decode("utf-8"))
 
-        job_id = msg["job_id"]
-        message_str = msg["status"]
-        timestamp = datetime.strptime(
-            msg["start"], "%Y-%m-%dT%H:%M:%S%z"
-        )  # incoming format: '2023-01-20T08:30:27-05:00'
-        timestamp = timestamp.replace(tzinfo=datetime.utcnow().tzinfo)
+        if "event_type" in msg and msg["event_type"] == "file_indexed":
+            logger.info(f"This is an event type file indexed!")
 
-        # TODO: Updating an event message could go in rabbitmq/listeners
+            # Convert string IDs back to PydanticObjectId if needed
+            file_data = msg.get("file_data", {})
+            user_data = msg.get("user", {})  # Fixed variable name
 
-        # Check if the job exists, and update if so
-        job = await EventListenerJobDB.find_one(
-            EventListenerJobDB.id == PydanticObjectId(job_id)
-        )
-        if job:
-            # Update existing job with new info
-            job.updated = timestamp
-            parsed = parse_message_status(message_str)
-            cleaned_msg = parsed["cleaned_msg"]
-            incoming_status = parsed["status"]
+            if "id" in file_data and isinstance(file_data["id"], str):
+                file_data["id"] = PydanticObjectId(file_data["id"])
 
-            # Don't override a finished status if a message comes in late
-            if job.status in [
-                EventListenerJobStatus.SUCCEEDED,
-                EventListenerJobStatus.ERROR,
-                EventListenerJobStatus.SKIPPED,
-            ]:
-                cleaned_status = job.status
-            else:
-                cleaned_status = incoming_status
+            # Create FileOut object
+            file_out = FileOut(**file_data)
 
-            # Prepare fields to update based on status (don't overwrite whole object to avoid async issues)
-            field_updates = {
-                EventListenerJobDB.status: cleaned_status,
-                EventListenerJobDB.latest_message: cleaned_msg,
-                EventListenerJobDB.updated: timestamp,
-            }
+            # Create UserOut object from the user data in the message
+            user = UserOut(**user_data)  # Use user_data, not user
 
-            if job.started is not None:
-                field_updates[EventListenerJobDB.duration] = (
-                    timestamp - job.started
-                ).total_seconds()
-            elif incoming_status == EventListenerJobStatus.STARTED:
-                field_updates[EventListenerJobDB.duration] = 0
-
-            logger.info(f"[{job_id}] {timestamp} {incoming_status.value} {cleaned_msg}")
-
-            # Update the job timestamps/duration depending on what status we received
-            if incoming_status == EventListenerJobStatus.STARTED:
-                field_updates[EventListenerJobDB.started] = timestamp
-            elif incoming_status in [
-                EventListenerJobStatus.SUCCEEDED,
-                EventListenerJobStatus.ERROR,
-                EventListenerJobStatus.SKIPPED,
-            ]:
-                # job.finished = timestamp
-                field_updates[EventListenerJobDB.finished] = timestamp
-
-            await job.set(field_updates)
-
-            # Add latest message to the job updates
-            event_msg = EventListenerJobUpdateDB(
-                job_id=job_id, status=cleaned_msg, timestamp=timestamp
+            # Now call check_feed_listeners with the injected dependencies
+            await check_feed_listeners(
+                es,  # Elasticsearch client
+                file_out,
+                user,
+                rabbitmq_client,  # RabbitMQ client
             )
-            await event_msg.insert()
             return True
+
         else:
-            # We don't know what this job is. Reject the message.
-            logger.error("Job ID %s not found in database, skipping message." % job_id)
-            return False
+            job_id = msg["job_id"]
+            message_str = msg["status"]
+            timestamp = datetime.strptime(
+                msg["start"], "%Y-%m-%dT%H:%M:%S%z"
+            )  # incoming format: '2023-01-20T08:30:27-05:00'
+            timestamp = timestamp.replace(tzinfo=datetime.utcnow().tzinfo)
+
+            # TODO: Updating an event message could go in rabbitmq/listeners
+
+            # Check if the job exists, and update if so
+            job = await EventListenerJobDB.find_one(
+                EventListenerJobDB.id == PydanticObjectId(job_id)
+            )
+            if job:
+                # Update existing job with new info
+                job.updated = timestamp
+                parsed = parse_message_status(message_str)
+                cleaned_msg = parsed["cleaned_msg"]
+                incoming_status = parsed["status"]
+
+                # Don't override a finished status if a message comes in late
+                if job.status in [
+                    EventListenerJobStatus.SUCCEEDED,
+                    EventListenerJobStatus.ERROR,
+                    EventListenerJobStatus.SKIPPED,
+                ]:
+                    cleaned_status = job.status
+                else:
+                    cleaned_status = incoming_status
+
+                # Prepare fields to update based on status (don't overwrite whole object to avoid async issues)
+                field_updates = {
+                    EventListenerJobDB.status: cleaned_status,
+                    EventListenerJobDB.latest_message: cleaned_msg,
+                    EventListenerJobDB.updated: timestamp,
+                }
+
+                if job.started is not None:
+                    field_updates[EventListenerJobDB.duration] = (
+                        timestamp - job.started
+                    ).total_seconds()
+                elif incoming_status == EventListenerJobStatus.STARTED:
+                    field_updates[EventListenerJobDB.duration] = 0
+
+                logger.info(
+                    f"[{job_id}] {timestamp} {incoming_status.value} {cleaned_msg}"
+                )
+
+                # Update the job timestamps/duration depending on what status we received
+                if incoming_status == EventListenerJobStatus.STARTED:
+                    field_updates[EventListenerJobDB.started] = timestamp
+                elif incoming_status in [
+                    EventListenerJobStatus.SUCCEEDED,
+                    EventListenerJobStatus.ERROR,
+                    EventListenerJobStatus.SKIPPED,
+                ]:
+                    # job.finished = timestamp
+                    field_updates[EventListenerJobDB.finished] = timestamp
+
+                await job.set(field_updates)
+
+                # Add latest message to the job updates
+                event_msg = EventListenerJobUpdateDB(
+                    job_id=job_id, status=cleaned_msg, timestamp=timestamp
+                )
+                await event_msg.insert()
+                return True
+            else:
+                # We don't know what this job is. Reject the message.
+                logger.error(
+                    "Job ID %s not found in database, skipping message." % job_id
+                )
+                return False
 
 
 async def listen_for_messages():
     await startup_beanie()
+
+    # Initialize dependencies using your existing functions
+    es = await get_elasticsearchclient()
 
     # For some reason, Pydantic Settings environment variable overrides aren't being applied, so get them here.
     RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
@@ -206,10 +246,17 @@ async def listen_for_messages():
             durable=True,
         )
         await queue.bind(exchange)
+        await queue.bind(exchange, routing_key="file_indexed_events")  # Add this line
 
         logger.info(f" [*] Listening to {exchange}")
+
+        # Create a partial function that includes the dependencies
+        from functools import partial
+
+        callback_with_deps = partial(callback, es=es, rabbitmq_client=channel)
+
         await queue.consume(
-            callback=callback,
+            callback=callback_with_deps,
             no_ack=False,
         )
 
@@ -219,9 +266,11 @@ async def listen_for_messages():
             await asyncio.Future()
         finally:
             await connection.close()
+            await es.close()  # Close ES connection when done
 
 
 if __name__ == "__main__":
+    logger.info(" Message listener starting...")
     start = datetime.now()
     while time_ran < timeout:
         try:

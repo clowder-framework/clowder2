@@ -5,6 +5,24 @@ from app.config import settings
 from app.main import app
 from app.tests.utils import delete_test_data, user_example
 from fastapi.testclient import TestClient
+from unittest.mock import AsyncMock, patch
+
+
+@pytest.fixture(autouse=True)
+def mock_rabbitmq():
+    """Mock RabbitMQ connections for all tests"""
+    with patch("aio_pika.connect_robust") as mock_connect:
+        mock_channel = AsyncMock()
+        mock_exchange = AsyncMock()
+        mock_connection = AsyncMock()
+
+        mock_connect.return_value = mock_connection
+        mock_connection.__aenter__.return_value = mock_connection
+        mock_connection.channel.return_value = mock_channel
+        mock_channel.declare_exchange.return_value = mock_exchange
+
+        yield mock_connect
+
 
 settings.MONGO_DATABASE = "clowder-tests"
 settings.elasticsearch_index = "clowder-tests"
