@@ -91,17 +91,23 @@ export class AuthService {
     /**
      * Token
      * @param code
+     * @param clientId
+     * @param authRedirectUri
      * @returns any Successful Response
      * @throws ApiError
      */
     public static tokenApiV2AuthTokenGet(
         code: string,
+        clientId: string,
+        authRedirectUri: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/auth/token`,
             query: {
                 'code': code,
+                'client_id': clientId,
+                'auth_redirect_uri': authRedirectUri,
             },
             errors: {
                 422: `Validation Error`,

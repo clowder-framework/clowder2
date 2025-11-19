@@ -1,8 +1,9 @@
 import mimetypes
 from typing import Optional
 
+from keycloak import KeycloakOpenID
+
 from app.config import settings
-from app.keycloak_auth import keycloak_openid
 from app.models.files import ContentType
 from app.models.tokens import TokenDB
 from app.models.users import UserDB
@@ -40,12 +41,29 @@ async def save_refresh_token(refresh_token: str, email: str):
         await token_created.insert()
 
 
-async def get_token(code: str):
+async def get_token(
+    code: str,
+    *,
+    server_url=settings.auth_server_url,
+    client_id=settings.auth_client_id,
+    realm_name=settings.auth_realm,
+    client_secret_key=settings.auth_client_secret,
+    auth_redirect_uri=settings.auth_redirect_uri,
+    verify=True,
+):
+    keycloak_openid = KeycloakOpenID(
+        server_url=server_url,
+        client_id=client_id,
+        realm_name=realm_name,
+        client_secret_key=client_secret_key,
+        verify=verify,
+    )
+
     # get token from Keycloak
     token_body = keycloak_openid.token(
         grant_type="authorization_code",
         code=code,
-        redirect_uri=settings.auth_redirect_uri,
+        redirect_uri=auth_redirect_uri,
     )
 
     access_token = token_body["access_token"]
