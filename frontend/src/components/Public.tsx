@@ -114,7 +114,7 @@ export const Public = (): JSX.Element => {
 						</Grid>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination
-								count={Math.ceil(pageMetadata.total_count / limit)}
+								count={Math.ceil((pageMetadata?.total_count ?? 0) / limit)}
 								page={currPageNum}
 								onChange={handlePageChange}
 								shape="rounded"
