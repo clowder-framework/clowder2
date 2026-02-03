@@ -21,8 +21,8 @@ services:
     restart: unless-stopped
     command:
       - --api.insecure=true
-      - --providers.docker
-    #      - --entryPoints.web.address=:80
+      - --providers.docker=true
+      - --entryPoints.web.address=:80
     ports:
       # The HTTP port
       - "80:80"
@@ -75,7 +75,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.swagger.rule=PathPrefix(`/docs`)"
+      - "traefik.http.routers.swagger.entrypoints=web"
+      - "traefik.http.routers.swagger.service=backend"
       - "traefik.http.services.backend.loadbalancer.server.port=80"
       - "traefik.http.routers.backend.priority=5"
 
@@ -84,6 +87,8 @@ services:
     restart: unless-stopped
     build:
       context: ./frontend
+    ports:
+      - "3000:80"
     networks:
       - clowder2
     depends_on:
@@ -94,6 +99,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.service=frontend"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
 
@@ -134,6 +141,8 @@ services:
     restart: unless-stopped
     networks:
       - clowder2
+    ports:
+      - "27017:27017"
     volumes:
       - mongo:/data/db
 
@@ -179,20 +188,27 @@ services:
       - minio3
       - minio4
 
-  postgres:
-    image: postgres:16
+  keycloak-postgres:
+    container_name: keycloak-postgres
+    hostname: keycloak-postgres
+    image: postgres:18.0
     restart: unless-stopped
     networks:
       - clowder2
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_DB: keycloak_prod
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
 
   keycloak:
-    image: quay.io/keycloak/keycloak:20.0
+    image: quay.io/keycloak/keycloak:26.4.0
     restart: unless-stopped
     networks:
       - clowder2
@@ -201,21 +217,24 @@ services:
       - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
     command:
       - start-dev
-      - --http-relative-path /keycloak
+      - --http-relative-path=/keycloak
       - --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL_HOST: postgres
+      KC_DB_URL_HOST: keycloak-postgres
+      KC_DB_URL_PORT: "5432"
       KC_DB_URL_DATABASE: keycloak_prod
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: password
     depends_on:
-      - postgres
+      keycloak-postgres:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=PathPrefix(`/keycloak`)"
+      - "traefik.http.routers.keycloak.entrypoints=web"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
       - "traefik.http.routers.keycloak.priority=10"
 
@@ -272,3 +291,4 @@ volumes:
 
 networks:
   clowder2:
+    name: clowder2
