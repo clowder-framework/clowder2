@@ -3465,9 +3465,6 @@
           },
           {
             "APIKeyCookie": []
-          },
-          {
-            "HTTPBearer": []
           }
         ]
       }
