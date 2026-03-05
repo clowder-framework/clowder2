@@ -63,19 +63,26 @@ services:
       - minio3
       - minio4
 
-  postgres:
-      image: postgres:16
+  postgres-keycloak:
+      image: postgres:18.0
       networks:
         - clowder2
+      ports:
+        - "5432:5432"
       volumes:
-        - postgres_data:/var/lib/postgresql/data
+        - postgres_data:/var/lib/postgresql
       environment:
         POSTGRES_DB: keycloak_dev
         POSTGRES_USER: keycloak
         POSTGRES_PASSWORD: password
+      healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
   keycloak:
-      image: quay.io/keycloak/keycloak:20.0
+      image: quay.io/keycloak/keycloak:26.4.0
       volumes:
         - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
         - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
@@ -83,20 +90,27 @@ services:
         - clowder2
       command:
         - start-dev
-        - --http-relative-path /keycloak
+#        - --http-enabled=true
+#        - --hostname=localhost
+#        - --hostname-strict=false
+##        - --hostname-strict-https=false
+##        - --https-port=0
+##        - --http-port=8080
+        - --http-relative-path=/keycloak
         - --import-realm
       environment:
         KEYCLOAK_ADMIN: admin
         KEYCLOAK_ADMIN_PASSWORD: admin
         KC_DB: postgres
-        KC_DB_URL_HOST: postgres
+        KC_DB_URL_HOST: postgres-keycloak
         KC_DB_URL_DATABASE: keycloak_dev
         KC_DB_USERNAME: keycloak
         KC_DB_PASSWORD: password
       ports:
-        - 8080:8080
+        - "8080:8080"
       depends_on:
-        - postgres
+        postgres-keycloak:
+          condition: service_healthy
 
   maildev:
     image: maildev/maildev
@@ -170,6 +184,14 @@ services:
     depends_on:
       - mongo
       - rabbitmq
+
+  image-metadata:
+    image: clowder/extractors-image-metadata:latest
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
 
 networks:
   clowder2:

@@ -17,12 +17,12 @@ x-minio-common: &minio-common
 services:
 
   traefik:
-    image: traefik:v2.5
+    image: traefik:v3.6
     restart: unless-stopped
     command:
-      - --api.insecure=true
-      - --providers.docker
-    #      - --entryPoints.web.address=:80
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
     ports:
       # The HTTP port
       - "80:80"
