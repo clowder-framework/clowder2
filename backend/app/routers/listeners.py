@@ -420,7 +420,7 @@ async def get_listeners(
         if dataset_id is None:
             criteria_list.append(
                 Or(
-                    EventListenerDB.access is None,
+                    EventListenerDB.access == None,  # noqa: E711
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -429,7 +429,7 @@ async def get_listeners(
         else:
             criteria_list.append(
                 Or(
-                    EventListenerDB.access is None,
+                    EventListenerDB.access == None,  # noqa: E711
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
