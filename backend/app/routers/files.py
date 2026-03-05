@@ -555,7 +555,6 @@ async def post_file_extract(
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
