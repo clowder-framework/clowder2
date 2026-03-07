@@ -3,5 +3,5 @@
 /* eslint-disable */
 
 export type Comment = {
-	text: string;
-};
+    text: string;
+}

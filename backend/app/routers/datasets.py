@@ -838,6 +838,66 @@ async def get_dataset_folders_and_files(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+@router.get("/{dataset_id}/all_folders")
+async def get_dataset_folders_all(
+    dataset_id: str,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    user_id=Depends(get_user),
+    skip: int = 0,
+    limit: int = 10,
+    admin=Depends(get_admin),
+    enable_admin: bool = False,
+    admin_mode: bool = Depends(get_admin_mode),
+    allow: bool = Depends(Authorization("viewer")),
+):
+    if (
+        await DatasetDBViewList.find_one(
+            Or(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id),
+            )
+        )
+    ) is not None:
+        if authenticated or public or (admin and admin_mode):
+            query = [
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderFileViewList.dataset_id == PydanticObjectId(dataset_id),
+            ]
+
+        folders = (
+            await FolderFileViewList.find(*query)
+            .aggregate(
+                [
+                    _get_page_query(
+                        skip,
+                        limit,
+                        sort_clause={
+                            "$sort": {
+                                "object_type": -1,  # folder first
+                                "created": -1,  # then sort by created descendingly
+                            }
+                        },
+                    )
+                ],
+            )
+            .to_list()
+        )
+        page_metadata = _construct_page_metadata(folders, skip, limit)
+
+        page = Paged(
+            metadata=page_metadata,
+            data=[FolderOut(id=item.pop("_id"), **item) for item in folders[0]["data"]],
+        )
+
+        return page.dict()
+
+        return folders.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
 @router.delete("/{dataset_id}/folders/{folder_id}")
 async def delete_folder(
     dataset_id: str,

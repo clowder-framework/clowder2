@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type JSONLD = {};
+export type JSONLD = {
+}
