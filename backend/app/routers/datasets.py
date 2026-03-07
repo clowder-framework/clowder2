@@ -52,6 +52,7 @@ from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.authentication import get_admin, get_admin_mode
+from app.routers.doi import DataCiteClient
 from app.routers.files import add_file_entry, add_local_file_entry
 from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
@@ -483,9 +484,54 @@ async def delete_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+@router.post("/{dataset_id}/doi", response_model=DatasetOut)
+async def mint_doi(
+    dataset_id: str,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization(RoleType.OWNER)) and settings.DOI_ENABLED,
+):
+    if (dataset := await DatasetFreezeDB.get(PydanticObjectId(dataset_id))) is not None:
+        metadata = {
+            "data": {
+                "type": "dois",
+                "event": "publish",
+                "attributes": {
+                    "prefix": os.getenv("DATACITE_PREFIX"),
+                    "url": f"{settings.frontend_url}/datasets/{dataset_id}",
+                    "titles": [{"title": dataset.name}],
+                    "creators": [
+                        {
+                            "name": dataset.creator.first_name
+                            + " "
+                            + dataset.creator.last_name
+                        }
+                    ],
+                    "publisher": "DataCite e.V.",
+                    "publicationYear": datetime.datetime.now().year,
+                    "types": {"resourceTypeGeneral": "Dataset"},
+                },
+            }
+        }
+        dataCiteClient = DataCiteClient()
+        response = dataCiteClient.create_doi(metadata)
+        print("doi created:", response.get("data").get("id"))
+        dataset.doi = response.get("data").get("id")
+        dataset.modified = datetime.datetime.utcnow()
+        await dataset.save()
+
+        # TODO: if we ever index freeze datasets
+        # await index_dataset(es, DatasetOut(**dataset_db), update=True)
+        return dataset.dict()
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
 async def freeze_dataset(
     dataset_id: str,
+    publish_doi: bool = False,
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
@@ -545,6 +591,9 @@ async def freeze_dataset(
         ).save()
 
         # TODO thumbnails, visualizations
+
+        if publish_doi:
+            return await mint_doi(frozen_dataset.id)
 
         return frozen_dataset.dict()
 

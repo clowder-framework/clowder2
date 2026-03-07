@@ -91,5 +91,9 @@ class Settings(BaseSettings):
     # defautl listener heartbeat time interval in seconds 5 minutes
     listener_heartbeat_interval = 5 * 60
 
+    # DataCite details
+    DOI_ENABLED = True
+    DATACITE_API_URL = "https://api.test.datacite.org/"
+
 
 settings = Settings()
