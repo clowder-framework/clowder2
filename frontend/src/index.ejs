@@ -26,8 +26,7 @@
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     />
-  <link href="styles/main.css" rel="stylesheet">
-
+  <link href="<%= htmlWebpackPlugin.options.publicPath !=='auto' ? htmlWebpackPlugin.options.publicPath + '/styles/main.css' :'styles/main.css' %>" rel="stylesheet">
   <title>Clowder v2</title>
 </head>
 <body>
