@@ -1,0 +1,28 @@
+services:
+  # https://github.com/UCLALibrary/docker-cantaloupe
+  cantaloupe:
+    image: uclalibrary/cantaloupe:5.0.6-6
+    ports:
+      - "8182:8182"
+    environment:
+      CANTALOUPE_SOURCE_STATIC: "S3Source"
+      CANTALOUPE_ENDPOINT_ADMIN_SECRET: "secret"
+      CANTALOUPE_ENDPOINT_ADMIN_ENABLED: "false"
+      CANTALOUPE_S3SOURCE_LOOKUP_STRATEGY: "BasicLookupStrategy"
+      CANTALOUPE_S3SOURCE_BASICLOOKUPSTRATEGY_BUCKET_NAME: "cantaloupe"
+      CANTALOUPE_S3SOURCE_SECRET_KEY: "minioadmin"
+      CANTALOUPE_S3SOURCE_ACCESS_KEY_ID: "minioadmin"
+      CANTALOUPE_S3SOURCE_ENDPOINT: "http://minio-nginx:9000"
+    networks:
+      - clowder2
+  iiif-presentation-api-server:
+    image: iiif-presentation-api-server
+    ports:
+      - "8002:8000"
+    environment:
+      IIIF_IMAGE_API_SERVER_URL: "http://192.168.4.100:8182/iiif/3"
+    networks:
+      - clowder2
+networks:
+  clowder2:
+    name: clowder2
