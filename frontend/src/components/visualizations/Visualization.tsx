@@ -158,7 +158,7 @@ export const Visualization = (props: previewProps) => {
 										fileSummary.bytes &&
 										fileSummary.bytes <
 											config["rawDataVisualizationThreshold"] &&
-										fileSummary.content_type !== undefined &&
+										fileSummary.content_type !== undefined && fileSummary.content_type.main_type !== "application" &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
 												fileSummary.content_type.content_type
