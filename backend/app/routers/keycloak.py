@@ -123,8 +123,10 @@ async def auth(code: str) -> RedirectResponse:
 
 
 @router.get("/token")
-async def token(code: str):
-    return await get_token(code)
+async def token(code: str, client_id: str, auth_redirect_uri: str):
+    return await get_token(
+        code, client_id=client_id, auth_redirect_uri=auth_redirect_uri
+    )
 
 
 @router.get("/refresh_token")
