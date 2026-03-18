@@ -349,8 +349,12 @@ async def download_file(
                 content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
 
             # Get content type & open file stream
+            media_type = file.content_type.content_type
+            if media_type == "N/A":
+                media_type = "application/octet-stream"
             response = StreamingResponse(
-                content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE)
+                content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE),
+                media_type=media_type,
             )
             response.headers["Content-Disposition"] = (
                 "attachment; filename=%s" % file.name
