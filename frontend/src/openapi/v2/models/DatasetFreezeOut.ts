@@ -30,6 +30,7 @@ export type DatasetFreezeOut = {
     origin_id?: string;
     standard_license?: boolean;
     license_id?: string;
+    doi?: string;
     id?: string;
     frozen?: boolean;
     frozen_version_num: number;
