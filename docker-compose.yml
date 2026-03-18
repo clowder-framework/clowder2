@@ -226,13 +226,6 @@ services:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
-    expose:
-      - 5672
-      - 15672
-    # TODO remove
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "5672" ]
       interval: 3s
@@ -247,7 +240,11 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     restart: unless-stopped
     healthcheck:
-      test: "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow"
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 60s
     networks:
       - clowder2
     environment:
@@ -255,6 +252,7 @@ services:
       - "discovery.type=single-node"
       - "xpack.security.enabled=false"
       - "xpack.security.http.ssl.enabled=false"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
 
