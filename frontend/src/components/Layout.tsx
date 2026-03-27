@@ -177,7 +177,7 @@ export default function PersistentDrawerLeft(props) {
 					>
 						<MenuIcon />
 					</IconButton>
-					<Link href="/">
+					<Link component={RouterLink} to="/">
 						<Box
 							component="img"
 							src="../../public/blue-clowder-logo-sm.svg"
@@ -195,10 +195,10 @@ export default function PersistentDrawerLeft(props) {
 					<Box sx={{ marginLeft: "auto" }}>
 						{loggedOut ? (
 							<>
-								<Link href="/auth/register" sx={link}>
+								<Link component={RouterLink} to="/auth/register" sx={link}>
 									Register
 								</Link>
-								<Link href="/auth/login" sx={link}>
+								<Link component={RouterLink} to="/auth/login" sx={link}>
 									Login
 								</Link>
 							</>
