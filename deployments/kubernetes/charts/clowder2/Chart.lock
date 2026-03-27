@@ -15,4 +15,4 @@ dependencies:
   repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
   version: 13.4.1
 digest: sha256:21d18d2cca8db612841c7d9ee1bade697171d353524ed5cab6f24c91cc774e2f
-generated: "2025-11-13T15:27:27.006227-06:00"
+generated: "2025-11-14T15:11:06.914559-06:00"
