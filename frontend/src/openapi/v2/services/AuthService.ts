@@ -91,52 +91,19 @@ export class AuthService {
     /**
      * Token
      * @param code
+     * @param redirectUri
      * @returns any Successful Response
      * @throws ApiError
      */
     public static tokenApiV2AuthTokenGet(
         code: string,
+        redirectUri?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/auth/token`,
             query: {
                 'code': code,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Token External
-     * @param code
-     * @param serverUrl
-     * @param clientId
-     * @param realmName
-     * @param clientSecretKey
-     * @param redirectUri
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static tokenExternalApiV2AuthTokenExternalGet(
-        code: string,
-        serverUrl?: string,
-        clientId?: string,
-        realmName?: string,
-        clientSecretKey?: string,
-        redirectUri?: string,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/auth/token/external`,
-            query: {
-                'code': code,
-                'server_url': serverUrl,
-                'client_id': clientId,
-                'realm_name': realmName,
-                'client_secret_key': clientSecretKey,
                 'redirect_uri': redirectUri,
             },
             errors: {

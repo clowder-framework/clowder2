@@ -124,26 +124,9 @@ async def auth(code: str) -> RedirectResponse:
 
 
 @router.get("/token")
-async def token(code: str):
-    return await get_token(code)
-
-
-@router.get("/token/external")
-async def token_external(
-    code: str,
-    server_url: Optional[str] = None,
-    client_id: Optional[str] = None,
-    realm_name: Optional[str] = None,
-    client_secret_key: Optional[str] = None,
-    redirect_uri: Optional[str] = None,
-):
+async def token(code: str, redirect_uri: Optional[str] = None):
     return await get_token(
-        code,
-        server_url=server_url,
-        client_id=client_id,
-        realm_name=realm_name,
-        client_secret_key=client_secret_key,
-        redirect_uri=redirect_uri,
+        code, redirect_uri=redirect_uri or settings.auth_redirect_uri
     )
 
 
