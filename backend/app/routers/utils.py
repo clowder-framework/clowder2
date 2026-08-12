@@ -40,12 +40,12 @@ async def save_refresh_token(refresh_token: str, email: str):
         await token_created.insert()
 
 
-async def get_token(code: str):
+async def get_token(code: str, *, redirect_uri: str = settings.auth_redirect_uri):
     # get token from Keycloak
     token_body = keycloak_openid.token(
         grant_type="authorization_code",
         code=code,
-        redirect_uri=settings.auth_redirect_uri,
+        redirect_uri=redirect_uri,
     )
 
     access_token = token_body["access_token"]

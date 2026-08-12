@@ -12071,6 +12071,15 @@
             },
             "name": "code",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Redirect Uri",
+              "type": "string"
+            },
+            "name": "redirect_uri",
+            "in": "query"
           }
         ],
         "responses": {

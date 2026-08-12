@@ -1,6 +1,7 @@
 import json
 import logging
 from secrets import token_urlsafe
+from typing import Optional
 
 import requests
 from app.config import settings
@@ -123,8 +124,10 @@ async def auth(code: str) -> RedirectResponse:
 
 
 @router.get("/token")
-async def token(code: str):
-    return await get_token(code)
+async def token(code: str, redirect_uri: Optional[str] = None):
+    return await get_token(
+        code, redirect_uri=redirect_uri or settings.auth_redirect_uri
+    )
 
 
 @router.get("/refresh_token")
