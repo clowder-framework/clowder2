@@ -293,6 +293,12 @@ interface NOT_FOUND_INLINE {
 	reason: string;
 }
 
+interface NOT_AUTHORIZED {
+	stack: string;
+	type: "NOT_AUTHORIZED";
+	reason: string;
+}
+
 interface RESET_FAILED {
 	type: "RESET_FAILED";
 	reason: string;
@@ -777,6 +783,7 @@ export type DataAction =
 	| FAILED_INLINE
 	| NOT_FOUND
 	| NOT_FOUND_INLINE
+	| NOT_AUTHORIZED
 	| RESET_FAILED
 	| RESET_FAILED_INLINE
 	| RESET_LOGOUT

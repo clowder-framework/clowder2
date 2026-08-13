@@ -62,7 +62,7 @@ async def get_token(
     if token:
         try:
             # See https://github.com/marcospereirampj/python-keycloak/issues/89
-            return keycloak_openid.decode_token(
+            payload = keycloak_openid.decode_token(
                 token,
                 key=await get_idp_public_key(),
                 options={"verify_aud": False},
@@ -85,6 +85,15 @@ async def get_token(
                 detail=str(e),
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        if settings.auth_role:
+            groups: list = payload.get("groups", {})
+            if settings.auth_role not in groups:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Not authorized.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        return payload
 
     if api_key:
         serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")

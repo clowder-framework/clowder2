@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "module": "uvicorn",
+            "args": [ "app.main:app", "--host", "0.0.0.0", "--reload" ]
+        },
+        {
+            "name": "Launch via npm",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/frontend",
+            "env": {
+                "CLOWDER_REMOTE_HOSTNAME": "http://localhost:8000"
+            },
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "start"],
+            "outFiles": ["${workspaceFolder}/frontend/src"]
+        }
+    ]
+}

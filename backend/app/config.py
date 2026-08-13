@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     )
     auth_server_url = f"{auth_base}/keycloak/"
     auth_client_secret = ""
+    auth_role = "clowder2"
 
     # keycloak local config
     keycloak_username = "admin"
