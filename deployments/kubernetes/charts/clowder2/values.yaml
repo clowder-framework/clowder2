@@ -80,6 +80,10 @@ geoserver:
 # MINIO
 # ----------------------------------------------------------------------
 minio:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/minio
+    tag: "2023.12.23"
   enabled: true
 
   # login to minio
@@ -130,6 +134,10 @@ minio:
 mongodb:
   # either mongodb is installed as part of this chart, or you need to
   # specify the mongodb uri
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/mongodb
+    tag: "5.0.10"
   enabled: true
   #uri: mongobd://server:27017/database
   database: clowder2
@@ -150,6 +158,10 @@ mongodb:
 # RABBITMQ
 # ----------------------------------------------------------------------
 rabbitmq:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/rabbitmq
+    tag: "3.10.8"
   # either rabbitmq is installed as part of this chart, or you need to
   # specify the rabbitmq uri. If neither is specified rabbitmq will not
   # be used by clowder.
@@ -219,6 +231,10 @@ extractors:
 # ELASTICSEARCH
 # ----------------------------------------------------------------------
 elasticsearch:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/elasticsearch
+    tag: "8.12.2"
   clusterName: clowder2
 
   master:
@@ -230,11 +246,21 @@ elasticsearch:
        storageClass: csi-cinder-sc-retain
        size: 8Gi
 
+  sysctlImage:
+    enabled: true
+    registry: docker.io
+    repository: bitnamilegacy/os-shell
+    tag: 12-debian-12-r16
+
 # ----------------------------------------------------------------------
 # KEYCLOAK
 # ----------------------------------------------------------------------
 keycloak:
   httpRelativePath: /keycloak/
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/keycloak
+    tag: "20.0.5"
 
   auth:
     adminUser: admin
@@ -249,6 +275,10 @@ keycloak:
     type: ClusterIP
 
   postgresql:
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgresql
+      tag: "15.5.0"
     auth:
       username: keycloak
       password: password
