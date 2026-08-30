@@ -1,0 +1,271 @@
+version: '3.7'
+
+# Settings and configurations that are common for all minio containers
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
+  command: server --console-address ":9001" http://minio{1...4}/data
+  restart: unless-stopped
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  networks:
+    - clowder2
+  healthcheck:
+    test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+
+  traefik:
+    image: traefik:v2.5
+    restart: unless-stopped
+    command:
+      - --api.insecure=true
+      - --providers.docker
+    #      - --entryPoints.web.address=:80
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    networks:
+      - clowder2
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  backend:
+    image: 'clowder/clowder2-backend:2.0.0-beta.2'
+    restart: unless-stopped
+    build:
+      context: ./backend
+    networks:
+      - clowder2
+    environment:
+      MONGODB_URL: mongodb://mongo:27017
+      MINIO_SERVER_URL: minio-nginx:9000
+      MINIO_EXTERNAL_SERVER_URL: minio-nginx:9000
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      API_HOST: ${API_HOST:-http://backend}
+      elasticsearch_url: http://elasticsearch:9200
+      auth_base: http://localhost/${BASE_URL_ROUTE}
+      auth_realm: clowder
+      auth_client_id: clowder2-backend
+      auth_redirect_uri: http://localhost:80/${BASE_URL_ROUTE}/api/v2/auth
+      auth_url: http://localhost/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+      oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+      auth_register_url: http://localhost/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=http://localhost:80/api/v2/auth&scope=openid%20email
+      auth_token_url: http://keycloak:8080/${BASE_URL_ROUTE}/keycloak/realms/clowder/protocol/openid-connect/token
+      auth_server_url: http://keycloak:8080/${BASE_URL_ROUTE}/keycloak/
+      keycloak_base: http://localhost/${BASE_URL_ROUTE}/api
+      frontend_url: http://localhost/${BASE_URL_ROUTE}
+      API_V2_STR: /${BASE_URL_ROUTE}/api/v2
+    depends_on:
+      - mongo
+      - minio-nginx
+      - keycloak
+      - elasticsearch
+      - rabbitmq
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/${BASE_URL_ROUTE}/api`)"
+      - "traefik.http.routers.swagger.rule=PathPrefix(`/${BASE_URL_ROUTE}/docs`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=80"
+      - "traefik.http.routers.backend.priority=5"
+
+  frontend:
+    image: "clowder/clowder2-frontend:basename"
+    restart: unless-stopped
+    build:
+      context: ./frontend
+    networks:
+      - clowder2
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.priority=1"
+
+  extractors-heartbeat:
+    image: "clowder/clowder2-heartbeat:main"
+    build:
+      context: backend
+      dockerfile: heartbeat.Dockerfile
+    networks:
+      - clowder2
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://mongo:27017
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  extractors-messages:
+    image: "clowder/clowder2-messages:main"
+    build:
+      context: backend
+      dockerfile: messages.Dockerfile
+    environment:
+      MONGODB_URL: mongodb://mongo:27017
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+    networks:
+      - clowder2
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  mongo:
+    image: mongo:5.0
+    restart: unless-stopped
+    networks:
+      - clowder2
+    volumes:
+      - mongo:/data/db
+
+  #    environment:
+  #      MONGO_INITDB_ROOT_USERNAME: root
+  #      MONGO_INITDB_ROOT_PASSWORD: example
+
+  minio1:
+    <<: *minio-common
+    hostname: minio1
+    volumes:
+      - data1:/data
+
+  minio2:
+    <<: *minio-common
+    hostname: minio2
+    volumes:
+      - data2:/data
+
+  minio3:
+    <<: *minio-common
+    hostname: minio3
+    volumes:
+      - data3:/data
+
+  minio4:
+    <<: *minio-common
+    hostname: minio4
+    volumes:
+      - data4:/data
+
+  minio-nginx:
+    image: nginx:1.19.2-alpine
+    restart: unless-stopped
+    hostname: nginx
+    networks:
+      - clowder2
+    volumes:
+      - ./deployments/docker/minio-nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    networks:
+      - clowder2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak_prod
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0
+    restart: unless-stopped
+    networks:
+      - clowder2
+    volumes:
+      - ./scripts/keycloak/clowder-realm-subdirectory-example.json:/opt/keycloak/data/import/realm.json:ro
+      - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+    command:
+      - start-dev
+      - --http-relative-path /${BASE_URL_ROUTE}/keycloak
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: keycloak_prod
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=PathPrefix(`/${BASE_URL_ROUTE}/keycloak`)"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "traefik.http.routers.keycloak.priority=10"
+
+  # message broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
+    expose:
+      - 5672
+      - 15672
+    # TODO remove
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 3s
+      timeout: 10s
+      retries: 3
+    networks:
+      - clowder2
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    restart: unless-stopped
+    networks:
+      - clowder2
+    environment:
+      - "cluster.name=clowder2"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  mongo:
+  data1:
+  data2:
+  data3:
+  data4:
+  postgres_data:
+  elasticsearch:
+  rabbitmq:
+
+networks:
+  clowder2:

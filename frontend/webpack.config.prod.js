@@ -12,8 +12,9 @@ console.log(
 	`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${process.env.CLOWDER_REMOTE_HOSTNAME}`
 );
 console.log(
-	`the JupyterHub URL is set to ${process.env.JUPYTERHUB_URL}`
-)
+	`The current BASE_URL_ROUTE environment variable is ${process.env.BASE_URL_ROUTE}.
+	 The JupyterHub URL is set to ${process.env.JUPYTERHUB_URL}.`
+);
 
 export default {
 	mode: "production",
@@ -34,6 +35,7 @@ export default {
 		filename: "[name].bundle.js",
 		chunkFilename: "[name].chunk.bundle.js",
 		path: path.resolve(__dirname, "dist"),
+		publicPath: "",
 	},
 	plugins: [
 		// NOTE: `npm run preinstall` currently runs eslint
@@ -50,6 +52,7 @@ export default {
 				CLOWDER_REMOTE_HOSTNAME: JSON.stringify(
 					process.env.CLOWDER_REMOTE_HOSTNAME
 				),
+				BASE_URL_ROUTE: JSON.stringify(process.env.BASE_URL_ROUTE),
 				JUPYTERHUB_URL: JSON.stringify(process.env.JUPYTERHUB_URL),
 				APIKEY: JSON.stringify(process.env.APIKEY),
 				KeycloakBaseURL: JSON.stringify(process.env.KeycloakBaseURL),
@@ -63,7 +66,7 @@ export default {
 		// Generate HTML file that contains references to generated bundles. See here for how this works: https://github.com/ampedandwired/html-webpack-plugin#basic-usage
 		new HtmlWebpackPlugin({
 			template: "src/index.ejs",
-			favicon: "./src/public/favicon.ico",
+			favicon: `src/public/favicon.ico`,
 			minify: {
 				removeComments: true,
 				collapseWhitespace: true,
