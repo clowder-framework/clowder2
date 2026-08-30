@@ -1,0 +1,86 @@
+hostname: &hostname ibmclowder.software-dev.ncsa.illinois.edu
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  tls:
+    - hosts:
+      - *hostname
+      secretName: clowder2-tls
+
+
+geoserver:
+  enabled: false
+
+minio:
+  auth:
+    rootUser: clowder
+    rootPassword: ilikecats
+  persistence:
+    storageClass: nfs-taiga
+    size: 20Gi
+  ingress:
+    enabled: true
+    hostname: minio.ibmclowder.software-dev.ncsa.illinois.edu
+  apiIngress:
+    enabled: true
+    hostname: minio-api.ibmclowder.software-dev.ncsa.illinois.edu
+
+rabbitmq:
+  # login
+  auth:
+    username: guest
+    password: ilikecats
+    erlangCookie: kittencookie
+  ingress:
+    enabled: true
+    hostname: rabbitmq.ibmclowder.software-dev.ncsa.illinois.edu
+  persistence:
+    storageClass: csi-cinder-sc-delete
+    size: 8Gi
+
+mongodb:
+  persistence:
+    storageClass: csi-cinder-sc-delete
+    size: 8Gi
+
+elasticsearch:
+  master:
+    persistence:
+      storageClass: csi-cinder-sc-delete
+      size: 20Gi
+  data:
+    persistence:
+      storageClass: csi-cinder-sc-delete
+      size: 20Gi
+
+keycloak:
+  auth:
+    adminUser: guest
+    adminPassword: ilikecats
+  ingress:
+    hostname: ibmclowder.software-dev.ncsa.illinois.edu
+  postgresql:
+    auth:
+      password: cGFzc3dvcmQ=
+      postgresPassword: Nm50T2lJR05sZQ==
+    primary:
+      persistence:
+        storageClass: csi-cinder-sc-delete
+        size: 8Gi
+
+message:
+  image:
+    repository: clowder/clowder2-messages
+    tag: release-v2.0-beta-3
+
+heartbeat:
+  image:
+    repository: clowder/clowder2-heartbeat
+    tag: release-v2.0-beta-3
+
+extractors:
+  wordcount:
+    enabled: true
+    image: clowder/extractors-wordcount:latest

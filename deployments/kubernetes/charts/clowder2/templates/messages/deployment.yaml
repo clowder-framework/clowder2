@@ -43,11 +43,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.message.existingSecret }}
                   key: {{ .Values.message.existingRabbitMQSecretKey | default "rabbitmq-password" }}
-              {{- else }}
+              {{- else if (lookup "v1" "Secret" .Release.Namespace (printf "%s-secret" (include "clowder2.releaseName" .))) }}
               valueFrom:
                 secretKeyRef:
                   name: {{ include "clowder2.releaseName" . }}-secret
                   key: rabbitmq-password
+              {{- else }}
+              value: {{ .Values.rabbitmq.auth.password }}
               {{- end }}
             - name: RABBITMQ_HOST
               value: {{ include "clowder2.releaseName" .  }}-rabbitmq
