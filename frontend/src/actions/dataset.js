@@ -186,10 +186,11 @@ export function updateDataset(datasetId, formData) {
 
 export const FREEZE_DATASET = "FREEZE_DATASET";
 
-export function freezeDataset(datasetId) {
+export function freezeDataset(datasetId, publishDOI = false) {
 	return (dispatch) => {
 		return V2.DatasetsService.freezeDatasetApiV2DatasetsDatasetIdFreezePost(
-			datasetId
+			datasetId,
+			publishDOI
 		)
 			.then((json) => {
 				dispatch({

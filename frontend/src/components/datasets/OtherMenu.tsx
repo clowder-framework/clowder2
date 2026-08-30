@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ActionModal } from "../dialog/ActionModal";
+import { ActionModalWithCheckbox } from "../dialog/ActionModalWithCheckbox";
 import {
 	datasetDeleted,
 	freezeDataset as freezeDatasetAction,
@@ -27,6 +28,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
 import ShareIcon from "@mui/icons-material/Share";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import config from "../../app.config";
 
 type ActionsMenuProps = {
 	datasetId?: string;
@@ -34,6 +36,7 @@ type ActionsMenuProps = {
 };
 
 export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
+	let doiActionText;
 	const { datasetId, datasetName } = props;
 
 	// use history hook to redirect/navigate between routes
@@ -46,8 +49,10 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	const freezeDataset = (datasetId: string | undefined) =>
-		dispatch(freezeDatasetAction(datasetId));
+	const freezeDataset = (
+		datasetId: string | undefined,
+		publishDOI: boolean | undefined
+	) => dispatch(freezeDatasetAction(datasetId, publishDOI));
 
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 
@@ -87,6 +92,14 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	};
 
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
+	const [publishDOI, setPublishDOI] = React.useState<boolean>(false);
+
+	doiActionText =
+		"By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset.";
+	if (config.enableDOI) {
+		doiActionText +=
+			" Optionally, you can also generate a Digital Object Identifier (DOI) by selecting the checkbox below. It will be displayed in the dataset page in the Details section.";
+	}
 
 	const handleOptionClick = (event: React.MouseEvent<any>) => {
 		setAnchorEl(event.currentTarget);
@@ -124,13 +137,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 				}}
 				actionLevel={"error"}
 			/>
-			<ActionModal
+			<ActionModalWithCheckbox
 				actionOpen={freezeDatasetConfirmOpen}
 				actionTitle="Are you ready to release this version of the dataset?"
-				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
+				actionText={doiActionText}
+				displayCheckbox={config.enableDOI}
+				checkboxLabel="Generate a DOI for this version of the dataset."
+				checkboxSelected={publishDOI}
+				setCheckboxSelected={setPublishDOI}
 				actionBtnName="Release"
 				handleActionBtnClick={() => {
-					freezeDataset(datasetId);
+					freezeDataset(datasetId, publishDOI);
 					setFreezeDatasetConfirmOpen(false);
 				}}
 				handleActionCancel={() => {

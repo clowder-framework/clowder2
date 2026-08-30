@@ -128,8 +128,33 @@ for client consumption. These views include:
     - providing users with greater control over dataset management
 - **Forbidden Modifications**: Prevent modifications to a released dataset.
 
-## Future Enhancements
+## Digital Object Identifier (DOI) Integration
+Currently, the feature to generate DOI through [DataCite](https://datacite.org/) is integrated with Clowder. The user is provided this option
+when they release a dataset. Clowder then talks with the DataCite API to mint a DOI for the released dataset and
+submits some metadata about the dataset like its title, URL, and creator details. The generated DOI is displayed in the
+dataset page in the Details section.
 
-- **Mint DOI**: Integrate DOI support to allow minting Digital Object Identifiers (DOIs) for each dataset version,
-  ensuring unique and persistent
-  identification ([Issue #919](https://github.com/clowder-framework/clowder2/issues/919)).
+### DOI Configuration Details
+The following configuration changes need to be made to integrate DOI generation with Clowder using DataCite:
+
+In the backend module, the following configurations should be set:
+```python
+DOI_ENABLED = True # Enable or disable DOI generation
+DATACITE_API_URL = "https://api.test.datacite.org/" # DataCite API URL (production URL is https://api.datacite.org/)
+```
+
+Also, following environment variables should be set when running the backend module:
+```shell
+DATACITE_USERNAME="<DataCite repository username>"
+DATACITE_PASSWORD="<DataCite repository password>"
+DATACITE_PREFIX="<DataCite repository prefix>"
+```
+
+In the frontend module, the following configuration should be set:
+```javascript
+config["enableDOI"] = true; // Enable or disable DOI generation
+```
+
+## Future Enhancements
+- **Add support for CrossRef when generate DOI**: Currently, Clowder supports DataCite for minting DOIs. We might need to
+  integrate CrossRef to provide users with more options, as some users may already have an account with CrossRef.
