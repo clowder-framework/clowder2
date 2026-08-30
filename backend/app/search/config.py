@@ -19,7 +19,10 @@ class IndexSettings:
             # metadata fields
             "metadata": {
                 "type": "object",
+                "dynamic": True,
             },
+            # metadata fields cast to plain string to enable search
+            "metadata_stringify": {"type": "text"},
         }
     }
 
