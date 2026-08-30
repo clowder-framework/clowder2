@@ -17,6 +17,20 @@ services:
       - geoserver_data:/opt/geoserver_data
       - geoserver_exts:/opt/additional_libs
 
+  geoshp-preview:
+    image: maxzilla2/geoshp
+    environment:
+      GEOSERVER_URL: http://geoserver:8080/geoserver/
+      EXTERNAL_GEOSERVER_URL: http://localhost:8085/geoserver/
+      GEOSERVER_USERNAME: admin
+      GEOSERVER_PASSWORD: geoserver
+      CLOWDER_VERSION: 2
+      CLOWDER_URL: http://host.docker.internal:8000/
+      RABBITMQ_URI: amqp://guest:guest@host.docker.internal:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
   ## This image must be built from:
   ##   https://github.com/clowder-framework/extractors-geo/blob/master/preview.geotiff/Dockerfile
   ## docker build -f Dockerfile -t clowder/extractors-geotiff-preview .
