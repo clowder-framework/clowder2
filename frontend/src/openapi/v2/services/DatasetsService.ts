@@ -457,6 +457,35 @@ export class DatasetsService {
     }
 
     /**
+     * Get Dataset Folders All
+     * @param datasetId
+     * @param skip
+     * @param limit
+     * @param enableAdmin
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetFoldersAllApiV2DatasetsDatasetIdAllFoldersGet(
+        datasetId: string,
+        skip?: number,
+        limit: number = 10,
+        enableAdmin: boolean = false,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/all_folders`,
+            query: {
+                'skip': skip,
+                'limit': limit,
+                'enable_admin': enableAdmin,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Folder
      * @param datasetId
      * @param folderId
