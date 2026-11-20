@@ -367,20 +367,25 @@ class MongoBridgeMigrator:
     def _stream_file_to_minio(
         self, file_doc: Dict[str, Any], v2_file_id: ObjectId
     ) -> tuple[str, int]:
+        """Upload a GridFS object to MinIO without buffering the whole file."""
         stream = self._gridfs_stream(self.uploads_gridfs, file_doc)
-        data = stream.read()
-        byte_count = len(data)
-        if self.config.dry_run:
-            return "dry-run", byte_count
-        content_type = first_present(file_doc, ("contentType", "content_type"))
-        result = self.minio.put_object(
-            self.config.minio_bucket,
-            str(v2_file_id),
-            io.BytesIO(data),
-            length=byte_count,
-            content_type=content_type or "application/octet-stream",
-        )
-        return result.version_id or "N/A", byte_count
+        try:
+            # GridOut.length is the file size. put_object reads the stream in
+            # parts, so a large upload does not have to fit in memory.
+            byte_count = int(stream.length)
+            if self.config.dry_run:
+                return "dry-run", byte_count
+            content_type = first_present(file_doc, ("contentType", "content_type"))
+            result = self.minio.put_object(
+                self.config.minio_bucket,
+                str(v2_file_id),
+                stream,
+                length=byte_count,
+                content_type=content_type or "application/octet-stream",
+            )
+            return result.version_id or "N/A", byte_count
+        finally:
+            stream.close()
 
     def _migrate_thumbnail(
         self,
