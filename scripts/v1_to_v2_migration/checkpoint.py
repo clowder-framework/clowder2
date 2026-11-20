@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from .utils import write_secret_json
+
 
 class Checkpoint:
     """Small JSON-backed store for v1-to-v2 ID maps and migration state."""
@@ -28,8 +30,9 @@ class Checkpoint:
             self.data.update(json.loads(self.path.read_text()))
 
     def save(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(self.data, indent=2, sort_keys=True))
+        # Same 0600 treatment as credential files. The checkpoint records v1
+        # to v2 id mappings and can sit on a shared migration host.
+        write_secret_json(self.path, self.data)
 
     def get(self, namespace: str, key: str) -> Optional[Any]:
         return self.data.setdefault(namespace, {}).get(str(key))

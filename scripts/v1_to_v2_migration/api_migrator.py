@@ -164,7 +164,7 @@ class ApiMigrator:
     def _write_failure_report(self) -> None:
         """Print an aggregate summary and write failures to a JSON file."""
         path = self.config.output_dir / "failures.json"
-        path.write_text(json.dumps(self.failures, indent=2))
+        write_secret_json(path, self.failures)
         if self.failures:
             by_kind: Dict[str, int] = {}
             for f in self.failures:
