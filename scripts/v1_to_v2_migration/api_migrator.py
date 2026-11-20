@@ -262,13 +262,15 @@ class ApiMigrator:
         ):
             if idx % 25 == 0 or idx == total:
                 print(f"  users: {idx}/{total}")
-            if email not in credentials:
-                credentials[email] = secrets.token_urlsafe(18)
             if self.config.dry_run:
+                # Do not mint or persist passwords. A dry run must not leave
+                # plaintext credentials on disk for users it never creates.
                 self.checkpoint.set(
                     "users", email, {"email": email, "existing": email in existing_v2}
                 )
                 continue
+            if email not in credentials:
+                credentials[email] = secrets.token_urlsafe(18)
             if email not in existing_v2:
                 try:
                     user = self.v2_admin.create_user(
@@ -298,7 +300,8 @@ class ApiMigrator:
             # logins before the first dataset migrates. Keys are instead created
             # lazily in _owner_client() the first time a user owns a dataset.
 
-        write_secret_json(self._owner_passwords_path(), credentials)
+        if not self.config.dry_run:
+            write_secret_json(self._owner_passwords_path(), credentials)
         self.owner_passwords = credentials
         return credentials
 
