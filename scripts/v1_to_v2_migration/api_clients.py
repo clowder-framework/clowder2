@@ -71,23 +71,46 @@ class ClowderV1Client:
             raise ApiError(str(exc), status_code=response.status_code) from exc
         return response.json()
 
+    def _get_json_with_retry(
+        self, path: str, params: Dict[str, Any], attempts: int = 3
+    ) -> Any:
+        """Retry transient 5xx responses so one blip does not fail the page."""
+        last_error: Optional[ApiError] = None
+        for attempt in range(attempts):
+            try:
+                return self.get_json(path, **params)
+            except ApiError as exc:
+                last_error = exc
+                retryable = exc.status_code is None or exc.status_code >= 500
+                if not retryable or attempt == attempts - 1:
+                    raise
+        assert last_error is not None
+        raise last_error
+
     def list_datasets(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """Fetch v1 datasets, paging through cursor-based pagination.
 
         The v1 cursor uses `when=b` + `date=<created timestamp>` as a page
-        token. If the server returns 500 on a paginated request (e.g. because
-        it cannot parse the date format), we stop and return what we have so
-        far rather than crashing the entire migration.
+        token. A failed page is retried, then raised. Returning the pages
+        collected so far would silently migrate only part of v1.
         """
         datasets: List[Dict[str, Any]] = []
         page_size = 1000 if limit is None else min(1000, max(limit, 1))
         params: Dict[str, Any] = {"limit": page_size}
+        page_num = 0
         while True:
+            page_num += 1
             try:
-                page = self.get_json("/api/datasets", **params)
-            except ApiError:
-                # Pagination cursor caused a server error; return what we have
-                break
+                page = self._get_json_with_retry("/api/datasets", params)
+            except ApiError as exc:
+                if not datasets:
+                    raise
+                raise ApiError(
+                    f"v1 dataset pagination failed on page {page_num} after "
+                    f"collecting {len(datasets)} dataset(s): {exc}. "
+                    "Refusing to continue with a partial dataset list.",
+                    status_code=exc.status_code,
+                ) from exc
             items: List[Dict[str, Any]] = []
             if isinstance(page, list):
                 items = page
