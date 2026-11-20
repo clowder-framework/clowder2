@@ -78,7 +78,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "api-inventory":
-        migrator = ApiMigrator(ApiConfig.from_env())
+        migrator = ApiMigrator(ApiConfig.from_env(require_v2=False), connect_v2=False)
         try:
             inventory = migrator.inventory()
         finally:

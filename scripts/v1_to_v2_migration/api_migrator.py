@@ -90,7 +90,7 @@ def _phase_finished(completed: Optional[str], phase: str) -> bool:
 class ApiMigrator:
     """Coordinates the REST API migration path."""
 
-    def __init__(self, config: ApiConfig):
+    def __init__(self, config: ApiConfig, *, connect_v2: bool = True):
         self.config = config
         self.checkpoint = Checkpoint(config.checkpoint_path)
         self.config.output_dir.mkdir(parents=True, exist_ok=True)
@@ -103,20 +103,26 @@ class ApiMigrator:
             password=config.clowder1_password,
             timeout=config.timeout_seconds,
         )
-        self.v2_admin = ClowderV2Client(
-            config.clowder2_url,
-            api_key=config.clowder2_api_key,
-            timeout=config.timeout_seconds,
-        )
-        if (
-            not config.clowder2_api_key
-            and config.clowder2_admin_email
-            and config.clowder2_admin_password
-        ):
-            self.v2_admin.bearer_token = self.v2_admin.login(
-                config.clowder2_admin_email,
-                config.clowder2_admin_password,
+        # api-inventory only lists v1 datasets. Skip the v2 client so that
+        # command can run before CLOWDER2_BASE_URL or v2 credentials exist.
+        self.v2_admin: Optional[ClowderV2Client] = None
+        if connect_v2:
+            if not config.clowder2_url:
+                raise RuntimeError("CLOWDER2_BASE_URL is required for this command.")
+            self.v2_admin = ClowderV2Client(
+                config.clowder2_url,
+                api_key=config.clowder2_api_key,
+                timeout=config.timeout_seconds,
             )
+            if (
+                not config.clowder2_api_key
+                and config.clowder2_admin_email
+                and config.clowder2_admin_password
+            ):
+                self.v2_admin.bearer_token = self.v2_admin.login(
+                    config.clowder2_admin_email,
+                    config.clowder2_admin_password,
+                )
         self.owner_passwords = self._load_owner_passwords()
         # Populated by sync_spaces(); maps v1_space_id -> space dict
         self._space_lookup: Dict[str, Dict[str, Any]] = {}
@@ -173,7 +179,8 @@ class ApiMigrator:
 
     def close(self) -> None:
         self.v1.close()
-        self.v2_admin.close()
+        if self.v2_admin is not None:
+            self.v2_admin.close()
 
     def _owner_passwords_path(self) -> Path:
         return self.config.output_dir / _OWNER_PASSWORDS_FILENAME

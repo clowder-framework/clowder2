@@ -35,8 +35,12 @@ class ApiConfig:
     timeout_seconds: float = 120.0
 
     @classmethod
-    def from_env(cls) -> "ApiConfig":
-        clowder2_url = os.environ["CLOWDER2_BASE_URL"].rstrip("/")
+    def from_env(cls, *, require_v2: bool = True) -> "ApiConfig":
+        if require_v2:
+            clowder2_url = os.environ["CLOWDER2_BASE_URL"].rstrip("/")
+        else:
+            # Inventory only talks to v1. An empty v2 URL is valid there.
+            clowder2_url = os.getenv("CLOWDER2_BASE_URL", "").rstrip("/")
         if ":3000" in clowder2_url:
             raise ValueError(
                 "CLOWDER2_BASE_URL appears to target the frontend dev server (port 3000). "
