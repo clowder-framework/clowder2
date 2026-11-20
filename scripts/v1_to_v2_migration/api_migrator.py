@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import secrets
-import tempfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -14,9 +13,19 @@ from .config import ApiConfig
 from .utils import (
     extract_email,
     first_present,
+    harden_secret_file,
     normalize_status,
+    sanitize_error,
+    secure_temp_file,
     stringify_id,
+    write_secret_json,
 )
+
+_MIGRATION_API_KEY_NAME = "migration"
+# Long enough for a full migration; leftover keys still expire if cleanup is skipped.
+_MIGRATION_API_KEY_TTL_MINUTES = 7 * 24 * 60
+_OWNER_PASSWORDS_FILENAME = "generated-owner-passwords.json"
+_USER_API_KEYS_FILENAME = "user-api-keys.json"
 
 _LEGACY_CONTEXT = [{"legacy": "https://clowderframework.org/legacy#"}]
 _TAGS_CONTEXT = [{"tags": "http://www.w3.org/2004/02/skos/core#prefLabel"}]
@@ -93,8 +102,9 @@ class ApiMigrator:
         # Per-user v2 API keys (email → key); created once in sync_users() and
         # reused for all operations within each user's datasets.
         self._user_api_keys: Dict[str, str] = {}
-        keys_path = self.config.output_dir / "user-api-keys.json"
+        keys_path = self._user_api_keys_path()
         if keys_path.exists():
+            harden_secret_file(keys_path)
             self._user_api_keys.update(json.loads(keys_path.read_text()))
         # Records every item that failed to migrate so failures are visible and
         # countable instead of vanishing into a lone SKIP log line.
@@ -111,15 +121,16 @@ class ApiMigrator:
         self, kind: str, v1_id: str, detail: str, exc: BaseException
     ) -> None:
         """Record and log a per-item migration failure without aborting the run."""
+        error = sanitize_error(exc)
         self.failures.append(
             {
                 "kind": kind,
                 "v1_id": v1_id,
                 "detail": detail,
-                "error": f"{type(exc).__name__}: {exc}",
+                "error": error,
             }
         )
-        print(f"  FAIL {kind} {v1_id} ({detail}): {type(exc).__name__}: {exc}")
+        print(f"  FAIL {kind} {v1_id} ({detail}): {error}")
 
     def _write_failure_report(self) -> None:
         """Print an aggregate summary and write failures to a JSON file."""
@@ -141,15 +152,26 @@ class ApiMigrator:
         self.v1.close()
         self.v2_admin.close()
 
+    def _owner_passwords_path(self) -> Path:
+        return self.config.output_dir / _OWNER_PASSWORDS_FILENAME
+
+    def _user_api_keys_path(self) -> Path:
+        return self.config.output_dir / _USER_API_KEYS_FILENAME
+
+    def _persist_user_api_keys(self) -> None:
+        write_secret_json(self._user_api_keys_path(), self._user_api_keys)
+
     def _load_owner_passwords(self) -> Dict[str, str]:
         passwords: Dict[str, str] = {}
-        generated = self.config.output_dir / "generated-owner-passwords.json"
+        generated = self._owner_passwords_path()
         if generated.exists():
+            harden_secret_file(generated)
             passwords.update(json.loads(generated.read_text()))
         if (
             self.config.owner_passwords_path
             and self.config.owner_passwords_path.exists()
         ):
+            harden_secret_file(self.config.owner_passwords_path)
             passwords.update(json.loads(self.config.owner_passwords_path.read_text()))
         return passwords
 
@@ -246,8 +268,7 @@ class ApiMigrator:
             # logins before the first dataset migrates. Keys are instead created
             # lazily in _owner_client() the first time a user owns a dataset.
 
-        credentials_path = self.config.output_dir / "generated-owner-passwords.json"
-        credentials_path.write_text(json.dumps(credentials, indent=2, sort_keys=True))
+        write_secret_json(self._owner_passwords_path(), credentials)
         self.owner_passwords = credentials
         return credentials
 
@@ -346,15 +367,23 @@ class ApiMigrator:
                 fallback="migration@localhost.localdomain",
             )
             ds_name = first_present(dataset, ("name", "title")) or v1_dataset_id
+            owner_client: Optional[ClowderV2Client] = None
             if self.config.dry_run:
-                owner_client = None
                 print(f"  owner: {owner_email}  dataset: {ds_name}")
             else:
                 owner_client = self._owner_client(owner_email)
-                has_key = owner_email in self._user_api_keys
-                print(
-                    f"  owner: {owner_email}  key: {'ok' if has_key else 'none (admin fallback)'}  dataset: {ds_name}"
-                )
+                if owner_client is None:
+                    self._record_failure(
+                        "dataset",
+                        v1_dataset_id,
+                        ds_name,
+                        RuntimeError(
+                            f"no v2 API key for owner {owner_email}; "
+                            "dataset not migrated to avoid admin attribution"
+                        ),
+                    )
+                    continue
+                print(f"  owner: {owner_email}  key: ok  dataset: {ds_name}")
             try:
                 self._migrate_dataset(
                     owner_client, owner_email, dataset, v1_dataset_id, license_id
@@ -367,9 +396,12 @@ class ApiMigrator:
                 if owner_client is not None:
                     owner_client.close()
 
-        if limit is None:
-            self._grant_space_group_roles()
-        self._write_failure_report()
+        try:
+            if limit is None:
+                self._grant_space_group_roles()
+        finally:
+            self._write_failure_report()
+            self.revoke_migration_keys()
 
     def _login_as(
         self, email: str, credentials: Dict[str, str]
@@ -385,11 +417,12 @@ class ApiMigrator:
             return None
 
     def _ensure_api_key(self, email: str) -> Optional[str]:
-        """Return a permanent v2 API key for *email*, creating one on demand.
+        """Return a time-limited v2 API key for *email*, creating one on demand.
 
         Keys are created lazily (only for users who actually own a dataset)
         rather than for every v1 user up front, since each key costs a Keycloak
-        login. Newly created keys are persisted to user-api-keys.json.
+        login. Newly created keys are persisted to user-api-keys.json with mode
+        0600 and revoked at the end of the run.
         """
         api_key = self._user_api_keys.get(email)
         if api_key:
@@ -401,45 +434,78 @@ class ApiMigrator:
             self._api_key_login_failed.add(email)
             return None
         try:
-            key = bearer_client.create_api_key("migration")
+            key = bearer_client.create_api_key(
+                _MIGRATION_API_KEY_NAME, mins=_MIGRATION_API_KEY_TTL_MINUTES
+            )
             self._user_api_keys[email] = key
         except ApiError:
             self._api_key_login_failed.add(email)
             return None
         finally:
             bearer_client.close()
-        keys_path = self.config.output_dir / "user-api-keys.json"
-        keys_path.write_text(json.dumps(self._user_api_keys, indent=2, sort_keys=True))
+        self._persist_user_api_keys()
         return self._user_api_keys[email]
 
     def _invalidate_owner_key(self, email: str) -> None:
         """Drop a cached API key that the backend has rejected (e.g. expired).
 
-        Keys created before the create_api_key(mins=0) fix, or issued to a user
-        whose Keycloak session has since died, are permanently stuck in
-        user-api-keys.json — without this, _ensure_api_key would keep returning
-        the same dead key forever. Clearing both caches lets the next
-        _owner_client() call log in again and mint a fresh one.
+        Expired or otherwise rejected keys stay in user-api-keys.json unless
+        cleared — without this, _ensure_api_key would keep returning the same
+        dead key forever. Clearing both caches lets the next _owner_client()
+        call log in again and mint a fresh one.
         """
         self._user_api_keys.pop(email, None)
         self._api_key_login_failed.discard(email)
-        keys_path = self.config.output_dir / "user-api-keys.json"
-        keys_path.write_text(json.dumps(self._user_api_keys, indent=2, sort_keys=True))
+        self._persist_user_api_keys()
 
-    def _owner_client(self, email: str) -> ClowderV2Client:
-        """Return a long-lived client for *email*, falling back to admin."""
+    def _owner_client(self, email: str) -> Optional[ClowderV2Client]:
+        """Return a long-lived client for *email*, or None if no per-user key."""
         api_key = self._ensure_api_key(email)
-        if api_key:
-            return ClowderV2Client(
+        if not api_key:
+            return None
+        return ClowderV2Client(
+            self.config.clowder2_url,
+            api_key=api_key,
+            timeout=self.config.timeout_seconds,
+        )
+
+    def revoke_migration_keys(self) -> None:
+        """Delete leftover keys named 'migration' so they do not outlive the run."""
+        if self.config.dry_run:
+            return
+        remaining: Dict[str, str] = {}
+        revoked = 0
+        for email, api_key in list(self._user_api_keys.items()):
+            client = ClowderV2Client(
                 self.config.clowder2_url,
                 api_key=api_key,
                 timeout=self.config.timeout_seconds,
             )
-        return ClowderV2Client(
-            self.config.clowder2_url,
-            api_key=self.config.clowder2_api_key,
-            timeout=self.config.timeout_seconds,
-        )
+            try:
+                for key in client.list_api_keys():
+                    if key.get("name") != _MIGRATION_API_KEY_NAME:
+                        continue
+                    key_id = key.get("id")
+                    if not key_id:
+                        continue
+                    client.delete_api_key(str(key_id))
+                    revoked += 1
+            except ApiError as exc:
+                remaining[email] = api_key
+                print(
+                    f"  WARN could not revoke migration API key for {email}: "
+                    f"{sanitize_error(exc)}"
+                )
+            finally:
+                client.close()
+        self._user_api_keys = remaining
+        keys_path = self._user_api_keys_path()
+        if remaining:
+            self._persist_user_api_keys()
+        elif keys_path.exists():
+            keys_path.unlink()
+        if revoked:
+            print(f"Revoked {revoked} migration API key(s).")
 
     def _migrate_dataset(
         self,
@@ -461,11 +527,16 @@ class ApiMigrator:
 
         # Use the owner's API key client for all operations so every resource
         # (dataset, files, folders, metadata) is attributed to the correct user.
-        # Falls back to the admin client when no per-user key is available.
-        client = owner_client if owner_client else self.v2_admin
+        # Callers must not pass admin here: missing owner keys fail the dataset.
+        if owner_client is None:
+            raise RuntimeError(
+                f"no v2 API key for owner {owner_email}; "
+                "dataset not migrated to avoid admin attribution"
+            )
+        client = owner_client
         # A client this method creates itself (the refreshed replacement below)
         # is this method's own responsibility to close; the caller-supplied
-        # owner_client/v2_admin is the caller's responsibility.
+        # owner_client is the caller's responsibility.
         fresh_client: Optional[ClowderV2Client] = None
         try:
             # Dataset creation can 401 either from a transient token-refresh
@@ -479,14 +550,17 @@ class ApiMigrator:
             except ApiError as exc:
                 if exc.status_code != 401:
                     raise
-                if owner_client is not None:
-                    # A per-user key was in play and got rejected — it may be
-                    # expired. Drop it and mint a fresh one rather than
-                    # retrying with the same dead key, which would just fail
-                    # again.
-                    self._invalidate_owner_key(owner_email)
-                    fresh_client = self._owner_client(owner_email)
-                    client = fresh_client
+                # A per-user key was rejected — it may be expired. Drop it
+                # and mint a fresh one rather than retrying with the same
+                # dead key, which would just fail again.
+                self._invalidate_owner_key(owner_email)
+                fresh_client = self._owner_client(owner_email)
+                if fresh_client is None:
+                    raise RuntimeError(
+                        f"no v2 API key for owner {owner_email} after 401; "
+                        "dataset not migrated to avoid admin attribution"
+                    ) from exc
+                client = fresh_client
                 created = client.create_dataset(dataset_body, license_id)
             v2_dataset_id = created["id"]
             self.checkpoint.set("datasets", v1_dataset_id, v2_dataset_id)
@@ -678,8 +752,7 @@ class ApiMigrator:
                 # filename; inside a real folder tree only the basename is the
                 # file's name.
                 filename = filename.rsplit("/", 1)[-1] or filename
-            with tempfile.NamedTemporaryFile(delete=False) as tmp:
-                tmp_path = Path(tmp.name)
+            tmp_path = secure_temp_file()
             try:
                 self.v1.download_file_to(v1_file_id, tmp_path)
                 created = v2.upload_file(
@@ -690,7 +763,6 @@ class ApiMigrator:
                     folder_id=v2_folder_id,
                 )
             except Exception as exc:
-                tmp_path.unlink(missing_ok=True)
                 self._record_failure("file", v1_file_id, filename, exc)
                 continue
             finally:
@@ -843,8 +915,7 @@ class ApiMigrator:
             for preview in previews
         ]
         for thumbnail_id in [value for value in thumbnail_ids if value]:
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                tmp_path = Path(tmp.name)
+            tmp_path = secure_temp_file(suffix=".png")
             try:
                 if not self.v1.download_thumbnail_to(thumbnail_id, tmp_path):
                     continue

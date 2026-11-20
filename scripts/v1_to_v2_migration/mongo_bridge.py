@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import io
 import json
-import os
 import secrets
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional
@@ -22,11 +21,13 @@ from .config import MongoConfig
 from .utils import (
     extract_email,
     first_present,
+    harden_secret_file,
     normalize_status,
     parse_datetime,
     split_content_type,
     stringify_id,
     user_out,
+    write_secret_json,
 )
 
 
@@ -124,6 +125,7 @@ class MongoBridgeMigrator:
         passwords_path = self.config.output_dir / "generated-owner-passwords.json"
         passwords: Dict[str, str] = {}
         if passwords_path.exists():
+            harden_secret_file(passwords_path)
             passwords.update(json.loads(passwords_path.read_text()))
         generated = False
         try:
@@ -137,6 +139,10 @@ class MongoBridgeMigrator:
                 if existing:
                     self.checkpoint.set("users", email, str(existing["_id"]))
                     continue
+                # Random per-user password; operators must rotate these (or
+                # provision Keycloak accounts) before handing access to users.
+                # Login is Keycloak-backed, so these hashes are a local-auth
+                # fallback only — never a shared default like "change-me".
                 password = secrets.token_urlsafe(18)
                 user_doc = {
                     **user,
@@ -149,12 +155,7 @@ class MongoBridgeMigrator:
                 self.checkpoint.set("users", email, str(inserted.inserted_id))
         finally:
             if generated:
-                fd = os.open(
-                    passwords_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600
-                )
-                with os.fdopen(fd, "w") as handle:
-                    json.dump(passwords, handle, indent=2, sort_keys=True)
-                os.chmod(passwords_path, 0o600)
+                write_secret_json(passwords_path, passwords)
 
     def _owner_docs(self) -> Dict[str, Dict[str, Any]]:
         owners: Dict[str, Dict[str, Any]] = {}

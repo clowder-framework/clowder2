@@ -442,17 +442,40 @@ class ClowderV2Client:
             self._request("PATCH", f"/files/{file_id}/thumbnail/{thumbnail_id}")
         )
 
-    def create_api_key(self, name: str) -> str:
-        """Create a non-expiring API key for the authenticated user. Returns the raw key.
+    def create_api_key(self, name: str, mins: int = 0) -> str:
+        """Create an API key for the authenticated user. Returns the raw key.
 
-        mins=0 is required: the endpoint's default (settings.local_auth_expiration,
-        30 minutes) is shorter than a full migration run, so keys created without it
-        expire mid-run and every subsequent dataset for that owner fails with 401.
+        mins is minutes until expiration (0 = no expiration). The endpoint default
+        (settings.local_auth_expiration, 30 minutes) is shorter than a full
+        migration run, so callers that need the key for the whole job must pass
+        a longer TTL or 0.
         """
         response = self._request(
-            "POST", "/users/keys", params={"name": name, "mins": 0}
+            "POST", "/users/keys", params={"name": name, "mins": mins}
         )
         return self._json_from_response(response)
+
+    def list_api_keys(self) -> List[Dict[str, Any]]:
+        """List API keys for the authenticated user."""
+        keys: List[Dict[str, Any]] = []
+        skip = 0
+        limit = 100
+        while True:
+            payload = self._json_from_response(
+                self._request(
+                    "GET", "/users/keys", params={"skip": skip, "limit": limit}
+                )
+            )
+            items = payload.get("data") or [] if isinstance(payload, dict) else []
+            keys.extend(items)
+            if len(items) < limit:
+                break
+            skip += limit
+        return keys
+
+    def delete_api_key(self, key_id: str) -> None:
+        """Delete an API key belonging to the authenticated user."""
+        self._request("DELETE", f"/users/keys/{key_id}")
 
     def list_listeners(self) -> List[Dict[str, Any]]:
         payload = self._json_from_response(

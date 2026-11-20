@@ -35,7 +35,12 @@ def build_parser() -> argparse.ArgumentParser:
     api_inventory.add_argument(
         "--print",
         action="store_true",
-        help="Print inventory JSON to stdout.",
+        help="Print dataset count and ids to stdout (not full dataset objects).",
+    )
+
+    subparsers.add_parser(
+        "cleanup-keys",
+        help="Revoke leftover 'migration' API keys written to user-api-keys.json.",
     )
 
     mongo = subparsers.add_parser(
@@ -74,7 +79,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         finally:
             migrator.close()
         if args.print:
-            print(json.dumps(inventory, indent=2, default=str))
+            summary = {
+                "datasets": len(inventory),
+                "ids": [
+                    str(ds.get("id") or ds.get("_id") or "")
+                    for ds in inventory
+                    if ds.get("id") or ds.get("_id")
+                ],
+            }
+            print(json.dumps(summary, indent=2))
+        return 0
+
+    if args.command == "cleanup-keys":
+        migrator = ApiMigrator(ApiConfig.from_env())
+        try:
+            migrator.revoke_migration_keys()
+        finally:
+            migrator.close()
         return 0
 
     if args.command == "mongo-bridge":

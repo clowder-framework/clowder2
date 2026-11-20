@@ -2,17 +2,59 @@
 
 from __future__ import annotations
 
+import json
+import os
 import re
+import tempfile
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 
 from bson import ObjectId
+
+_SECRET_FILE_MODE = 0o600
+_ERROR_MESSAGE_MAX_LEN = 200
 
 
 UUID_RE = re.compile(
     r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
     r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 )
+
+
+def harden_secret_file(path: Path) -> None:
+    """Best-effort chmod 0600 for an existing credential file."""
+    try:
+        if path.exists():
+            os.chmod(path, _SECRET_FILE_MODE)
+    except OSError:
+        pass
+
+
+def write_secret_json(path: Path, payload: Any) -> None:
+    """Write JSON with mode 0600 so credential files are not group/world readable."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, _SECRET_FILE_MODE)
+    with os.fdopen(fd, "w") as handle:
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    harden_secret_file(path)
+
+
+def sanitize_error(exc: BaseException, max_len: int = _ERROR_MESSAGE_MAX_LEN) -> str:
+    """Collapse and truncate exception text so failure logs do not store HTTP bodies."""
+    text = " ".join(f"{type(exc).__name__}: {exc}".split())
+    if len(text) > max_len:
+        return text[: max_len - 3] + "..."
+    return text
+
+
+def secure_temp_file(suffix: str = "") -> Path:
+    """Create a 0600 temp file and return its path. Caller must unlink it."""
+    fd, name = tempfile.mkstemp(suffix=suffix)
+    os.close(fd)
+    os.chmod(name, _SECRET_FILE_MODE)
+    return Path(name)
 
 
 def first_present(document: Dict[str, Any], names: Iterable[str]) -> Any:

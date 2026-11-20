@@ -86,3 +86,6 @@ fact.png
 jupyterhub/.env-dev
 /migration-output/
 /migration-checkpoint.json
+**/migration-checkpoint.json
+**/user-api-keys.json
+**/generated-owner-passwords.json

@@ -137,7 +137,7 @@ services:
     networks:
       - clowder2
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"  # host-only access for the migration tool
     volumes:
       - mongo:/data/db
 
