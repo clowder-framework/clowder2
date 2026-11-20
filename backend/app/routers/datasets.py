@@ -707,6 +707,9 @@ async def get_dataset_folders(
     public: bool = Depends(CheckStatus("PUBLIC")),
     skip: int = 0,
     limit: int = 10,
+    admin=Depends(get_admin),
+    enable_admin: bool = False,
+    admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (
@@ -716,7 +719,7 @@ async def get_dataset_folders(
             )
         )
     ) is not None:
-        if authenticated or public:
+        if authenticated or public or (admin and admin_mode):
             query = [
                 FolderDBViewList.dataset_id == PydanticObjectId(dataset_id),
             ]

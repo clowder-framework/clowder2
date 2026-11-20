@@ -17,8 +17,15 @@ class IndexSettings:
             "folder_id": {"type": "text", "index": False},
             "bytes": {"type": "long"},
             # metadata fields
+            # Use "flattened" rather than "object": arbitrary user/extractor
+            # metadata has unpredictable value types for the same key across
+            # documents (e.g. one doc has a numeric "Number pixels", another has
+            # the string "2.53266M"). A dynamic "object" mapping infers a type
+            # from the first value it sees per key and then rejects conflicting
+            # documents with mapper_parsing_exception. "flattened" indexes every
+            # leaf as a keyword under a single field, so no type conflicts occur.
             "metadata": {
-                "type": "object",
+                "type": "flattened",
             },
         }
     }

@@ -84,3 +84,5 @@ secrets.yaml
 official.csv
 fact.png
 jupyterhub/.env-dev
+/migration-output/
+/migration-checkpoint.json
