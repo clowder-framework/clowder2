@@ -19,7 +19,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     api = subparsers.add_parser("api", help="Run API-first migration path.")
     api.add_argument(
-        "--force", action="store_true", help="Re-run already mapped items."
+        "--force",
+        action="store_true",
+        help=(
+            "Re-enter datasets already marked complete. An existing v2 dataset "
+            "is reused instead of creating another one."
+        ),
     )
     api.add_argument(
         "--limit",

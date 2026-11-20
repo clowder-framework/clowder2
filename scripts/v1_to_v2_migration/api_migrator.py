@@ -63,6 +63,29 @@ _TAGS_LISTENER = {
     "description": "Tags migrated from Clowder v1",
 }
 
+# A dataset is checkpointed under "datasets" only after every phase below has
+# finished. The v2 id is stored earlier, under "dataset_state", so a crashed
+# run can resume folders/files/metadata on the same dataset. Writing the v2 id
+# into "datasets" immediately after create_dataset made resume skip the
+# half-finished dataset, and --force then called create_dataset again.
+_DATASET_PHASES = (
+    "created",
+    "provenance",
+    "folders",
+    "files",
+    "metadata",
+    "tags",
+    "comments",
+    "complete",
+)
+
+
+def _phase_finished(completed: Optional[str], phase: str) -> bool:
+    """Return whether *phase* is already included in *completed*."""
+    if completed not in _DATASET_PHASES:
+        return False
+    return _DATASET_PHASES.index(completed) >= _DATASET_PHASES.index(phase)
+
 
 class ApiMigrator:
     """Coordinates the REST API migration path."""
@@ -354,10 +377,11 @@ class ApiMigrator:
             v1_dataset_id = stringify_id(first_present(dataset, ("id", "_id")))
             if not v1_dataset_id:
                 continue
-            if (
-                isinstance(self.checkpoint.get("datasets", v1_dataset_id), str)
-                and not force
-            ):
+            _v2_id, phase = self._dataset_progress(v1_dataset_id)
+            # Only a fully finished dataset is skipped. An in-progress v2 id
+            # must be reused so resume fills in the rest instead of creating
+            # another dataset. --force re-enters finished datasets the same way.
+            if phase == "complete" and not force:
                 continue
             # v1 list response includes authorId (ObjectId) but not the full author
             # object. Resolve via the user map built in sync_users().
@@ -390,7 +414,8 @@ class ApiMigrator:
                 )
             except Exception as exc:
                 # One failing dataset must never abort the whole run. Record it
-                # and move on; a later resume run will retry unmapped datasets.
+                # and move on; a later resume retries datasets that are not
+                # marked complete.
                 self._record_failure("dataset", v1_dataset_id, ds_name, exc)
             finally:
                 if owner_client is not None:
@@ -538,48 +563,107 @@ class ApiMigrator:
         # is this method's own responsibility to close; the caller-supplied
         # owner_client is the caller's responsibility.
         fresh_client: Optional[ClowderV2Client] = None
+        v2_dataset_id, phase = self._dataset_progress(v1_dataset_id)
         try:
-            # Dataset creation can 401 either from a transient token-refresh
-            # blip or because the cached owner API key has expired mid-run.
-            # Retry once before giving up so one bad request doesn't defer a
-            # dataset to a later resume run. Safe to retry here specifically:
-            # nothing is created until create_dataset returns, so a retry can
-            # never duplicate work.
-            try:
-                created = client.create_dataset(dataset_body, license_id)
-            except ApiError as exc:
-                if exc.status_code != 401:
-                    raise
-                # A per-user key was rejected — it may be expired. Drop it
-                # and mint a fresh one rather than retrying with the same
-                # dead key, which would just fail again.
-                self._invalidate_owner_key(owner_email)
-                fresh_client = self._owner_client(owner_email)
-                if fresh_client is None:
-                    raise RuntimeError(
-                        f"no v2 API key for owner {owner_email} after 401; "
-                        "dataset not migrated to avoid admin attribution"
-                    ) from exc
-                client = fresh_client
-                created = client.create_dataset(dataset_body, license_id)
-            v2_dataset_id = created["id"]
-            self.checkpoint.set("datasets", v1_dataset_id, v2_dataset_id)
-
-            self._migrate_provenance_metadata(
-                client, dataset, v1_dataset_id, v2_dataset_id
-            )
-            self._migrate_folders(client, v1_dataset_id, v2_dataset_id)
-            self._migrate_files(client, v1_dataset_id, v2_dataset_id)
-            self._migrate_metadata(
-                client.add_dataset_metadata, "datasets", v1_dataset_id, v2_dataset_id
-            )
-            self._migrate_tags_as_metadata(
-                client.add_dataset_metadata, "datasets", v1_dataset_id, v2_dataset_id
-            )
-            self._export_comment_sidecar("dataset", v1_dataset_id)
+            if not v2_dataset_id:
+                # Dataset creation can 401 either from a transient token-refresh
+                # blip or because the cached owner API key has expired mid-run.
+                # Retry once before giving up so one bad request doesn't defer a
+                # dataset to a later resume run. Safe to retry here specifically:
+                # nothing is created until create_dataset returns, so a retry can
+                # never duplicate work. A later resume reuses the stored id.
+                try:
+                    created = client.create_dataset(dataset_body, license_id)
+                except ApiError as exc:
+                    if exc.status_code != 401:
+                        raise
+                    # A per-user key was rejected — it may be expired. Drop it
+                    # and mint a fresh one rather than retrying with the same
+                    # dead key, which would just fail again.
+                    self._invalidate_owner_key(owner_email)
+                    fresh_client = self._owner_client(owner_email)
+                    if fresh_client is None:
+                        raise RuntimeError(
+                            f"no v2 API key for owner {owner_email} after 401; "
+                            "dataset not migrated to avoid admin attribution"
+                        ) from exc
+                    client = fresh_client
+                    created = client.create_dataset(dataset_body, license_id)
+                v2_dataset_id = created["id"]
+                phase = None
+            if not _phase_finished(phase, "created"):
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "created")
+                phase = "created"
+            if not _phase_finished(phase, "provenance"):
+                self._migrate_provenance_metadata(
+                    client, dataset, v1_dataset_id, v2_dataset_id
+                )
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "provenance")
+                phase = "provenance"
+            if not _phase_finished(phase, "folders"):
+                self._migrate_folders(client, v1_dataset_id, v2_dataset_id)
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "folders")
+                phase = "folders"
+            if not _phase_finished(phase, "files"):
+                self._migrate_files(client, v1_dataset_id, v2_dataset_id)
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "files")
+                phase = "files"
+            if not _phase_finished(phase, "metadata"):
+                self._migrate_metadata(
+                    client.add_dataset_metadata,
+                    "datasets",
+                    v1_dataset_id,
+                    v2_dataset_id,
+                )
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "metadata")
+                phase = "metadata"
+            if not _phase_finished(phase, "tags"):
+                self._migrate_tags_as_metadata(
+                    client.add_dataset_metadata,
+                    "datasets",
+                    v1_dataset_id,
+                    v2_dataset_id,
+                )
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "tags")
+                phase = "tags"
+            if not _phase_finished(phase, "comments"):
+                self._export_comment_sidecar("dataset", v1_dataset_id)
+                self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "comments")
+            self._mark_dataset_phase(v1_dataset_id, v2_dataset_id, "complete")
         finally:
             if fresh_client is not None:
                 fresh_client.close()
+
+    def _dataset_progress(
+        self, v1_dataset_id: str
+    ) -> Tuple[Optional[str], Optional[str]]:
+        """Return the stored v2 dataset id and the last finished phase.
+
+        A legacy checkpoint that stored only the v2 id under "datasets" is
+        treated as complete so an already-finished run is not repeated.
+        """
+        state = self.checkpoint.get("dataset_state", v1_dataset_id)
+        if isinstance(state, dict):
+            v2_id = state.get("v2_id")
+            phase = state.get("phase")
+            if isinstance(v2_id, str) and isinstance(phase, str):
+                return v2_id, phase
+        legacy = self.checkpoint.get("datasets", v1_dataset_id)
+        if isinstance(legacy, str):
+            return legacy, "complete"
+        return None, None
+
+    def _mark_dataset_phase(
+        self, v1_dataset_id: str, v2_dataset_id: str, phase: str
+    ) -> None:
+        """Record phase progress. The resumable id map is written only at the end."""
+        self.checkpoint.set(
+            "dataset_state",
+            v1_dataset_id,
+            {"v2_id": v2_dataset_id, "phase": phase},
+        )
+        if phase == "complete":
+            self.checkpoint.set("datasets", v1_dataset_id, v2_dataset_id)
 
     def _migrate_provenance_metadata(
         self,
