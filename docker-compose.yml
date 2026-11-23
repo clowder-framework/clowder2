@@ -78,6 +78,8 @@ services:
       - "traefik.http.routers.swagger.rule=PathPrefix(`/docs`)"
       - "traefik.http.services.backend.loadbalancer.server.port=80"
       - "traefik.http.routers.backend.priority=5"
+      - "traefik.http.middlewares.limit.buffering.maxRequestBodyBytes=0"  # 0 = unlimited
+      - "traefik.http.routers.backend.middlewares=limit"
 
   frontend:
     image: "clowder/clowder2-frontend:2.0.0-beta.4"
@@ -130,10 +132,12 @@ services:
       - rabbitmq
 
   mongo:
-    image: mongo:5.0
+    image: mongo:6
     restart: unless-stopped
     networks:
       - clowder2
+    ports:
+      - "127.0.0.1:27017:27017"  # host-only access for the migration tool
     volumes:
       - mongo:/data/db
 

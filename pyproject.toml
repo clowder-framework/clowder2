@@ -25,6 +25,7 @@ dependencies = [
     "elasticsearch==8.7.0",
     "rocrate==0.7.0",
     "itsdangerous==2.1.2",
+    "httpx==0.24.0",
     "setuptools",
     "boto3>=1.37.8",
 ]
@@ -40,7 +41,6 @@ dev = [
     "ruff>=0.8.0",
     "pre-commit>=4.0.1",
     "shellcheck-py>=0.10.0.1",
-    "httpx==0.24.0",
 ]
 docs = [
     "mkdocs-material"
